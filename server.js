@@ -433,7 +433,206 @@ const db = {
   ],
   invoices: [],
   appointmentAuditLogs: [],
-  loyaltyTransactions: []
+  loyaltyTransactions: [],
+
+  // --------------------------------------------------------------------------
+  // BONOS DE SESIONES Y PACKS DE SERVICIOS
+  // --------------------------------------------------------------------------
+  packages: [
+    {
+      id: 'pkg-1',
+      name: 'Bono 5 Sesiones Peinado & Brushing (1 Gratis)',
+      category: 'peinado',
+      description: 'Ideal para clientas de peinado semanal. Pagas 4 y disfrutas 5 sesiones con lavado e hidratación exprés incluidos.',
+      totalSessions: 5,
+      price: 72.00,
+      regularPrice: 90.00,
+      discountPercent: 20,
+      validDays: 180,
+      includedServices: ['Peinado & Brushing', 'Lavado Dermo-Protector']
+    },
+    {
+      id: 'pkg-2',
+      name: 'Pack Luxury Balayage & Reconstrucción Total',
+      category: 'coloracion',
+      description: 'Balayage a mano alzada + Matiz perlado o vainilla + Tratamiento Olaplex Nº1 y Nº2 + Corte de diseño.',
+      totalSessions: 1,
+      price: 98.00,
+      regularPrice: 122.00,
+      discountPercent: 20,
+      validDays: 90,
+      includedServices: ['Mechas Balayage & Matiz', 'Tratamiento Olaplex Reconstructor', 'Corte y Estilismo']
+    },
+    {
+      id: 'pkg-3',
+      name: 'Bono 4 Sesiones Tratamiento Molecular Keratina',
+      category: 'tratamiento',
+      description: 'Tratamiento mensual continuo para recuperar cabellos castigados o decolorados.',
+      totalSessions: 4,
+      price: 110.00,
+      regularPrice: 140.00,
+      discountPercent: 21,
+      validDays: 365,
+      includedServices: ['Tratamiento Olaplex / Keratina', 'Campana Vapor Ozonizado']
+    }
+  ],
+
+  // Bonos adquiridos por clientas
+  clientPackages: [
+    {
+      id: 'cpkg-1',
+      packageId: 'pkg-1',
+      packageName: 'Bono 5 Sesiones Peinado & Brushing (1 Gratis)',
+      clientId: 'cli-1',
+      clientDni: '12345678Z',
+      clientName: 'Laura Martínez',
+      totalSessions: 5,
+      usedSessions: 2,
+      remainingSessions: 3,
+      purchaseDate: '2026-09-10',
+      expiresAt: '2027-03-10',
+      status: 'active'
+    },
+    {
+      id: 'cpkg-2',
+      packageId: 'pkg-3',
+      packageName: 'Bono 4 Sesiones Tratamiento Molecular Keratina',
+      clientId: 'cli-7',
+      clientDni: '98732165S',
+      clientName: 'Clara Sanz',
+      totalSessions: 4,
+      usedSessions: 1,
+      remainingSessions: 3,
+      purchaseDate: '2026-10-02',
+      expiresAt: '2027-10-02',
+      status: 'active'
+    }
+  ],
+
+  // --------------------------------------------------------------------------
+  // TARJETAS REGALO DIGITALES (GIFT CARDS / VOUCHERS)
+  // --------------------------------------------------------------------------
+  giftCards: [
+    {
+      id: 'gc-1',
+      code: 'REGALO-50-LOSAN',
+      initialBalance: 50.00,
+      remainingBalance: 50.00,
+      buyerName: 'Carlos Gómez',
+      buyerEmail: 'carlos@example.com',
+      recipientName: 'Laura Martínez',
+      recipientDni: '12345678Z',
+      message: '¡Feliz cumpleaños Laura! Disfruta de una tarde de relax en Losan.',
+      createdAt: '2026-10-15T12:00:00.000Z',
+      expiresAt: '2027-10-15',
+      status: 'active'
+    },
+    {
+      id: 'gc-2',
+      code: 'VIP-100-LOSAN',
+      initialBalance: 100.00,
+      remainingBalance: 75.00,
+      buyerName: 'Javier Sanz',
+      buyerEmail: 'javier@example.com',
+      recipientName: 'Clara Sanz',
+      recipientDni: '98732165S',
+      message: 'Para tus sesiones de tratamiento capilar con Carmen.',
+      createdAt: '2026-10-01T10:00:00.000Z',
+      expiresAt: '2027-10-01',
+      status: 'active'
+    }
+  ],
+
+  // --------------------------------------------------------------------------
+  // TESTS DE DIAGNÓSTICO CAPILAR DIGITAL (CONSULTATION FORMS)
+  // --------------------------------------------------------------------------
+  consultations: [
+    {
+      id: 'con-1',
+      clientId: 'cli-1',
+      clientDni: '12345678Z',
+      clientName: 'Laura Martínez',
+      hairType: 'Ondulado, grosor medio',
+      scalpCondition: 'Sensible / tendencia reactiva',
+      chemicalHistory: 'Decoloración balayage previa hace 4 meses',
+      washFrequency: 'Cada 2-3 días',
+      mainGoal: 'Aclarar contorno facial (Money Piece) y mantener brillo sin resecar',
+      allergiesConfirmed: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)',
+      patchTestVerified: true,
+      updatedAt: '2026-10-01T11:00:00.000Z'
+    },
+    {
+      id: 'con-2',
+      clientId: 'cli-7',
+      clientDni: '98732165S',
+      clientName: 'Clara Sanz',
+      hairType: 'Fino, porosidad alta, muy quebradizo en puntas',
+      scalpCondition: 'Normal',
+      chemicalHistory: 'Decoloración casera agresiva en agosto 2026',
+      washFrequency: 'Diario',
+      mainGoal: 'Reconstrucción molecular de puentes de disulfuro (Olaplex), frenar rotura',
+      allergiesConfirmed: 'Sin alergias conocidas',
+      patchTestVerified: true,
+      updatedAt: '2026-10-05T09:30:00.000Z'
+    }
+  ],
+
+  // --------------------------------------------------------------------------
+  // LOOKBOOK: GALERÍA DE TRANSFORMACIONES "ANTES Y DESPUÉS"
+  // --------------------------------------------------------------------------
+  galleryLooks: [
+    {
+      id: 'look-1',
+      title: 'Balayage Rubio Perla & Face Framing',
+      category: 'Coloración',
+      stylistId: 'stf-1',
+      stylistName: 'Elena Gómez',
+      beforeImg: 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=500&q=80',
+      afterImg: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=500&q=80',
+      description: 'Transición de base castaña natural a rubio luminoso mediante micro-mechas a mano alzada y matizado frío.',
+      formulaSummary: 'Igora 9.5-1 (30g) + 20vol (30g) con Olaplex Nº1',
+      durationMinutes: 120,
+      priceEstimate: 85.00,
+      serviceIds: ['srv-3', 'srv-5']
+    },
+    {
+      id: 'look-2',
+      title: 'Corte French Bob Desfilado & Peinado Wet',
+      category: 'Corte & Estilismo',
+      stylistId: 'stf-2',
+      stylistName: 'Raquel Santos',
+      beforeImg: 'https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?auto=format&fit=crop&w=500&q=80',
+      afterImg: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80',
+      description: 'Corte Bob texturizado a la altura de la mandíbula que aporta volumen natural y movimiento.',
+      formulaSummary: 'Corte navaja feather + Sérum Kérastase Elixir',
+      durationMinutes: 45,
+      priceEstimate: 40.00,
+      serviceIds: ['srv-1', 'srv-4']
+    },
+    {
+      id: 'look-3',
+      title: 'Reconstrucción Capilar Shock Térmico',
+      category: 'Tratamiento',
+      stylistId: 'stf-3',
+      stylistName: 'Carmen Vidal',
+      beforeImg: 'https://images.unsplash.com/photo-1522337094346-29177f374716?auto=format&fit=crop&w=500&q=80',
+      afterImg: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=500&q=80',
+      description: 'Tratamiento intensivo con campana de ozono y concentrado de ceramidas para sellar puntas abiertas.',
+      formulaSummary: 'Olaplex Nº1 (15ml) + Infusión Ácido Hialurónico',
+      durationMinutes: 60,
+      priceEstimate: 55.00,
+      serviceIds: ['srv-5']
+    }
+  ],
+
+  // --------------------------------------------------------------------------
+  // PROPINAS Y REGISTRO DE RENDIMIENTO
+  // --------------------------------------------------------------------------
+  staffTips: [
+    { id: 'tip-1', staffId: 'stf-1', amount: 5.00, paymentMethod: 'bizum', clientName: 'Laura Martínez', date: '2026-10-21' },
+    { id: 'tip-2', staffId: 'stf-2', amount: 3.50, paymentMethod: 'card', clientName: 'Sofía Morales', date: '2026-10-22' },
+    { id: 'tip-3', staffId: 'stf-3', amount: 6.00, paymentMethod: 'cash', clientName: 'Clara Sanz', date: '2026-10-22' }
+  ]
 };
 
 // ============================================================================
@@ -1044,6 +1243,367 @@ app.post('/api/ai/chat', (req, res) => {
   }
 
   res.json({ reply, toolCalled });
+});
+
+// ============================================================================
+// 12. TEST DE DIAGNÓSTICO CAPILAR DIGITAL (CONSULTATION FORMS)
+// ============================================================================
+app.get('/api/consultations/:idOrDni', (req, res) => {
+  const query = req.params.idOrDni.trim().toUpperCase().replace(/[\s-]/g, '');
+  const found = db.consultations.find(c => 
+    c.clientId === req.params.idOrDni || 
+    (c.clientDni && c.clientDni.toUpperCase() === query)
+  );
+
+  if (!found) {
+    return res.status(404).json({ exists: false, message: 'No hay diagnóstico registrado para esta clienta.' });
+  }
+
+  res.json({ exists: true, consultation: found });
+});
+
+app.post('/api/consultations', (req, res) => {
+  const { clientId, clientDni, clientName, hairType, scalpCondition, chemicalHistory, washFrequency, mainGoal, allergiesConfirmed, patchTestVerified } = req.body;
+
+  if (!clientDni && !clientId) {
+    return res.status(400).json({ error: 'El DNI o ID de la clienta es obligatorio.' });
+  }
+
+  const cleanDni = clientDni ? clientDni.trim().toUpperCase().replace(/[\s-]/g, '') : '';
+  let existing = db.consultations.find(c => 
+    (clientId && c.clientId === clientId) || 
+    (cleanDni && c.clientDni && c.clientDni.toUpperCase() === cleanDni)
+  );
+
+  if (existing) {
+    if (hairType) existing.hairType = hairType;
+    if (scalpCondition) existing.scalpCondition = scalpCondition;
+    if (chemicalHistory) existing.chemicalHistory = chemicalHistory;
+    if (washFrequency) existing.washFrequency = washFrequency;
+    if (mainGoal) existing.mainGoal = mainGoal;
+    if (allergiesConfirmed) existing.allergiesConfirmed = allergiesConfirmed;
+    if (patchTestVerified !== undefined) existing.patchTestVerified = patchTestVerified;
+    existing.updatedAt = new Date().toISOString();
+
+    // Actualizar también alergias en la ficha maestra del cliente si aplica
+    const client = db.clients.find(c => c.id === existing.clientId || (cleanDni && c.dni === cleanDni));
+    if (client && allergiesConfirmed) {
+      client.allergies = allergiesConfirmed;
+    }
+
+    return res.json({ success: true, message: 'Diagnóstico capilar actualizado con éxito.', consultation: existing });
+  }
+
+  const newCon = {
+    id: 'con-' + Date.now(),
+    clientId: clientId || 'cli-' + Date.now(),
+    clientDni: cleanDni,
+    clientName: clientName || 'Clienta',
+    hairType: hairType || 'Normal',
+    scalpCondition: scalpCondition || 'Normal',
+    chemicalHistory: chemicalHistory || 'Sin químicos recientes',
+    washFrequency: washFrequency || 'Cada 2 días',
+    mainGoal: mainGoal || 'Mantenimiento saludable',
+    allergiesConfirmed: allergiesConfirmed || 'Sin alergias',
+    patchTestVerified: patchTestVerified !== undefined ? patchTestVerified : true,
+    updatedAt: new Date().toISOString()
+  };
+
+  db.consultations.push(newCon);
+
+  // Sincronizar alergias con el cliente
+  const client = db.clients.find(c => c.id === newCon.clientId || (cleanDni && c.dni === cleanDni));
+  if (client && allergiesConfirmed) {
+    client.allergies = allergiesConfirmed;
+  }
+
+  res.status(201).json({ success: true, message: 'Test de diagnóstico registrado en base de datos.', consultation: newCon });
+});
+
+// ============================================================================
+// 13. BONOS DE SESIONES Y PACKS DE SERVICIOS
+// ============================================================================
+app.get('/api/packages', (req, res) => {
+  res.json(db.packages);
+});
+
+app.get('/api/packages/client/:idOrDni', (req, res) => {
+  const query = req.params.idOrDni.trim().toUpperCase().replace(/[\s-]/g, '');
+  const activePackages = db.clientPackages.filter(p => 
+    p.clientId === req.params.idOrDni || 
+    (p.clientDni && p.clientDni.toUpperCase() === query)
+  );
+
+  res.json(activePackages);
+});
+
+app.post('/api/packages/purchase', (req, res) => {
+  const { packageId, clientId, clientDni } = req.body;
+  const pkg = db.packages.find(p => p.id === packageId);
+  if (!pkg) return res.status(404).json({ error: 'Bono o pack no encontrado.' });
+
+  let client = null;
+  if (clientDni) {
+    const cleanDni = clientDni.trim().toUpperCase().replace(/[\s-]/g, '');
+    client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  }
+  if (!client && clientId) {
+    client = db.clients.find(c => c.id === clientId);
+  }
+  if (!client) {
+    client = db.clients[0];
+  }
+
+  const expiresDate = new Date();
+  expiresDate.setDate(expiresDate.getDate() + (pkg.validDays || 180));
+
+  const newClientPkg = {
+    id: 'cpkg-' + Date.now(),
+    packageId: pkg.id,
+    packageName: pkg.name,
+    clientId: client.id,
+    clientDni: client.dni || '',
+    clientName: client.name,
+    totalSessions: pkg.totalSessions,
+    usedSessions: 0,
+    remainingSessions: pkg.totalSessions,
+    purchaseDate: new Date().toISOString().slice(0, 10),
+    expiresAt: expiresDate.toISOString().slice(0, 10),
+    status: 'active'
+  };
+
+  db.clientPackages.push(newClientPkg);
+
+  // Conceder puntos de fidelización por la compra del bono (1 punto por euro)
+  client.loyaltyPoints += Math.floor(pkg.price);
+
+  res.status(201).json({
+    success: true,
+    message: `¡${pkg.name} adquirido con éxito! Se han sumado +${Math.floor(pkg.price)} puntos de fidelización.`,
+    clientPackage: newClientPkg
+  });
+});
+
+app.post('/api/packages/redeem', (req, res) => {
+  const { clientPackageId } = req.body;
+  const cpkg = db.clientPackages.find(p => p.id === clientPackageId);
+  if (!cpkg) return res.status(404).json({ error: 'Bono no encontrado.' });
+
+  if (cpkg.remainingSessions <= 0) {
+    return res.status(400).json({ error: 'No quedan sesiones disponibles en este bono.' });
+  }
+
+  cpkg.usedSessions += 1;
+  cpkg.remainingSessions -= 1;
+  if (cpkg.remainingSessions === 0) {
+    cpkg.status = 'consumed';
+  }
+
+  res.json({
+    success: true,
+    message: `Sesión canjeada. Te quedan ${cpkg.remainingSessions} de ${cpkg.totalSessions} sesiones.`,
+    clientPackage: cpkg
+  });
+});
+
+// ============================================================================
+// 14. TARJETAS REGALO DIGITALES (GIFT CARDS)
+// ============================================================================
+app.get('/api/gift-cards', (req, res) => {
+  res.json(db.giftCards);
+});
+
+app.get('/api/gift-cards/verify/:code', (req, res) => {
+  const cleanCode = req.params.code.trim().toUpperCase();
+  const card = db.giftCards.find(c => c.code.toUpperCase() === cleanCode);
+
+  if (!card) {
+    return res.status(404).json({ valid: false, error: 'Código de Tarjeta Regalo no válido.' });
+  }
+
+  if (card.status !== 'active' || card.remainingBalance <= 0) {
+    return res.status(400).json({ valid: false, error: 'Esta tarjeta regalo ya ha sido consumida o está caducada.' });
+  }
+
+  res.json({ valid: true, card });
+});
+
+app.post('/api/gift-cards/buy', (req, res) => {
+  const { amount, buyerName, buyerEmail, recipientName, recipientDni, message } = req.body;
+  const numAmount = Number(amount);
+
+  if (!numAmount || numAmount <= 0) {
+    return res.status(400).json({ error: 'El importe de la tarjeta regalo debe ser superior a 0 €.' });
+  }
+
+  const generatedCode = `REGALO-${Math.round(numAmount)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+  const expiresDate = new Date();
+  expiresDate.setFullYear(expiresDate.getFullYear() + 1);
+
+  const newCard = {
+    id: 'gc-' + Date.now(),
+    code: generatedCode,
+    initialBalance: numAmount,
+    remainingBalance: numAmount,
+    buyerName: buyerName || 'Cliente Anónimo',
+    buyerEmail: buyerEmail || '',
+    recipientName: recipientName || 'Destinataria Especial',
+    recipientDni: recipientDni ? recipientDni.trim().toUpperCase() : '',
+    message: message || 'Disfruta de tu experiencia de belleza en Peluquería Losan.',
+    createdAt: new Date().toISOString(),
+    expiresAt: expiresDate.toISOString().slice(0, 10),
+    status: 'active'
+  };
+
+  db.giftCards.push(newCard);
+
+  res.status(201).json({
+    success: true,
+    message: `Tarjeta Regalo emitida con código único: ${newCard.code} por valor de ${newCard.initialBalance.toFixed(2)} €.`,
+    card: newCard
+  });
+});
+
+app.post('/api/gift-cards/redeem', (req, res) => {
+  const { code, amountToDeduct } = req.body;
+  const cleanCode = (code || '').trim().toUpperCase();
+  const card = db.giftCards.find(c => c.code.toUpperCase() === cleanCode);
+
+  if (!card) return res.status(404).json({ error: 'Tarjeta regalo no encontrada.' });
+
+  const deduct = Number(amountToDeduct);
+  if (!deduct || deduct <= 0) return res.status(400).json({ error: 'Importe a descontar inválido.' });
+
+  if (card.remainingBalance < deduct) {
+    return res.status(400).json({ error: `Saldo insuficiente. Saldo disponible: ${card.remainingBalance.toFixed(2)} €.` });
+  }
+
+  card.remainingBalance = Math.round((card.remainingBalance - deduct) * 100) / 100;
+  if (card.remainingBalance === 0) {
+    card.status = 'consumed';
+  }
+
+  res.json({
+    success: true,
+    message: `Se han canjeado ${deduct.toFixed(2)} € de la tarjeta regalo. Saldo restante: ${card.remainingBalance.toFixed(2)} €.`,
+    remainingBalance: card.remainingBalance
+  });
+});
+
+// ============================================================================
+// 15. LOOKBOOK / GALERÍA ANTES Y DESPUÉS
+// ============================================================================
+app.get('/api/gallery', (req, res) => {
+  res.json(db.galleryLooks);
+});
+
+// ============================================================================
+// 16. RENDIMIENTO, COMISIONES Y PROPINAS DE ESTILISTAS
+// ============================================================================
+app.get('/api/staff/:id/performance', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Profesional no encontrada.' });
+
+  const staffApts = db.appointments.filter(a => a.staffId === staff.id && a.status === 'confirmed');
+  const serviceRevenue = staffApts.length * 35.00; // Estimación media o cálculo real de servicios
+  const serviceCommission = Math.round(serviceRevenue * 0.15 * 100) / 100; // 15% comisión por servicio
+
+  const retailCommission = 12.50; // Comisión estimada por venta cosmética (10%)
+  const tips = db.staffTips.filter(t => t.staffId === staff.id);
+  const totalTips = tips.reduce((sum, t) => sum + t.amount, 0);
+
+  res.json({
+    staffId: staff.id,
+    staffName: staff.name,
+    chair: staff.chair,
+    appointmentsCount: staffApts.length,
+    serviceRevenue,
+    serviceCommission,
+    retailCommission,
+    totalCommission: serviceCommission + retailCommission,
+    tipsCount: tips.length,
+    totalTips,
+    tips
+  });
+});
+
+app.post('/api/staff/:id/tips', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Profesional no encontrada.' });
+
+  const { amount, paymentMethod = 'bizum', clientName } = req.body;
+  const numAmount = Number(amount);
+  if (!numAmount || numAmount <= 0) {
+    return res.status(400).json({ error: 'Importe de propina inválido.' });
+  }
+
+  const newTip = {
+    id: 'tip-' + Date.now(),
+    staffId: staff.id,
+    amount: numAmount,
+    paymentMethod,
+    clientName: clientName || 'Clienta agradecida',
+    date: new Date().toISOString().slice(0, 10)
+  };
+
+  db.staffTips.push(newTip);
+
+  res.status(201).json({
+    success: true,
+    message: `¡Propina de ${numAmount.toFixed(2)} € registrada para ${staff.name}!`,
+    tip: newTip
+  });
+});
+
+// ============================================================================
+// 17. DASHBOARD DE KPIS & BUSINESS INTELLIGENCE
+// ============================================================================
+app.get('/api/analytics/kpis', (req, res) => {
+  const totalInvoices = db.invoices.length;
+  const totalRevenue = db.invoices.reduce((sum, i) => sum + i.totalAmount, 0);
+  const averageTicket = totalInvoices > 0 ? (totalRevenue / totalInvoices) : 38.50;
+
+  const totalClients = db.clients.length;
+  const totalAppointments = db.appointments.filter(a => a.status === 'confirmed').length;
+
+  // Tasa de ocupación: total minutos reservados vs minutos disponibles (3 estilistas x 10h = 1800 min)
+  const totalBookedMinutes = totalAppointments * 45;
+  const capacityMinutes = 3 * 10 * 60; // 1800 min
+  const occupancyRate = Math.min(100, Math.round((totalBookedMinutes / capacityMinutes) * 100));
+
+  res.json({
+    totalRevenue: Math.round(totalRevenue * 100) / 100,
+    averageTicket: Math.round(averageTicket * 100) / 100,
+    occupancyRate, // %
+    totalAppointments,
+    totalClients,
+    totalInvoices,
+    rebookingRate: 78.5, // %
+    executiveCards: {
+      totalRevenueMonth: '8.450 €',
+      averageTicket: '44,50 €',
+      chairOccupancyRate: '87 %',
+      clientRetentionRate: '74 %'
+    },
+    staffPerformanceBreakdown: [
+      { staffName: 'Elena Gómez', appointmentsCompleted: 14, revenueGenerated: 3480.00, commissionsEarned: 522.00, tipsCollected: 115.00 },
+      { staffName: 'Raquel Santos', appointmentsCompleted: 19, revenueGenerated: 2790.00, commissionsEarned: 418.50, tipsCollected: 95.00 },
+      { staffName: 'Carmen Vidal', appointmentsCompleted: 11, revenueGenerated: 2180.00, commissionsEarned: 327.00, tipsCollected: 70.00 }
+    ],
+    topServicesByRevenue: [
+      { name: 'Mechas Balayage & Matiz', duration: '90 min', unitPrice: 65.00, margin: 'Alta Demanda' },
+      { name: 'Coloración Completa (Tinte)', duration: '60 min', unitPrice: 38.00, margin: 'Fidelización' },
+      { name: 'Tratamiento Olaplex / Keratina', duration: '45 min', unitPrice: 35.00, margin: 'Alto Margen' },
+      { name: 'Corte y Estilismo', duration: '30 min', unitPrice: 22.00, margin: 'Base Diaria' }
+    ],
+    topServices: [
+      { name: 'Mechas Balayage & Matiz', count: 18, share: '36%' },
+      { name: 'Coloración Completa (Tinte)', count: 14, share: '28%' },
+      { name: 'Corte y Estilismo', count: 12, share: '24%' },
+      { name: 'Tratamiento Olaplex', count: 6, share: '12%' }
+    ]
+  });
 });
 
 // Iniciar servidor

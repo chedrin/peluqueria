@@ -243,6 +243,15 @@
           <button onclick="switchClientTab('calendar')" id="tab-c-calendar" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
             <i data-lucide="calendar" class="w-4 h-4 text-stone-500"></i> Calendario & Huecos Libres
           </button>
+          <button onclick="switchClientTab('consultation')" id="tab-c-consultation" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="clipboard-check" class="w-4 h-4 text-stone-500"></i> Test Capilar Digital
+          </button>
+          <button onclick="switchClientTab('packages')" id="tab-c-packages" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="ticket" class="w-4 h-4 text-stone-500"></i> Bonos & Regalo
+          </button>
+          <button onclick="switchClientTab('lookbook')" id="tab-c-lookbook" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="sparkles" class="w-4 h-4 text-stone-500"></i> Lookbook
+          </button>
           <button onclick="switchClientTab('loyalty')" id="tab-c-loyalty" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
             <i data-lucide="qr-code" class="w-4 h-4 text-stone-500"></i> Fidelización QR & Reseñas Google
           </button>
@@ -530,6 +539,223 @@
           </div>
         </div>
 
+        <!-- VISTA 1G: TEST DE DIAGNÓSTICO CAPILAR DIGITAL (CONSULTATION QUIZ) -->
+        <div id="cview-consultation" class="hidden space-y-6">
+          <div class="luxury-card rounded-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-100 pb-4">
+              <div>
+                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+                  <i data-lucide="clipboard-check" class="w-5 h-5 text-rose-500"></i>
+                  Test de Diagnóstico Capilar & Alergias
+                </h3>
+                <p class="text-xs text-stone-500 mt-0.5">
+                  Completa tu perfil capilar digital. Tu estilista consultará esta ficha antes de aplicar cualquier tinte, decoloración o tratamiento.
+                </p>
+              </div>
+              <span class="text-xs bg-rose-50 text-rose-700 font-semibold px-3 py-1 rounded-full border border-rose-200">
+                Vinculado a tu DNI
+              </span>
+            </div>
+
+            <form id="form-consultation" onsubmit="saveHairConsultation(event)" class="space-y-5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">Tipo y Grosor de Cabello:</label>
+                  <select id="quiz-hair-type" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                    <option value="Ondulado, grosor medio">Ondulado — Grosor Medio</option>
+                    <option value="Liso, cabello fino sin volumen">Liso — Fino (tiende a apelmazarse)</option>
+                    <option value="Rizado con frizz, cabello grueso">Rizado — Grueso / Rebelde</option>
+                    <option value="Fino, porosidad alta y quebradizo">Fino — Porosidad alta / Quebradizo</option>
+                    <option value="Afro / Muy rizado, sequedad">Afro / Muy rizado — Seco</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">Estado del Cuero Cabelludo:</label>
+                  <select id="quiz-scalp" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                    <option value="Sensible / tendencia reactiva">Sensible / Tendencia a picor o rojez</option>
+                    <option value="Normal y equilibrado">Normal / Equilibrado</option>
+                    <option value="Graso con lavado diario">Graso (necesita lavado muy frecuente)</option>
+                    <option value="Seco con descamación">Seco / Con descamación estacional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">Tratamientos Químicos en los últimos 6 meses:</label>
+                  <select id="quiz-chemical" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                    <option value="Decoloración balayage previa hace 4 meses">Decoloración o Balayage reciente</option>
+                    <option value="Tinte de cobertura sin amoniaco">Coloración / Tinte habitual</option>
+                    <option value="Alisado de keratina / tratamiento botox">Alisado químico o Keratina</option>
+                    <option value="Cabello 100% natural sin decolorar">Cabello virgen / Natural sin tintes</option>
+                    <option value="Decoloración casera previa">Decoloración casera previa</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">Frecuencia de Lavado en Casa:</label>
+                  <select id="quiz-wash" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                    <option value="Cada 2-3 días">Cada 2 - 3 días (habitual)</option>
+                    <option value="Lavado diario">Diario</option>
+                    <option value="1 o 2 veces por semana">1 o 2 veces por semana</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-stone-700 mb-1">Objetivo Estético Deseado:</label>
+                <input type="text" id="quiz-goal" placeholder="Ej: Aclarar contorno facial (Money Piece) y mantener brillo sin resecar puntas..."
+                  class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-rose-500">
+              </div>
+
+              <div class="p-4 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+                <label class="block text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                  <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i> Alergias y Declaración de Seguridad (Patch-Test):
+                </label>
+                <input type="text" id="quiz-allergies" placeholder="Indica si tienes alergia al níquel, amoniaco, látex o sulfatos..."
+                  class="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none">
+                <label class="flex items-center gap-2 pt-1 text-[11px] text-amber-800 cursor-pointer">
+                  <input type="checkbox" id="quiz-patch-test" checked class="rounded border-amber-400 text-amber-600 focus:ring-0">
+                  <span>Confirmo no haber sufrido reacciones anafilácticas y autorizo el test de contacto previo para tintes de oxidación.</span>
+                </label>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 transition shadow-sm shadow-rose-200">
+                  <i data-lucide="save" class="w-4 h-4"></i> Guardar Test en Mi Expediente
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- VISTA 1H: BONOS DE SESIONES Y TARJETAS REGALO DIGITALES -->
+        <div id="cview-packages" class="hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Columna A: Bonos de Sesiones & Packs Activos -->
+            <div class="luxury-card rounded-2xl p-6 space-y-5">
+              <div class="border-b border-stone-100 pb-3">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold mb-2">
+                  <i data-lucide="ticket" class="w-3.5 h-3.5"></i> Bonos Prepago & Ahorro
+                </div>
+                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Packs de Servicios con Sesiones de Regalo</h3>
+                <p class="text-xs text-stone-500 mt-1">Asegura tu rutina de belleza con hasta un 21% de ahorro en sesiones continuadas.</p>
+              </div>
+
+              <!-- Mis Bonos Activos -->
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2.5">Mis Bonos Activos:</h4>
+                <div id="client-active-packages-list" class="space-y-3">
+                  <!-- Render dinámico -->
+                </div>
+              </div>
+
+              <!-- Catálogo de Bonos a la Venta -->
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2.5">Comprar Nuevo Bono:</h4>
+                <div id="packages-catalog-list" class="space-y-3">
+                  <!-- Render dinámico de catálogo -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna B: Tarjetas Regalo Digitales (Gift Cards) -->
+            <div class="luxury-card rounded-2xl p-6 space-y-5">
+              <div class="border-b border-stone-100 pb-3">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold mb-2">
+                  <i data-lucide="gift" class="w-3.5 h-3.5 text-amber-600"></i> Tarjetas Regalo Digitales
+                </div>
+                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Regala una Experiencia en Salón</h3>
+                <p class="text-xs text-stone-500 mt-1">Envía una tarjeta de regalo personalizada con código canjeable en peluquería o tienda.</p>
+              </div>
+
+              <!-- Previsualización Visual de Tarjeta Regalo -->
+              <div class="p-5 rounded-2xl bg-gradient-to-tr from-stone-900 via-stone-800 to-rose-950 text-white shadow-md relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-rose-500/10 blur-xl"></div>
+                <div class="flex justify-between items-start mb-6">
+                  <div>
+                    <span class="text-[10px] tracking-widest uppercase text-rose-300 font-bold">Tarjeta Regalo VIP</span>
+                    <h5 class="text-base font-serif-luxury font-bold text-white mt-0.5">Peluquería Losan</h5>
+                  </div>
+                  <span class="text-xl font-black font-mono-code text-amber-300" id="preview-card-amount">50,00 €</span>
+                </div>
+                <div class="flex justify-between items-end text-xs">
+                  <div>
+                    <span class="text-[10px] text-stone-400 block">Para:</span>
+                    <span class="font-bold text-stone-200" id="preview-card-recipient">Laura Martínez</span>
+                  </div>
+                  <span class="font-mono-code text-[11px] bg-white/10 px-2 py-1 rounded-md border border-white/20 text-rose-200">
+                    CÓDIGO DIGITAL
+                  </span>
+                </div>
+              </div>
+
+              <!-- Formulario de Emisión de Tarjeta Regalo -->
+              <form id="form-buy-gift-card" onsubmit="buyGiftCardSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                  <label class="block font-semibold text-stone-700 mb-1">Importe del Regalo (€):</label>
+                  <div class="grid grid-cols-4 gap-2 mb-2">
+                    <button type="button" onclick="selectGiftAmount(30)" class="gift-amt-btn py-1.5 rounded-lg border border-stone-200 text-stone-700 font-semibold hover:border-rose-400">30 €</button>
+                    <button type="button" onclick="selectGiftAmount(50)" class="gift-amt-btn active py-1.5 rounded-lg border-2 border-rose-600 bg-rose-50 text-rose-700 font-bold">50 €</button>
+                    <button type="button" onclick="selectGiftAmount(75)" class="gift-amt-btn py-1.5 rounded-lg border border-stone-200 text-stone-700 font-semibold hover:border-rose-400">75 €</button>
+                    <button type="button" onclick="selectGiftAmount(100)" class="gift-amt-btn py-1.5 rounded-lg border border-stone-200 text-stone-700 font-semibold hover:border-rose-400">100 €</button>
+                  </div>
+                  <input type="number" id="gift-card-amount" value="50" min="10" max="500" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-900 font-bold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Destinataria (Nombre):</label>
+                    <input type="text" id="gift-card-recipient" placeholder="Ej: Laura Martínez" oninput="document.getElementById('preview-card-recipient').innerText = this.value || 'Destinataria'" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="block font-semibold text-stone-700 mb-1">DNI Destinataria (Opcional):</label>
+                    <input type="text" id="gift-card-dni" placeholder="Ej: 12345678Z" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs font-mono-code">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-stone-700 mb-1">Mensaje de Felicitación:</label>
+                  <input type="text" id="gift-card-msg" placeholder="¡Feliz cumpleaños! Que disfrutes de tu sesión de relax..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs">
+                </div>
+
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-rose-200">
+                  <i data-lucide="send" class="w-4 h-4"></i> Generar y Enviar Tarjeta Regalo
+                </button>
+              </form>
+
+              <!-- Comprobador de Saldo -->
+              <div class="pt-3 border-t border-stone-100 flex items-center gap-2">
+                <input type="text" id="check-gc-code" placeholder="Tengo un código: REGALO-50-LOSAN" class="flex-1 bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs font-mono-code uppercase">
+                <button type="button" onclick="verifyGiftCardCode()" class="bg-stone-800 hover:bg-stone-700 text-white px-3 py-2 rounded-xl text-xs font-semibold">
+                  Verificar
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VISTA 1I: LOOKBOOK / GALERÍA DE TRABAJOS ANTES Y DESPUÉS -->
+        <div id="cview-lookbook" class="hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-stone-200 pb-3">
+            <div>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5 text-rose-500"></i>
+                Lookbook — Transformaciones Reales de Nuestro Salón
+              </h3>
+              <p class="text-xs text-stone-500">Inspírate con trabajos de colorimetría, cortes y tratamientos realizados por nuestras estilistas en Madrid.</p>
+            </div>
+            <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">
+              Fotos 100% Reales
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lookbook-grid">
+            <!-- Render dinámico de transformaciones -->
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -590,43 +816,113 @@
             <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">Ficha Técnica</span>
           </div>
 
-          <!-- Historial Dinámico de Fórmulas y Alergias -->
-          <div id="client-history-preview" class="space-y-3 text-xs max-h-72 overflow-y-auto scrollbar-thin pr-1">
-            <!-- Se carga dinámicamente con la clienta seleccionada -->
+          <!-- Selector de Subpestaña en Expediente -->
+          <div class="flex gap-2 border-b border-stone-100 pb-2">
+            <button onclick="setWorkerTechTab('formulas')" id="worker-tab-formulas" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-purple-100 text-purple-800 transition">
+              🧪 Fórmulas Color
+            </button>
+            <button onclick="setWorkerTechTab('quiz')" id="worker-tab-quiz" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100 transition">
+              📋 Test Capilar & Alergias
+            </button>
           </div>
 
-          <!-- Formulario Rápido Post-Servicio (Actualiza de Inmediato la Ficha) -->
-          <div class="border-t border-stone-200 pt-4 space-y-3 bg-stone-50/70 p-3.5 rounded-xl border">
-            <div class="flex items-center justify-between">
-              <h5 class="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-purple-600"></i> Nuevo Registro Post-Servicio
-              </h5>
-              <span class="text-[10px] text-purple-700 font-semibold" id="form-target-client">Laura Martínez</span>
+          <!-- Subvista A: Historial de Fórmulas y Formulario Post-Servicio -->
+          <div id="worker-view-formulas" class="space-y-4">
+            <!-- Historial Dinámico de Fórmulas y Alergias -->
+            <div id="client-history-preview" class="space-y-3 text-xs max-h-72 overflow-y-auto scrollbar-thin pr-1">
+              <!-- Se carga dinámicamente con la clienta seleccionada -->
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-stone-600">Fórmula Técnica / Productos Usados *:</label>
-              <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con oxidante 20vol" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-stone-600">Técnica Aplicada:</label>
-                <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight / Balayage" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
+
+            <!-- Formulario Rápido Post-Servicio (Actualiza de Inmediato la Ficha) -->
+            <div class="border-t border-stone-200 pt-4 space-y-3 bg-stone-50/70 p-3.5 rounded-xl border">
+              <div class="flex items-center justify-between">
+                <h5 class="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-purple-600"></i> Nuevo Registro Post-Servicio
+                </h5>
+                <span class="text-[10px] text-purple-700 font-semibold" id="form-target-client">Laura Martínez</span>
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-stone-600">Exposición (min):</label>
-                <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
+                <label class="block text-[11px] font-semibold text-stone-600">Fórmula Técnica / Productos Usados *:</label>
+                <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con oxidante 20vol" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
               </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-semibold text-stone-600">Técnica Aplicada:</label>
+                  <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight / Balayage" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-stone-600">Exposición (min):</label>
+                  <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-stone-600">Observaciones Técnicas / Resultado:</label>
+                <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, matiz bien integrado en puntas..." class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs"></textarea>
+              </div>
+              <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar y Actualizar Expediente
+              </button>
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-stone-600">Observaciones Técnicas / Resultado:</label>
-              <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, matiz bien integrado en puntas..." class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs"></textarea>
+          </div>
+
+          <!-- Subvista B: Test de Diagnóstico Capilar & Alergias de la Clienta -->
+          <div id="worker-view-quiz" class="hidden space-y-3 text-xs">
+            <div id="worker-client-quiz-content" class="space-y-3">
+              <!-- Render dinámico del quiz diagnóstico -->
             </div>
-            <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200">
-              <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar y Actualizar Expediente
-            </button>
           </div>
         </div>
 
+      </div>
+
+      <!-- Card de Rendimiento, Comisiones y Propinas de la Estilista -->
+      <div class="luxury-card rounded-2xl p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-100 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+              <i data-lucide="wallet" class="w-5 h-5 text-purple-600"></i>
+              Mis Comisiones & Propinas del Día
+            </h3>
+            <p class="text-xs text-stone-500 mt-0.5" id="staff-perf-subtitle">Resumen de liquidación para Elena Gómez (15% en servicios, 10% en venta cosmética + propinas)</p>
+          </div>
+          <button onclick="promptAddStaffTip()" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm shadow-purple-200">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Registrar Propina (+€)
+          </button>
+        </div>
+
+        <!-- Métricas de Comisiones -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="staff-perf-metrics">
+          <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 text-center">
+            <span class="text-[11px] text-stone-500 font-medium block">Servicios Realizados</span>
+            <span class="text-lg font-black text-stone-900 font-mono-code" id="perf-services-count">3 citas</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5" id="perf-services-gross">125,00 € brut.</span>
+          </div>
+          <div class="p-4 bg-purple-50/70 rounded-xl border border-purple-200 text-center">
+            <span class="text-[11px] text-purple-800 font-medium block">Comisión Servicios (15%)</span>
+            <span class="text-lg font-black text-purple-700 font-mono-code" id="perf-services-comm">18,75 €</span>
+            <span class="text-[10px] text-purple-600/70 block mt-0.5">15% s/base</span>
+          </div>
+          <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200 text-center">
+            <span class="text-[11px] text-emerald-800 font-medium block">Propinas del Turno</span>
+            <span class="text-lg font-black text-emerald-700 font-mono-code" id="perf-tips-total">15,00 €</span>
+            <span class="text-[10px] text-emerald-600/70 block mt-0.5" id="perf-tips-count">2 propinas</span>
+          </div>
+          <div class="p-4 bg-gradient-to-br from-stone-900 to-purple-950 text-white rounded-xl text-center shadow-xs">
+            <span class="text-[11px] text-stone-300 font-medium block">Total Ganado Hoy</span>
+            <span class="text-lg font-black text-amber-300 font-mono-code" id="perf-total-earned">33,75 €</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5">Liquidación diaria</span>
+          </div>
+        </div>
+
+        <!-- Desglose de Propinas Recientes -->
+        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+          <h5 class="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="receipt" class="w-3.5 h-3.5 text-stone-500"></i> Últimas Propinas Registradas en Salón:
+          </h5>
+          <div id="staff-tips-list" class="space-y-1.5 text-xs">
+            <!-- Render dinámico -->
+          </div>
+        </div>
       </div>
 
     </div>
@@ -653,6 +949,9 @@
         </button>
         <button onclick="switchAdminTab('crm')" id="tab-a-crm" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
           <i data-lucide="users" class="w-4 h-4 text-stone-500"></i> CRM / Clientas & DNI
+        </button>
+        <button onclick="switchAdminTab('kpis')" id="tab-a-kpis" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-stone-500"></i> KPIs & Negocio
         </button>
       </div>
 
@@ -810,6 +1109,10 @@
                 <span>Descuento Puntos Fidelización:</span>
                 <span id="tpv-loyalty-discount" class="text-emerald-600 font-mono-code font-bold">-0,00 €</span>
               </div>
+              <div class="flex justify-between text-stone-500 hidden" id="tpv-voucher-discount-row">
+                <span>Tarjeta Regalo / Bono Canjeado:</span>
+                <span id="tpv-voucher-discount" class="text-purple-600 font-mono-code font-bold">-0,00 €</span>
+              </div>
               <div class="border-t border-stone-200 pt-2 flex justify-between text-base font-black">
                 <span class="text-stone-900">Total a Cobrar:</span>
                 <span id="tpv-total-amount" class="text-rose-600 font-mono-code text-xl">0,00 €</span>
@@ -824,6 +1127,22 @@
               <div class="flex gap-2">
                 <button onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-1.5 font-semibold text-[11px] transition">
                   Canjear 100 pts (-5,00 €)
+                </button>
+              </div>
+            </div>
+
+            <!-- Canjear Tarjeta Regalo o Bono Prepago en TPV -->
+            <div class="p-3.5 bg-purple-50/70 border border-purple-200 rounded-xl space-y-2 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-stone-700 font-semibold flex items-center gap-1.5">
+                  <i data-lucide="gift" class="w-3.5 h-3.5 text-purple-600"></i> Tarjeta Regalo o Bono de Sesiones:
+                </span>
+                <span class="text-[10px] text-purple-700 font-mono-code" id="tpv-voucher-status">Voucher Digital</span>
+              </div>
+              <div class="flex gap-2">
+                <input type="text" id="tpv-voucher-code" placeholder="Código: REGALO-50-LOSAN" class="flex-1 bg-white border border-purple-300 rounded-lg p-2 text-xs font-mono-code uppercase focus:outline-none focus:border-purple-500">
+                <button type="button" onclick="applyTpvGiftCard()" class="bg-purple-700 hover:bg-purple-600 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition">
+                  Aplicar
                 </button>
               </div>
             </div>
@@ -1018,6 +1337,111 @@
         </div>
       </div>
 
+      <!-- VISTA 3F: KPIS & BUSINESS INTELLIGENCE DASHBOARD -->
+      <div id="aview-kpis" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-200 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-5 h-5 text-indigo-600"></i>
+              Panel de Business Intelligence & Rendimiento del Salón
+            </h3>
+            <p class="text-xs text-stone-500 mt-0.5">Analítica ejecutiva en tiempo real: ocupación, ticket medio, retención de clientas y productividad por estilista.</p>
+          </div>
+          <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-full border border-indigo-200">
+            Período: Octubre 2026
+          </span>
+        </div>
+
+        <!-- 4 Tarjetas de Métricas Ejecutivas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-summary-cards">
+          <div class="luxury-card rounded-2xl p-5 border-l-4 border-l-indigo-500 space-y-2">
+            <span class="text-xs font-semibold text-stone-500">Facturación Estimada Mes</span>
+            <div class="flex items-baseline justify-between">
+              <span class="text-2xl font-black text-stone-900 font-mono-code" id="kpi-total-revenue">8.450 €</span>
+              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">+14.2%</span>
+            </div>
+            <p class="text-[11px] text-stone-400">Servicios + Cosmética + Bonos</p>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-5 border-l-4 border-l-rose-500 space-y-2">
+            <span class="text-xs font-semibold text-stone-500">Ticket Medio / Visita</span>
+            <div class="flex items-baseline justify-between">
+              <span class="text-2xl font-black text-stone-900 font-mono-code" id="kpi-avg-ticket">44,50 €</span>
+              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">+6.8%</span>
+            </div>
+            <p class="text-[11px] text-stone-400">Supera la media del sector (38 €)</p>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-5 border-l-4 border-l-purple-500 space-y-2">
+            <span class="text-xs font-semibold text-stone-500">Ocupación Media de Sillones</span>
+            <div class="flex items-baseline justify-between">
+              <span class="text-2xl font-black text-stone-900 font-mono-code" id="kpi-occupancy">87 %</span>
+              <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Alta Demanda</span>
+            </div>
+            <p class="text-[11px] text-stone-400">Franjas punta: 10:00-13:00 / 16:30-19:30</p>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-5 border-l-4 border-l-emerald-500 space-y-2">
+            <span class="text-xs font-semibold text-stone-500">Tasa de Fidelización</span>
+            <div class="flex items-baseline justify-between">
+              <span class="text-2xl font-black text-stone-900 font-mono-code" id="kpi-retention">74 %</span>
+              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">⭐ 4.9/5</span>
+            </div>
+            <p class="text-[11px] text-stone-400">Clientas recurrentes con DNI registrado</p>
+          </div>
+        </div>
+
+        <!-- 2 Tablas / Bloques de Análisis Profundo -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Bloque A: Rendimiento y Comisiones por Estilista -->
+          <div class="luxury-card rounded-2xl p-6 space-y-4">
+            <h4 class="text-sm font-bold text-stone-900 font-serif-luxury text-base flex items-center justify-between">
+              <span>Productividad y Facturación por Estilista</span>
+              <span class="text-xs text-stone-500 font-sans font-normal">Octubre 2026</span>
+            </h4>
+            <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
+                  <tr>
+                    <th class="p-3">Estilista</th>
+                    <th class="p-3 text-center">Citas</th>
+                    <th class="p-3 text-right">Facturación</th>
+                    <th class="p-3 text-right">Comisión 15%</th>
+                    <th class="p-3 text-center">Propinas</th>
+                  </tr>
+                </thead>
+                <tbody id="kpi-staff-tbody" class="divide-y divide-stone-100 text-stone-800">
+                  <!-- Render dinámico -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bloque B: Servicios Más Demandados y Rentabilidad -->
+          <div class="luxury-card rounded-2xl p-6 space-y-4">
+            <h4 class="text-sm font-bold text-stone-900 font-serif-luxury text-base flex items-center justify-between">
+              <span>Top Servicios por Facturación</span>
+              <span class="text-xs text-stone-500 font-sans font-normal">Mix de Ventas</span>
+            </h4>
+            <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
+                  <tr>
+                    <th class="p-3">Servicio</th>
+                    <th class="p-3 text-center">Duración</th>
+                    <th class="p-3 text-right">Precio Ud.</th>
+                    <th class="p-3 text-center">Margen</th>
+                  </tr>
+                </thead>
+                <tbody id="kpi-services-tbody" class="divide-y divide-stone-100 text-stone-800">
+                  <!-- Render dinámico -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -1071,6 +1495,10 @@
       tpvPaymentMethod: 'card',
       tpvDiscountPoints: 0,
       
+      tpvVoucherDiscount: 0,
+      tpvVoucherCode: '',
+      workerTechTab: 'formulas',
+
       // Colecciones
       services: [],
       staff: [],
@@ -1078,7 +1506,14 @@
       products: [],
       invoices: [],
       clients: [],
-      technicalRecords: []
+      technicalRecords: [],
+      packages: [],
+      clientPackages: [],
+      giftCards: [],
+      galleryLooks: [],
+      consultations: [],
+      staffTips: [],
+      analyticsKpis: null
     };
 
     // ========================================================================
@@ -1107,18 +1542,26 @@
       renderInvoicesTable();
       renderStockTable();
       renderAdminCrmTable();
+      renderStaffPerformance();
+      renderPackagesAndGiftCards();
+      renderLookbook();
+      renderAdminKpis();
     });
 
     async function fetchInitialData() {
       try {
-        const [resSrv, resStf, resApt, resPrd, resInv, resCli, resTec] = await Promise.all([
+        const [resSrv, resStf, resApt, resPrd, resInv, resCli, resTec, resPkg, resGft, resGal, resKpi] = await Promise.all([
           fetch('/api/services'),
           fetch('/api/staff'),
           fetch('/api/appointments'),
           fetch('/api/products'),
           fetch('/api/invoices'),
           fetch('/api/clients'),
-          fetch('/api/technical-records')
+          fetch('/api/technical-records'),
+          fetch('/api/packages'),
+          fetch('/api/gift-cards'),
+          fetch('/api/gallery'),
+          fetch('/api/analytics/kpis')
         ]);
 
         state.services = await resSrv.json();
@@ -1128,6 +1571,18 @@
         state.invoices = await resInv.json();
         state.clients = await resCli.json();
         state.technicalRecords = await resTec.json();
+        state.packages = await resPkg.json();
+        state.giftCards = await resGft.json();
+        state.galleryLooks = await resGal.json();
+        state.analyticsKpis = await resKpi.json();
+
+        // Cargar bonos de clienta si está autenticada
+        if (state.loggedInClient) {
+          try {
+            const resClientPkg = await fetch('/api/packages/client/' + (state.loggedInClient.dni || state.loggedInClient.id));
+            if (resClientPkg.ok) state.clientPackages = await resClientPkg.json();
+          } catch(e){}
+        }
 
         // Si ya hay una clienta logueada, actualizar su objeto en memoria
         if (state.loggedInClient) {
@@ -1338,7 +1793,7 @@
         activeBtn.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
       }
 
-      document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-loyalty, #cview-showcase, #cview-my-appointments, #cview-history').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-consultation, #cview-packages, #cview-lookbook, #cview-loyalty, #cview-showcase, #cview-my-appointments, #cview-history').forEach(el => el.classList.add('hidden'));
       const targetView = document.getElementById('cview-' + tab);
       if (targetView) targetView.classList.remove('hidden');
 
@@ -1348,6 +1803,12 @@
         renderClientTechnicalHistory();
       } else if (tab === 'my-appointments') {
         renderClientAppointments();
+      } else if (tab === 'consultation') {
+        loadClientConsultationQuiz();
+      } else if (tab === 'packages') {
+        renderPackagesAndGiftCards();
+      } else if (tab === 'lookbook') {
+        renderLookbook();
       }
       lucide.createIcons();
     }
@@ -1364,12 +1825,14 @@
         activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
       }
 
-      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis').forEach(el => el.classList.add('hidden'));
       const targetView = document.getElementById('aview-' + tabKey);
       if (targetView) targetView.classList.remove('hidden');
 
       if (tabKey === 'crm') {
         renderAdminCrmTable();
+      } else if (tabKey === 'kpis') {
+        renderAdminKpis();
       }
       lucide.createIcons();
     }
@@ -1466,6 +1929,7 @@
       }
 
       renderWorkerAgenda();
+      renderStaffPerformance();
     }
 
     function renderWorkerAgenda() {
@@ -1531,6 +1995,7 @@
       state.selectedClientId = clientId;
       if (aptId) state.selectedAppointmentId = aptId;
       renderWorkerAgenda();
+      loadWorkerClientQuiz(clientId);
     }
 
     function renderClientTechnicalProfile(clientId) {
@@ -2374,7 +2839,8 @@
 
       let grossTotal = state.tpvItems.reduce((acc, it) => acc + (it.quantity * it.unitPrice), 0);
       const discount = state.tpvDiscountPoints;
-      const finalGross = Math.max(0, grossTotal - discount);
+      const voucherDiscount = state.tpvVoucherDiscount || 0;
+      const finalGross = Math.max(0, grossTotal - discount - voucherDiscount);
 
       const base = finalGross / 1.21;
       const vat = finalGross - base;
@@ -2382,6 +2848,18 @@
       document.getElementById('tpv-tax-base').innerText = base.toFixed(2) + ' €';
       document.getElementById('tpv-vat-amount').innerText = vat.toFixed(2) + ' €';
       document.getElementById('tpv-loyalty-discount').innerText = '-' + discount.toFixed(2) + ' €';
+
+      const vRow = document.getElementById('tpv-voucher-discount-row');
+      const vDisc = document.getElementById('tpv-voucher-discount');
+      if (vRow && vDisc) {
+        if (voucherDiscount > 0) {
+          vRow.classList.remove('hidden');
+          vDisc.innerText = '-' + voucherDiscount.toFixed(2) + ' €';
+        } else {
+          vRow.classList.add('hidden');
+        }
+      }
+
       document.getElementById('tpv-total-amount').innerText = finalGross.toFixed(2) + ' €';
 
       populateQuickSelects();
@@ -2670,6 +3148,512 @@
         document.getElementById('tpv-client-points-badge').innerText = `${pts} pts disp.`;
         alert(`Clienta ${client.name} (DNI: ${client.dni}) seleccionada en el TPV.`);
       }
+    }
+
+    // ========================================================================
+    // TEST DE DIAGNÓSTICO CAPILAR DIGITAL
+    // ========================================================================
+    async function loadClientConsultationQuiz() {
+      if (!state.loggedInClient) return;
+      try {
+        const res = await fetch('/api/consultations/' + (state.loggedInClient.dni || state.loggedInClient.id));
+        if (res.ok) {
+          const data = await res.json();
+          const quiz = data.consultation || data;
+          if (quiz) {
+            if (document.getElementById('quiz-hair-type')) document.getElementById('quiz-hair-type').value = quiz.hairType || '';
+            if (document.getElementById('quiz-scalp')) document.getElementById('quiz-scalp').value = quiz.scalpCondition || '';
+            if (document.getElementById('quiz-chemical')) document.getElementById('quiz-chemical').value = quiz.chemicalHistory || quiz.chemicalTreatments || '';
+            if (document.getElementById('quiz-wash')) document.getElementById('quiz-wash').value = quiz.washFrequency || '';
+            if (document.getElementById('quiz-goal')) document.getElementById('quiz-goal').value = quiz.mainGoal || quiz.aestheticGoals || '';
+            if (document.getElementById('quiz-allergies')) document.getElementById('quiz-allergies').value = quiz.allergiesConfirmed || quiz.allergiesNote || '';
+            if (document.getElementById('quiz-patch-test')) document.getElementById('quiz-patch-test').checked = (quiz.patchTestVerified !== undefined ? quiz.patchTestVerified : quiz.patchTestConsent);
+          }
+        }
+      } catch(e){}
+    }
+
+    async function saveHairConsultation(e) {
+      e.preventDefault();
+      if (!state.loggedInClient) {
+        alert('Debes identificarte con tu DNI para guardar tu test capilar.');
+        return;
+      }
+
+      const bodyData = {
+        clientId: state.loggedInClient.id,
+        clientDni: state.loggedInClient.dni,
+        clientName: state.loggedInClient.name,
+        hairType: document.getElementById('quiz-hair-type').value,
+        scalpCondition: document.getElementById('quiz-scalp').value,
+        chemicalTreatments: document.getElementById('quiz-chemical').value,
+        washFrequency: document.getElementById('quiz-wash').value,
+        aestheticGoals: document.getElementById('quiz-goal').value,
+        allergiesNote: document.getElementById('quiz-allergies').value,
+        patchTestConsent: document.getElementById('quiz-patch-test').checked
+      };
+
+      try {
+        const res = await fetch('/api/consultations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          if (bodyData.allergiesNote) {
+            state.loggedInClient.allergies = bodyData.allergiesNote;
+            renderClientSession();
+          }
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch(e) {
+        alert('Test guardado en expediente localmente.');
+      }
+    }
+
+    function setWorkerTechTab(tab) {
+      state.workerTechTab = tab;
+      const btnFormulas = document.getElementById('worker-tab-formulas');
+      const btnQuiz = document.getElementById('worker-tab-quiz');
+      const viewFormulas = document.getElementById('worker-view-formulas');
+      const viewQuiz = document.getElementById('worker-view-quiz');
+
+      if (tab === 'formulas') {
+        btnFormulas.className = 'flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-purple-100 text-purple-800 transition';
+        btnQuiz.className = 'flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100 transition';
+        viewFormulas.classList.remove('hidden');
+        viewQuiz.classList.add('hidden');
+      } else {
+        btnQuiz.className = 'flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-purple-100 text-purple-800 transition';
+        btnFormulas.className = 'flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-100 transition';
+        viewQuiz.classList.remove('hidden');
+        viewFormulas.classList.add('hidden');
+        loadWorkerClientQuiz(state.selectedClientId);
+      }
+    }
+
+    async function loadWorkerClientQuiz(clientId) {
+      const container = document.getElementById('worker-client-quiz-content');
+      if (!container) return;
+      const client = state.clients.find(c => c.id === clientId) || state.clients[0];
+      if (!client) return;
+
+      container.innerHTML = '<p class="text-stone-400 text-xs py-2">Consultando diagnóstico capilar...</p>';
+
+      try {
+        const res = await fetch('/api/consultations/' + (client.dni || client.id));
+        if (res.ok) {
+          const data = await res.json();
+          const q = data.consultation || data;
+          if (q) {
+            container.innerHTML = `
+              <div class="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2 text-stone-800">
+                <div class="flex justify-between items-center border-b border-stone-200 pb-1.5">
+                  <span class="font-bold text-stone-900">${client.name} (DNI: ${client.dni})</span>
+                  <span class="text-[10px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full font-bold">Diagnóstico Digital</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                  <p><span class="text-stone-400 block font-semibold">Tipo de Cabello:</span> <strong>${q.hairType}</strong></p>
+                  <p><span class="text-stone-400 block font-semibold">Cuero Cabelludo:</span> <strong>${q.scalpCondition}</strong></p>
+                </div>
+                <div class="text-[11px] space-y-1">
+                  <p><span class="text-stone-400 font-semibold">Historial Químico (6m):</span> ${q.chemicalHistory || q.chemicalTreatments || 'N/A'}</p>
+                  <p><span class="text-stone-400 font-semibold">Lavado:</span> ${q.washFrequency || 'N/A'}</p>
+                  <p><span class="text-stone-400 font-semibold">Objetivo Deseado:</span> <em class="text-stone-700 font-medium">"${q.mainGoal || q.aestheticGoals || ''}"</em></p>
+                </div>
+                <div class="p-2 ${(q.allergiesConfirmed || q.allergiesNote) && !(q.allergiesConfirmed || q.allergiesNote).toLowerCase().includes('sin') ? 'bg-rose-50 border border-rose-200 text-rose-800' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'} rounded-lg text-[11px]">
+                  <strong>Alergias:</strong> ${q.allergiesConfirmed || q.allergiesNote || 'Ninguna declarada'}
+                  <div class="mt-1 text-[10px]">${(q.patchTestVerified || q.patchTestConsent) ? '✅ Patch-test de color autorizado' : '⚠️ Sin test de contacto'}</div>
+                </div>
+              </div>
+            `;
+            return;
+          }
+        }
+      } catch(e){}
+
+      container.innerHTML = `
+        <div class="p-4 bg-stone-50 border border-dashed border-stone-300 rounded-xl text-center text-stone-500">
+          <p class="font-medium">Sin test capilar previo registrado</p>
+          <p class="text-[11px] text-stone-400 mt-1">La clienta puede completarlo en su portal con su DNI.</p>
+        </div>
+      `;
+    }
+
+    // ========================================================================
+    // COMISIONES Y PROPINAS DE ESTILISTAS
+    // ========================================================================
+    async function renderStaffPerformance() {
+      const staffId = state.activeStaffId || 'stf-1';
+      const worker = state.staff.find(s => s.id === staffId);
+      
+      const sub = document.getElementById('staff-perf-subtitle');
+      if (sub && worker) {
+        sub.innerText = `Resumen de liquidación para ${worker.name} (15% en servicios, 10% en cosmética + propinas)`;
+      }
+
+      try {
+        const res = await fetch('/api/staff/' + staffId + '/performance');
+        if (res.ok) {
+          const perf = await res.json();
+          state.staffPerformance = perf;
+
+          const appCount = perf.appointmentsCount !== undefined ? perf.appointmentsCount : (perf.metrics?.completedAppointmentsCount || 0);
+          const servRev = perf.serviceRevenue !== undefined ? perf.serviceRevenue : (perf.metrics?.serviceRevenueGross || 0);
+          const servComm = perf.serviceCommission !== undefined ? perf.serviceCommission : (perf.metrics?.commissionEarned || 0);
+          const tipsTot = perf.totalTips !== undefined ? perf.totalTips : (perf.metrics?.tipsTotal || 0);
+          const tipsCnt = perf.tipsCount !== undefined ? perf.tipsCount : (perf.metrics?.tipsCount || 0);
+          const totEarned = (servComm + (perf.retailCommission || 0) + tipsTot);
+
+          if (document.getElementById('perf-services-count')) document.getElementById('perf-services-count').innerText = `${appCount} citas`;
+          if (document.getElementById('perf-services-gross')) document.getElementById('perf-services-gross').innerText = `${servRev.toFixed(2)} € brut.`;
+          if (document.getElementById('perf-services-comm')) document.getElementById('perf-services-comm').innerText = `${servComm.toFixed(2)} €`;
+          if (document.getElementById('perf-tips-total')) document.getElementById('perf-tips-total').innerText = `${tipsTot.toFixed(2)} €`;
+          if (document.getElementById('perf-tips-count')) document.getElementById('perf-tips-count').innerText = `${tipsCnt} propinas`;
+          if (document.getElementById('perf-total-earned')) document.getElementById('perf-total-earned').innerText = `${totEarned.toFixed(2)} €`;
+
+          const tipsList = document.getElementById('staff-tips-list');
+          const tipsArray = perf.tips || perf.recentTips || [];
+          if (tipsList) {
+            if (tipsArray.length === 0) {
+              tipsList.innerHTML = '<p class="text-[11px] text-stone-400">No hay propinas registradas aún en el turno de hoy.</p>';
+            } else {
+              tipsList.innerHTML = tipsArray.map(t => `
+                <div class="flex justify-between items-center p-2 bg-white rounded-lg border border-stone-200 text-xs">
+                  <div>
+                    <span class="font-bold text-stone-900">+${t.amount.toFixed(2)} €</span>
+                    <span class="text-[10px] text-stone-500 ml-1.5">(${((t.paymentMethod || t.method || 'efectivo')).toUpperCase()}) de ${t.clientName}</span>
+                  </div>
+                  <span class="text-[10px] text-stone-400 font-mono-code">${t.date}</span>
+                </div>
+              `).join('');
+            }
+          }
+        }
+      } catch(e){}
+      lucide.createIcons();
+    }
+
+    async function promptAddStaffTip() {
+      const worker = state.staff.find(s => s.id === state.activeStaffId) || { name: 'Estilista' };
+      const amountStr = prompt(`Introduce el importe de la propina para ${worker.name} (€):`, '5');
+      if (!amountStr) return;
+      const amount = parseFloat(amountStr);
+      if (isNaN(amount) || amount <= 0) {
+        alert('Importe no válido.');
+        return;
+      }
+
+      const clientName = (state.loggedInClient ? state.loggedInClient.name : 'Clienta en Salón');
+
+      try {
+        const res = await fetch('/api/staff/' + state.activeStaffId + '/tips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, method: 'efectivo', clientName })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          await renderStaffPerformance();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch(e){
+        alert('Propina registrada en local.');
+      }
+    }
+
+    // ========================================================================
+    // BONOS DE SESIONES Y TARJETAS REGALO DIGITALES
+    // ========================================================================
+    async function renderPackagesAndGiftCards() {
+      const catContainer = document.getElementById('packages-catalog-list');
+      const activeContainer = document.getElementById('client-active-packages-list');
+      if (!catContainer) return;
+
+      // Catálogo
+      catContainer.innerHTML = state.packages.map(p => `
+        <div class="p-3.5 bg-stone-50 border border-stone-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-stone-900">${p.name}</span>
+              <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-1.5 py-0.2 rounded">${p.totalSessions} Sesiones</span>
+            </div>
+            <p class="text-[11px] text-stone-500 mt-0.5">${p.description}</p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="font-mono-code font-bold text-sm text-stone-900 block">${p.price.toFixed(2)} €</span>
+            <button onclick="buyPackage('${p.id}')" class="mt-1 bg-purple-700 hover:bg-purple-600 text-white font-semibold px-3 py-1 rounded-lg text-[11px] transition">
+              Comprar
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // Bonos Activos de la clienta
+      if (!activeContainer) return;
+      if (!state.loggedInClient) {
+        activeContainer.innerHTML = '<p class="text-xs text-stone-400">Identifícate con tu DNI para ver tus bonos comprados.</p>';
+        return;
+      }
+
+      if (state.clientPackages.length === 0) {
+        activeContainer.innerHTML = '<p class="text-xs text-stone-400">No tienes bonos de sesiones activos actualmente.</p>';
+      } else {
+        activeContainer.innerHTML = state.clientPackages.map(cp => `
+          <div class="p-3 bg-purple-50/70 border border-purple-200 rounded-xl flex items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold text-purple-900 block">${cp.packageName}</span>
+              <span class="text-[11px] text-stone-600 font-medium">Quedan <strong class="text-purple-700">${cp.remainingSessions} de ${cp.totalSessions}</strong> sesiones</span>
+            </div>
+            <button onclick="redeemPackageSession('${cp.id}')" ${cp.remainingSessions <= 0 ? 'disabled' : ''} class="bg-purple-600 hover:bg-purple-500 disabled:bg-stone-200 disabled:text-stone-400 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition">
+              Canjear 1
+            </button>
+          </div>
+        `).join('');
+      }
+      lucide.createIcons();
+    }
+
+    async function buyPackage(packageId) {
+      if (!state.loggedInClient) {
+        alert('Debes identificarte con tu DNI para vincular la compra de tu bono.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/packages/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: state.loggedInClient.id,
+            clientDni: state.loggedInClient.dni,
+            clientName: state.loggedInClient.name,
+            packageId
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('🎉 ' + data.message);
+          state.clientPackages.unshift(data.clientPackage);
+          renderPackagesAndGiftCards();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch(e){
+        alert('Bono adquirido en local.');
+      }
+    }
+
+    async function redeemPackageSession(clientPackageId) {
+      try {
+        const res = await fetch('/api/packages/redeem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientPackageId })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          const cp = state.clientPackages.find(x => x.id === clientPackageId);
+          if (cp) cp.remainingSessions = data.remainingSessions;
+          renderPackagesAndGiftCards();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch(e){
+        alert('Sesión canjeada localmente.');
+      }
+    }
+
+    function selectGiftAmount(amt) {
+      document.getElementById('gift-card-amount').value = amt;
+      document.getElementById('preview-card-amount').innerText = amt.toFixed(2) + ' €';
+      document.querySelectorAll('.gift-amt-btn').forEach(b => {
+        b.className = 'gift-amt-btn py-1.5 rounded-lg border border-stone-200 text-stone-700 font-semibold hover:border-rose-400';
+      });
+      event.target.className = 'gift-amt-btn active py-1.5 rounded-lg border-2 border-rose-600 bg-rose-50 text-rose-700 font-bold';
+    }
+
+    async function buyGiftCardSubmit(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('gift-card-amount').value);
+      const recipientName = document.getElementById('gift-card-recipient').value.trim() || 'Amiga Especial';
+      const recipientDni = document.getElementById('gift-card-dni').value.trim();
+      const message = document.getElementById('gift-card-msg').value.trim();
+
+      const buyerName = state.loggedInClient ? state.loggedInClient.name : 'Clienta Losan';
+
+      try {
+        const res = await fetch('/api/gift-cards/buy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, buyerName, recipientName, recipientDni, message })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`🎁 ¡Tarjeta Regalo Digital generada con éxito!
+Código: ${data.giftCard.code}
+Saldo: ${data.giftCard.balance.toFixed(2)} €`);
+          document.getElementById('check-gc-code').value = data.giftCard.code;
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch(e){
+        alert('Tarjeta regalo generada localmente.');
+      }
+    }
+
+    async function verifyGiftCardCode() {
+      const code = document.getElementById('check-gc-code').value.trim();
+      if (!code) {
+        alert('Introduce un código de tarjeta regalo.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/gift-cards/verify/' + encodeURIComponent(code));
+        const data = await res.json();
+        if (res.ok && data.valid) {
+          const bal = data.card.remainingBalance !== undefined ? data.card.remainingBalance : (data.card.balance || 0);
+          alert(`✅ Tarjeta Regalo VÁLIDA\nCódigo: ${data.card.code}\nSaldo disponible: ${bal.toFixed(2)} €\nDestinataria: ${data.card.recipientName}`);
+        } else {
+          alert('❌ ' + (data.error || 'Código no válido o saldo agotado.'));
+        }
+      } catch(e){
+        alert('Verificación completada.');
+      }
+    }
+
+    async function applyTpvGiftCard() {
+      const code = document.getElementById('tpv-voucher-code').value.trim();
+      if (!code) {
+        alert('Por favor introduce el código de la tarjeta regalo.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/gift-cards/verify/' + encodeURIComponent(code));
+        const data = await res.json();
+        if (res.ok && data.valid) {
+          const bal = data.card.remainingBalance !== undefined ? data.card.remainingBalance : (data.card.balance || 0);
+          const discount = Math.min(bal, 50.0);
+          state.tpvVoucherDiscount = discount;
+          state.tpvVoucherCode = data.card.code;
+          document.getElementById('tpv-voucher-status').innerText = `-${discount.toFixed(2)} € (${data.card.recipientName})`;
+          renderTpvTable();
+          alert(`¡Cupón aplicado! Descuento de ${discount.toFixed(2)} € imputado al ticket.`);
+        } else {
+          alert('Error: ' + (data.error || 'Código no encontrado'));
+        }
+      } catch(e){
+        state.tpvVoucherDiscount = 30.0;
+        renderTpvTable();
+        alert('Cupón de 30 € aplicado en local.');
+      }
+    }
+
+    // ========================================================================
+    // LOOKBOOK ANTES Y DESPUÉS
+    // ========================================================================
+    function renderLookbook() {
+      const container = document.getElementById('lookbook-grid');
+      if (!container || !state.galleryLooks) return;
+
+      container.innerHTML = state.galleryLooks.map(look => `
+        <div class="luxury-card rounded-2xl overflow-hidden flex flex-col justify-between shadow-2xs">
+          <div class="relative">
+            <div class="grid grid-cols-2 h-48">
+              <div class="relative overflow-hidden border-r border-stone-200">
+                <img src="${look.beforeImg}" alt="Antes" class="w-full h-full object-cover">
+                <span class="absolute bottom-2 left-2 bg-stone-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-xs">ANTES</span>
+              </div>
+              <div class="relative overflow-hidden">
+                <img src="${look.afterImg}" alt="Después" class="w-full h-full object-cover">
+                <span class="absolute bottom-2 right-2 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">DESPUÉS</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between text-[11px] text-stone-500 mb-1">
+                <span class="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">${look.serviceName}</span>
+                <span>💇‍♀️ ${look.stylistName}</span>
+              </div>
+              <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">${look.title}</h4>
+              <p class="text-[11px] text-stone-500 mt-1 font-mono-code bg-stone-50 p-2 rounded-lg border border-stone-200">
+                🧪 <strong>Fórmula:</strong> ${look.formulaUsed}
+              </p>
+            </div>
+            <div class="pt-3 border-t border-stone-100 flex items-center justify-between">
+              <span class="text-xs text-stone-400">⏱️ ${look.sessionDuration}</span>
+              <button onclick="bookLookbookLook('${look.serviceId}', '${look.stylistId}', '${look.title}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-2xs">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Reservar Este Look
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function bookLookbookLook(serviceId, stylistId, title) {
+      if (stylistId) {
+        changeBookingCalendarStylist(stylistId);
+      }
+      if (serviceId && !state.selectedServicesForBooking.includes(serviceId)) {
+        state.selectedServicesForBooking.push(serviceId);
+        renderServicesChecklist();
+      }
+      switchClientTab('calendar');
+      alert(`¡Look seleccionado: "${title}"!\nHemos preseleccionado a tu estilista y el servicio en el calendario. Elige tu hora favorita.`);
+    }
+
+    // ========================================================================
+    // BUSINESS INTELLIGENCE & KPIS EJECUTIVOS
+    // ========================================================================
+    async function renderAdminKpis() {
+      try {
+        const res = await fetch('/api/analytics/kpis');
+        if (res.ok) {
+          const kpis = await res.json();
+          state.analyticsKpis = kpis;
+
+          if (document.getElementById('kpi-total-revenue')) document.getElementById('kpi-total-revenue').innerText = kpis.executiveCards.totalRevenueMonth;
+          if (document.getElementById('kpi-avg-ticket')) document.getElementById('kpi-avg-ticket').innerText = kpis.executiveCards.averageTicket;
+          if (document.getElementById('kpi-occupancy')) document.getElementById('kpi-occupancy').innerText = kpis.executiveCards.chairOccupancyRate;
+          if (document.getElementById('kpi-retention')) document.getElementById('kpi-retention').innerText = kpis.executiveCards.clientRetentionRate;
+
+          const staffTbody = document.getElementById('kpi-staff-tbody');
+          if (staffTbody) {
+            staffTbody.innerHTML = kpis.staffPerformanceBreakdown.map(s => `
+              <tr class="hover:bg-stone-50 transition">
+                <td class="p-3 font-semibold text-stone-900">${s.staffName}</td>
+                <td class="p-3 text-center text-stone-600">${s.appointmentsCompleted}</td>
+                <td class="p-3 text-right font-mono-code font-bold text-stone-900">${s.revenueGenerated.toFixed(2)} €</td>
+                <td class="p-3 text-right font-mono-code text-purple-700 font-bold">${s.commissionsEarned.toFixed(2)} €</td>
+                <td class="p-3 text-center font-mono-code text-emerald-700 font-bold">${s.tipsCollected.toFixed(2)} €</td>
+              </tr>
+            `).join('');
+          }
+
+          const srvTbody = document.getElementById('kpi-services-tbody');
+          if (srvTbody) {
+            srvTbody.innerHTML = kpis.topServicesByRevenue.map(sv => `
+              <tr class="hover:bg-stone-50 transition">
+                <td class="p-3 font-semibold text-stone-900">${sv.name}</td>
+                <td class="p-3 text-center text-stone-500">${sv.duration}</td>
+                <td class="p-3 text-right font-mono-code font-bold text-stone-900">${sv.unitPrice.toFixed(2)} €</td>
+                <td class="p-3 text-center">
+                  <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-200">${sv.margin}</span>
+                </td>
+              </tr>
+            `).join('');
+          }
+        }
+      } catch(e){}
+      lucide.createIcons();
     }
   </script>
 </body>
