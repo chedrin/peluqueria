@@ -718,6 +718,111 @@ function hasOverlap(staffId, start, end, excludeAptId = null) {
   });
 }
 
+// 3B. Endpoint de Disponibilidad y Huecos Libres Reales por Duración
+app.get('/api/availability', (req, res) => {
+  const staffId = req.query.staffId || 'stf-1';
+  const dateStr = req.query.date || '2026-10-23';
+  let durationMinutes = parseInt(req.query.durationMinutes, 10);
+
+  if (isNaN(durationMinutes) || durationMinutes <= 0) {
+    if (req.query.serviceIds) {
+      const ids = req.query.serviceIds.split(',');
+      const selected = db.services.filter(s => ids.includes(s.id));
+      durationMinutes = selected.reduce((sum, s) => sum + s.durationMinutes, 0);
+    }
+  }
+  if (!durationMinutes || isNaN(durationMinutes) || durationMinutes <= 0) {
+    durationMinutes = 30;
+  }
+
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) {
+    return res.status(404).json({ error: 'Estilista no encontrada' });
+  }
+
+  // Horario del salón: Mañana (09:30 - 14:00), Tarde (16:00 - 19:30)
+  const allIntervals = [
+    '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+    '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'
+  ];
+
+  const staffApts = db.appointments.filter(a => 
+    a.staffId === staffId && 
+    a.status !== 'cancelled' && 
+    a.status !== 'rescheduling_required' &&
+    a.startTime.startsWith(dateStr)
+  );
+
+  const shiftMorningEndMs = new Date(`${dateStr}T14:00:00.000Z`).getTime();
+  const shiftAfternoonEndMs = new Date(`${dateStr}T19:30:00.000Z`).getTime();
+
+  const slots = allIntervals.map(timeStr => {
+    const slotStartMs = new Date(`${dateStr}T${timeStr}:00.000Z`).getTime();
+    const slotEndMs = slotStartMs + durationMinutes * 60000;
+    const endStr = new Date(slotEndMs).toISOString().slice(11, 16);
+
+    // 1. Verificar límites de turno
+    const isMorning = timeStr < '14:00';
+    if (isMorning && slotEndMs > shiftMorningEndMs) {
+      return {
+        time: timeStr,
+        available: false,
+        reason: `Excede el turno de mañana (cierre a las 14:00). Requiere ${durationMinutes} min.`
+      };
+    }
+    if (!isMorning && slotEndMs > shiftAfternoonEndMs) {
+      return {
+        time: timeStr,
+        available: false,
+        reason: `Excede el horario de cierre (19:30). Requiere ${durationMinutes} min.`
+      };
+    }
+
+    // 2. Disponibilidad de la trabajadora
+    if (!staff.isAvailable) {
+      return {
+        time: timeStr,
+        available: false,
+        reason: `${staff.name} no se encuentra disponible (baja médica o descanso).`
+      };
+    }
+
+    // 3. Colisión con citas activas
+    const conflictApt = staffApts.find(a => {
+      const aStartMs = new Date(a.startTime).getTime();
+      const aEndMs = new Date(a.endTime).getTime();
+      return slotStartMs < aEndMs && slotEndMs > aStartMs;
+    });
+
+    if (conflictApt) {
+      const aStartTime = new Date(conflictApt.startTime).toISOString().slice(11, 16);
+      const aEndTime = new Date(conflictApt.endTime).toISOString().slice(11, 16);
+      return {
+        time: timeStr,
+        available: false,
+        reason: `Solapa con cita (${aStartTime} - ${aEndTime}) de ${conflictApt.clientName}`
+      };
+    }
+
+    return {
+      time: timeStr,
+      available: true,
+      reason: `Hueco libre (${timeStr} - ${endStr})`
+    };
+  });
+
+  const availableCount = slots.filter(s => s.available).length;
+
+  res.json({
+    staffId,
+    staffName: staff.name,
+    date: dateStr,
+    durationMinutes,
+    availableCount,
+    slots
+  });
+});
+
 // 4. Crear Cita
 app.post('/api/appointments/book', (req, res) => {
   const { clientId, clientDni, staffId, serviceIds, startTime, clientComments } = req.body;
@@ -1203,11 +1308,11 @@ app.post('/api/ai/chat', (req, res) => {
       `¿Para qué estilista (Elena, Raquel o Carmen) y qué día te gustaría consultar hueco?`;
   } else if (text.includes('elena') || text.includes('raquel') || text.includes('carmen') || text.includes('viernes') || text.includes('mañana') || text.includes('hueco') || text.includes('hora')) {
     toolCalled = 'check_availability(service_ids=["srv-1", "srv-2"], staff="Elena", date="2026-10-23")';
-    reply = `He consultado la agenda en directo para el viernes 23 con Elena:\n` +
-      `• **13:00** — Disponible ✅\n` +
-      `• **17:30** — Disponible ✅\n` +
-      `• **18:30** — Disponible ✅\n` +
-      `*(A las 10:00 y a las 16:00 tiene citas reservadas).* \n\n` +
+    reply = `He consultado la agenda en directo para el viernes 23 con Elena (para 90 min de servicios):\n` +
+      `• **12:30** — Disponible ✅ (12:30 a 14:00)\n` +
+      `• **17:30** — Disponible ✅ (17:30 a 19:00)\n` +
+      `• **18:00** — Disponible ✅ (18:00 a 19:30)\n` +
+      `*(A las 10:00-11:30, 12:00-12:30 y 16:00-17:30 tiene citas ocupadas).* \n\n` +
       `¿Te reservo a las 17:30 para ${client.name} (DNI: ${client.dni || 'Registrado'})?`;
   } else if (text.includes('17:30') || text.includes('si') || text.includes('sí') || text.includes('reserva') || text.includes('confirma') || text.includes('perfecto')) {
     toolCalled = `book_appointment(client_id="${client.id}", dni="${client.dni || ''}", staff_id="stf-1", start_time="2026-10-23T17:30:00Z")`;
