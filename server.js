@@ -16,6 +16,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ============================================================================
 
 const db = {
+  salonInfo: {
+    name: 'Peluquería Losan',
+    commercialName: 'Peluquería & Estilismo Losan',
+    legalName: 'Peluquería & Estilismo Losan S.L.',
+    cif: 'B-87654321',
+    tagline: 'Salón Boutique & Cuidado Capilar de Vanguardia',
+    phone: '+34 912 345 678',
+    whatsapp: '+34 611 223 344',
+    email: 'contacto@peluquerialosan.es',
+    address: 'Calle Velázquez 42, 28001 Madrid',
+    schedule: 'Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00',
+    vatRateDefault: 21,
+    currency: 'EUR'
+  },
   users: [
     { id: 'usr-admin-1', phone: '34611111111', role: 'admin', firstName: 'Marisa', lastName: 'Garrido (Gerente)', isActive: true },
     { id: 'usr-staff-1', phone: '34622222222', role: 'staff', firstName: 'Elena', lastName: 'Gómez', isActive: true },
@@ -33,6 +47,11 @@ const db = {
       specialty: 'Colorimetría & Balayage',
       chair: 'Sillón 1 (Color)',
       isAvailable: true,
+      isActive: true,
+      status: 'active',
+      phone: '+34 622 222 222',
+      email: 'elena@peluquerialosan.es',
+      leaveReason: '',
       notes: 'Especialista en Balayage y Colorimetría avanzada',
       scheduleConfig: {
         monday: { start: '09:30', end: '19:30' },
@@ -51,6 +70,11 @@ const db = {
       specialty: 'Cortes & Estilismo',
       chair: 'Sillón 2 (Cortes)',
       isAvailable: true,
+      isActive: true,
+      status: 'active',
+      phone: '+34 633 333 333',
+      email: 'raquel@peluquerialosan.es',
+      leaveReason: '',
       notes: 'Corte de diseño, peinados y recogidos',
       scheduleConfig: {
         monday: { start: '09:30', end: '19:30' },
@@ -69,6 +93,11 @@ const db = {
       specialty: 'Tratamientos & Salud Capilar',
       chair: 'Sillón 3 (Tratamientos)',
       isAvailable: true,
+      isActive: true,
+      status: 'active',
+      phone: '+34 644 444 444',
+      email: 'carmen@peluquerialosan.es',
+      leaveReason: '',
       notes: 'Tratamientos capilares, keratina e hidratación profunda',
       scheduleConfig: {
         monday: { start: '09:30', end: '19:30' },
@@ -690,9 +719,193 @@ app.get('/api/services', (req, res) => {
   res.json(db.services);
 });
 
-// 2. Personal y Disponibilidad
+// 2. INFORMACIÓN Y CONFIGURACIÓN DEL SALÓN (TÍTULO Y DATOS COMERCIALES)
+app.get('/api/salon/info', (req, res) => {
+  res.json(db.salonInfo);
+});
+
+app.put('/api/salon/info', (req, res) => {
+  const { name, commercialName, legalName, cif, tagline, phone, whatsapp, email, address, schedule } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'El nombre de la peluquería es obligatorio.' });
+  }
+
+  db.salonInfo = {
+    ...db.salonInfo,
+    name: name.trim(),
+    commercialName: commercialName ? commercialName.trim() : name.trim(),
+    legalName: legalName ? legalName.trim() : db.salonInfo.legalName,
+    cif: cif ? cif.trim().toUpperCase() : db.salonInfo.cif,
+    tagline: tagline ? tagline.trim() : db.salonInfo.tagline,
+    phone: phone ? phone.trim() : db.salonInfo.phone,
+    whatsapp: whatsapp ? whatsapp.trim() : db.salonInfo.whatsapp,
+    email: email ? email.trim() : db.salonInfo.email,
+    address: address ? address.trim() : db.salonInfo.address,
+    schedule: schedule ? schedule.trim() : db.salonInfo.schedule,
+    updatedAt: new Date().toISOString()
+  };
+
+  res.json({
+    success: true,
+    message: 'Datos de la peluquería actualizados correctamente. El título de la página y los datos fiscales se han sincronizado.',
+    salonInfo: db.salonInfo
+  });
+});
+
+// 2B. GESTIÓN INTEGRAL DE ESTILISTAS (ALTAS, BAJAS Y MODIFICACIONES)
 app.get('/api/staff', (req, res) => {
+  if (req.query.activeOnly === 'true') {
+    return res.json(db.staff.filter(s => s.isActive !== false));
+  }
   res.json(db.staff);
+});
+
+// Dar de alta a una nueva estilista
+app.post('/api/staff', (req, res) => {
+  const { name, specialty, chair, phone, email, displayColor, notes, scheduleConfig } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'El nombre y apellidos de la trabajadora son obligatorios.' });
+  }
+
+  const staffId = 'stf-' + Date.now();
+  const userId = 'usr-staff-' + Date.now();
+
+  const newStaff = {
+    id: staffId,
+    userId: userId,
+    name: name.trim(),
+    displayColor: displayColor || '#8B5CF6',
+    specialty: specialty ? specialty.trim() : 'Estilista & Peluquería General',
+    chair: chair ? chair.trim() : `Sillón ${db.staff.length + 1}`,
+    phone: phone ? phone.trim() : '',
+    email: email ? email.trim() : '',
+    isAvailable: true,
+    isActive: true, // ALTA
+    status: 'active',
+    leaveReason: '',
+    notes: notes ? notes.trim() : 'Incorporación al equipo técnico del salón',
+    createdAt: new Date().toISOString(),
+    scheduleConfig: scheduleConfig || {
+      monday: { start: '09:30', end: '19:30' },
+      tuesday: { start: '09:30', end: '19:30' },
+      wednesday: { start: '09:30', end: '19:30' },
+      thursday: { start: '09:30', end: '19:30' },
+      friday: { start: '09:30', end: '19:30' },
+      saturday: { start: '09:00', end: '14:00' },
+    }
+  };
+
+  db.staff.push(newStaff);
+
+  // Crear usuario con rol staff en users
+  db.users.push({
+    id: userId,
+    phone: newStaff.phone || `34600${Date.now().toString().slice(-6)}`,
+    role: 'staff',
+    firstName: newStaff.name.split(' ')[0],
+    lastName: newStaff.name.split(' ').slice(1).join(' ') || '',
+    isActive: true
+  });
+
+  res.status(201).json({
+    success: true,
+    message: `Estilista ${newStaff.name} dada de alta con éxito en el salón.`,
+    staff: newStaff
+  });
+});
+
+// Dar de baja o reactivar (alta) a una estilista
+app.patch('/api/staff/:id/status', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) {
+    return res.status(404).json({ error: 'Estilista no encontrada.' });
+  }
+
+  const { isActive, reason } = req.body;
+  if (typeof isActive !== 'boolean') {
+    return res.status(400).json({ error: 'El campo isActive (booleano) es obligatorio.' });
+  }
+
+  staff.isActive = isActive;
+  staff.isAvailable = isActive;
+  staff.status = isActive ? 'active' : 'inactive';
+
+  if (!isActive) {
+    staff.leaveReason = reason ? reason.trim() : 'Baja tramitada desde el panel de administración';
+    staff.notes = (staff.notes || '') + ` [BAJA TRAMITADA: ${staff.leaveReason} el ${new Date().toLocaleDateString('es-ES')}]`;
+  } else {
+    staff.leaveReason = '';
+    staff.notes = (staff.notes || '') + ` [REINCORPORACIÓN / ALTA el ${new Date().toLocaleDateString('es-ES')}]`;
+  }
+
+  // Contar citas pendientes asignadas para informar a gerencia
+  const pendingAppointments = db.appointments.filter(a => 
+    a.staffId === staff.id && 
+    (a.status === 'confirmed' || a.status === 'pending')
+  );
+
+  res.json({
+    success: true,
+    staff,
+    pendingAppointmentsCount: pendingAppointments.length,
+    message: isActive 
+      ? `Estilista ${staff.name} reactivada y dada de ALTA. Vuelve a estar disponible para clientas.` 
+      : `Estilista ${staff.name} dada de BAJA (${staff.leaveReason}). Citas pendientes asociadas: ${pendingAppointments.length}.`
+  });
+});
+
+// Modificar datos de una estilista
+app.put('/api/staff/:id', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) {
+    return res.status(404).json({ error: 'Estilista no encontrada.' });
+  }
+
+  const { name, specialty, chair, phone, email, displayColor, notes } = req.body;
+  if (name && name.trim()) staff.name = name.trim();
+  if (specialty !== undefined) staff.specialty = specialty.trim();
+  if (chair !== undefined) staff.chair = chair.trim();
+  if (phone !== undefined) staff.phone = phone.trim();
+  if (email !== undefined) staff.email = email.trim();
+  if (displayColor !== undefined) staff.displayColor = displayColor;
+  if (notes !== undefined) staff.notes = notes.trim();
+
+  res.json({
+    success: true,
+    message: 'Datos de la estilista actualizados correctamente.',
+    staff
+  });
+});
+
+// Eliminar o dar de baja irreversible
+app.delete('/api/staff/:id', (req, res) => {
+  const idx = db.staff.findIndex(s => s.id === req.params.id);
+  if (idx === -1) {
+    return res.status(404).json({ error: 'Estilista no encontrada.' });
+  }
+
+  const staff = db.staff[idx];
+  const hasApts = db.appointments.some(a => a.staffId === staff.id && a.status !== 'cancelled');
+
+  if (hasApts) {
+    // Si tiene citas registradas, se le da de baja en lugar de borrar para preservar integridad referencial
+    staff.isActive = false;
+    staff.isAvailable = false;
+    staff.status = 'inactive';
+    staff.leaveReason = 'Baja forzosa por solicitud de baja definitiva';
+    return res.json({
+      success: true,
+      softDeleted: true,
+      message: `La estilista ${staff.name} tiene histórico de citas y no puede eliminarse físicamente. Se ha tramitado su BAJA en el sistema.`,
+      staff
+    });
+  }
+
+  db.staff.splice(idx, 1);
+  res.json({
+    success: true,
+    message: `Estilista ${staff.name} eliminada permanentemente del sistema.`
+  });
 });
 
 // 3. Citas y Agenda
@@ -735,16 +948,31 @@ app.get('/api/availability', (req, res) => {
     durationMinutes = 30;
   }
 
-  const staff = db.staff.find(s => s.id === staffId);
-  if (!staff) {
-    return res.status(404).json({ error: 'Estilista no encontrada' });
-  }
-
   // Horario del salón: Mañana (09:30 - 14:00), Tarde (16:00 - 19:30)
   const allIntervals = [
     '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
     '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'
   ];
+
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) {
+    return res.status(404).json({ error: 'Estilista no encontrada' });
+  }
+  if (staff.isActive === false || staff.isAvailable === false) {
+    return res.json({
+      staffId: staff.id,
+      staffName: staff.name,
+      date: dateStr,
+      durationMinutes,
+      isStaffOnLeave: true,
+      availableCount: 0,
+      slots: allIntervals.map(timeStr => ({
+        time: timeStr,
+        available: false,
+        reason: `${staff.name} se encuentra actualmente de BAJA y no está disponible`
+      }))
+    });
+  }
 
   const staffApts = db.appointments.filter(a => 
     a.staffId === staffId && 

@@ -58,7 +58,7 @@
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-base font-bold text-stone-900 tracking-tight font-serif-luxury text-lg">
+            <h1 id="header-salon-name" class="text-base font-bold text-stone-900 tracking-tight font-serif-luxury text-lg salon-name-display">
               Peluquería Losan
             </h1>
             <span class="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full shadow-2xs">
@@ -375,16 +375,8 @@
                 <span>Ver cuadrante y huecos libres de:</span>
                 <span class="text-[11px] text-rose-600 font-bold" id="calendar-stylist-badge">Elena Gómez (Color & Balayage)</span>
               </label>
-              <div class="grid grid-cols-3 gap-2">
-                <button type="button" onclick="changeBookingCalendarStylist('stf-1')" id="cal-stf-btn-stf-1" class="cal-stf-pill active bg-white border-2 border-purple-500 text-purple-900 font-bold py-2 px-3 rounded-xl text-xs shadow-xs text-center transition">
-                  💜 Elena Gómez
-                </button>
-                <button type="button" onclick="changeBookingCalendarStylist('stf-2')" id="cal-stf-btn-stf-2" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-pink-400 text-center transition">
-                  💖 Raquel Santos
-                </button>
-                <button type="button" onclick="changeBookingCalendarStylist('stf-3')" id="cal-stf-btn-stf-3" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-emerald-400 text-center transition">
-                  💚 Carmen Vidal
-                </button>
+              <div id="booking-stylists-pills-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <!-- Se genera dinámicamente con las estilistas de ALTA -->
               </div>
             </div>
 
@@ -982,6 +974,12 @@
         <button onclick="switchAdminTab('kpis')" id="tab-a-kpis" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
           <i data-lucide="bar-chart-3" class="w-4 h-4 text-stone-500"></i> KPIs & Negocio
         </button>
+        <button onclick="switchAdminTab('staff')" id="tab-a-staff" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
+          <i data-lucide="scissors" class="w-4 h-4 text-stone-500"></i> Estilistas (Altas & Bajas)
+        </button>
+        <button onclick="switchAdminTab('salon')" id="tab-a-salon" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
+          <i data-lucide="store" class="w-4 h-4 text-stone-500"></i> Datos de la Peluquería
+        </button>
       </div>
 
       <!-- VISTA 3A: AGENDA MAESTRA & PROTOCOLO DE BAJA MÉDICA -->
@@ -1471,6 +1469,178 @@
         </div>
       </div>
 
+      <!-- ===================================================================== -->
+      <!-- VISTA 3G: GESTIÓN DE ESTILISTAS (ALTAS Y BAJAS) -->
+      <!-- ===================================================================== -->
+      <div id="aview-staff" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-200 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+              <i data-lucide="scissors" class="w-5 h-5 text-indigo-600"></i>
+              Gestión de Personal & Estilistas (Altas y Bajas)
+            </h3>
+            <p class="text-xs text-stone-500 mt-0.5">Control de plantilla del salón: tramita altas de nuevas trabajadoras o gestiona bajas temporales. Las estilistas de baja dejan de estar seleccionables en el portal de clientas.</p>
+          </div>
+          <button type="button" onclick="openNewStaffModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 shadow-sm shadow-indigo-200 transition cursor-pointer">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> + Dar de Alta Nueva Estilista
+          </button>
+        </div>
+
+        <!-- 3 Tarjetas de Métricas de Plantilla -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="luxury-card rounded-2xl p-4 border-l-4 border-l-indigo-500 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-stone-500">Total en Plantilla</span>
+              <div class="text-2xl font-black text-stone-900 font-mono-code" id="staff-metric-total">3</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-4 border-l-4 border-l-emerald-500 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-stone-500">En Activo / Alta</span>
+              <div class="text-2xl font-black text-emerald-700 font-mono-code" id="staff-metric-active">3</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i data-lucide="user-check" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-4 border-l-4 border-l-rose-500 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-stone-500">De Baja / Inactivas</span>
+              <div class="text-2xl font-black text-rose-700 font-mono-code" id="staff-metric-inactive">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
+              <i data-lucide="user-x" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenedor dinámico de Tarjetas de Estilistas -->
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-stone-900 font-serif-luxury text-base flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+              Equipo Profesional de Peluquería
+            </h4>
+            <span class="text-xs text-stone-400">Control de disponibilidad y estado laboral</span>
+          </div>
+
+          <div id="admin-staff-cards-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Render dinámico con renderAdminStaffTable() -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- VISTA 3H: DATOS DE LA PELUQUERÍA & TÍTULO DE LA PÁGINA -->
+      <!-- ===================================================================== -->
+      <div id="aview-salon" class="hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-200 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+              <i data-lucide="store" class="w-5 h-5 text-indigo-600"></i>
+              Identidad Comercial y Datos de la Peluquería
+            </h3>
+            <p class="text-xs text-stone-500 mt-0.5">El nombre aquí establecido define de forma automática el título de la pestaña del navegador (&lt;title&gt;), el encabezado del salón, los portales y las facturas fiscales Veri*Factu.</p>
+          </div>
+          <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3 py-1.5 rounded-full border border-indigo-200 flex items-center gap-1.5 shadow-2xs">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600"></i> Sincronización en Tiempo Real
+          </span>
+        </div>
+
+        <!-- Vista previa interactiva de la Pestaña del Navegador -->
+        <div class="luxury-card rounded-2xl p-5 border border-indigo-100 bg-gradient-to-r from-indigo-50/50 to-stone-50/50 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-indigo-900 uppercase tracking-wider">
+            <i data-lucide="globe" class="w-4 h-4 text-indigo-600"></i>
+            Previsualización en Vivo de la Pestaña del Navegador (&lt;title&gt;)
+          </div>
+          <div class="inline-flex items-center gap-2.5 bg-stone-100 border border-stone-300 rounded-t-xl px-4 py-2 text-xs shadow-2xs">
+            <span class="text-sm">✂️</span>
+            <span id="preview-tab-title" class="font-semibold text-stone-800">Peluquería Losan — Gestión Integral</span>
+            <span class="text-stone-400 hover:text-stone-600 cursor-pointer ml-2">×</span>
+          </div>
+          <p class="text-[11px] text-stone-500">Al escribir en el campo "Nombre Comercial de la Peluquería", el título del navegador se actualizará automáticamente en tiempo real.</p>
+        </div>
+
+        <!-- Formulario de Configuración -->
+        <div class="luxury-card rounded-2xl p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Nombre de la Peluquería (Título Principal) -->
+            <div class="md:col-span-2 space-y-1.5">
+              <label class="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="tag" class="w-3.5 h-3.5 text-indigo-600"></i>
+                Nombre Comercial de la Peluquería (Título Web y Salón) <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="salon-name-input" oninput="onSalonNameInput(this.value)" placeholder="Ej. Peluquería Losan" class="w-full bg-white border-2 border-indigo-200 focus:border-indigo-600 rounded-xl p-3 text-stone-900 font-bold text-base focus:outline-none shadow-2xs transition">
+              <p class="text-[11px] text-stone-500">Este valor determina el título de la página (&lt;title&gt;), la cabecera general y las comunicaciones.</p>
+            </div>
+
+            <!-- Lema / Subtítulo -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Lema / Subtítulo del Salón</label>
+              <input type="text" id="salon-tagline-input" placeholder="Ej. Salón Boutique & Cuidado Capilar" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Razón Social Legal -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Razón Social / Titular Legal</label>
+              <input type="text" id="salon-legal-name-input" placeholder="Ej. Peluquería & Estilismo Losan S.L." class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- NIF / CIF Fiscal -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">NIF / CIF Fiscal (Veri*Factu AEAT)</label>
+              <input type="text" id="salon-cif-input" placeholder="Ej. B-87654321" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-mono-code focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Teléfono Principal -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Teléfono Principal del Salón</label>
+              <input type="text" id="salon-phone-input" placeholder="Ej. +34 912 345 678" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- WhatsApp Citas -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">WhatsApp de Notificaciones y Citas</label>
+              <input type="text" id="salon-whatsapp-input" placeholder="Ej. +34 611 223 344" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Email Oficial -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Correo Electrónico Oficial</label>
+              <input type="email" id="salon-email-input" placeholder="Ej. contacto@peluquerialosan.es" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Dirección Física -->
+            <div class="md:col-span-2 space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Dirección Completa (Salón Físico)</label>
+              <input type="text" id="salon-address-input" placeholder="Ej. Calle Velázquez 42, 28001 Madrid" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <!-- Horario Comercial Visible -->
+            <div class="md:col-span-2 space-y-1.5">
+              <label class="text-xs font-bold text-stone-700">Horario de Apertura al Público</label>
+              <input type="text" id="salon-schedule-input" placeholder="Ej. Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <!-- Botón de Guardado -->
+          <div class="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div id="salon-save-status" class="text-xs text-stone-500">
+              Los cambios se guardan de forma permanente y se sincronizan en todo el sistema.
+            </div>
+            <button type="button" onclick="saveSalonSettings()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-indigo-200 transition cursor-pointer">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Guardar Datos de la Peluquería
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -1562,6 +1732,7 @@
       }
 
       renderClientSession();
+      renderBookingStylistSelectors();
       renderBookingSlots(state.bookingCalendarStaffId);
       renderServicesChecklist();
       renderShowcaseProducts();
@@ -1571,6 +1742,8 @@
       renderInvoicesTable();
       renderStockTable();
       renderAdminCrmTable();
+      renderAdminStaffTable();
+      loadSalonInfo();
       renderStaffPerformance();
       renderPackagesAndGiftCards();
       renderLookbook();
@@ -1579,7 +1752,7 @@
 
     async function fetchInitialData() {
       try {
-        const [resSrv, resStf, resApt, resPrd, resInv, resCli, resTec, resPkg, resGft, resGal, resKpi] = await Promise.all([
+        const [resSrv, resStf, resApt, resPrd, resInv, resCli, resTec, resPkg, resGft, resGal, resKpi, resSal] = await Promise.all([
           fetch('/api/services'),
           fetch('/api/staff'),
           fetch('/api/appointments'),
@@ -1590,7 +1763,8 @@
           fetch('/api/packages'),
           fetch('/api/gift-cards'),
           fetch('/api/gallery'),
-          fetch('/api/analytics/kpis')
+          fetch('/api/analytics/kpis'),
+          fetch('/api/salon/info')
         ]);
 
         state.services = await resSrv.json();
@@ -1604,6 +1778,10 @@
         state.giftCards = await resGft.json();
         state.galleryLooks = await resGal.json();
         state.analyticsKpis = await resKpi.json();
+        if (resSal && resSal.ok) {
+          state.salonInfo = await resSal.json();
+          applySalonInfo(state.salonInfo);
+        }
 
         // Cargar bonos de clienta si está autenticada
         if (state.loggedInClient) {
@@ -1854,7 +2032,7 @@
         activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
       }
 
-      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis, #aview-staff, #aview-salon').forEach(el => el.classList.add('hidden'));
       const targetView = document.getElementById('aview-' + tabKey);
       if (targetView) targetView.classList.remove('hidden');
 
@@ -1862,6 +2040,10 @@
         renderAdminCrmTable();
       } else if (tabKey === 'kpis') {
         renderAdminKpis();
+      } else if (tabKey === 'staff') {
+        renderAdminStaffTable();
+      } else if (tabKey === 'salon') {
+        loadSalonInfo();
       }
       lucide.createIcons();
     }
@@ -3827,6 +4009,508 @@ Saldo: ${data.giftCard.balance.toFixed(2)} €`);
       } catch(e){}
       lucide.createIcons();
     }
-  </script>
+  
+
+    // ========================================================================
+    // CONFIGURACIÓN Y DATOS DE LA PELUQUERÍA (TÍTULO Y DATOS COMERCIALES)
+    // ========================================================================
+    async function loadSalonInfo() {
+      try {
+        const res = await fetch('/api/salon/info');
+        if (res.ok) {
+          state.salonInfo = await res.json();
+          applySalonInfo(state.salonInfo);
+        }
+      } catch (e) {
+        console.warn('Error al cargar datos del salón:', e);
+      }
+    }
+
+    function applySalonInfo(info) {
+      if (!info) return;
+
+      // 1. TÍTULO DE LA PÁGINA (<title>) Y PREVIEW
+      const pageTitle = `${info.name} — Gestión Integral`;
+      document.title = pageTitle;
+
+      const previewTab = document.getElementById('preview-tab-title');
+      if (previewTab) previewTab.innerText = pageTitle;
+
+      // 2. ACTUALIZAR ENCABEZADOS Y NAVBAR
+      const headerTitle = document.getElementById('header-salon-name');
+      if (headerTitle) headerTitle.innerText = info.name;
+
+      const headerTagline = document.getElementById('header-salon-tagline');
+      if (headerTagline && info.tagline) headerTagline.innerText = info.tagline;
+
+      // 3. ACTUALIZAR TODOS LOS ELEMENTOS CON CLASE .salon-name-display
+      document.querySelectorAll('.salon-name-display').forEach(el => {
+        el.innerText = info.name;
+      });
+
+      // 4. PRELLENAR FORMULARIO DE ADMINISTRACIÓN
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val !== undefined) el.value = val;
+      };
+
+      setVal('salon-name-input', info.name);
+      setVal('salon-tagline-input', info.tagline);
+      setVal('salon-legal-name-input', info.legalName);
+      setVal('salon-cif-input', info.cif);
+      setVal('salon-phone-input', info.phone);
+      setVal('salon-whatsapp-input', info.whatsapp);
+      setVal('salon-email-input', info.email);
+      setVal('salon-address-input', info.address);
+      setVal('salon-schedule-input', info.schedule);
+
+      // 5. DATOS FISCALES EN FACTURACIÓN VERI*FACTU
+      const fiscalLegal = document.getElementById('fiscal-salon-legal-name');
+      if (fiscalLegal) fiscalLegal.innerText = info.legalName || info.name;
+      const fiscalCif = document.getElementById('fiscal-salon-cif');
+      if (fiscalCif) fiscalCif.innerText = `NIF: ${info.cif}`;
+      const fiscalAddr = document.getElementById('fiscal-salon-address');
+      if (fiscalAddr) fiscalAddr.innerText = info.address;
+    }
+
+    function onSalonNameInput(val) {
+      const cleanVal = val.trim() || 'Peluquería Losan';
+      const pageTitle = `${cleanVal} — Gestión Integral`;
+      const previewTab = document.getElementById('preview-tab-title');
+      if (previewTab) previewTab.innerText = pageTitle;
+      document.title = pageTitle;
+    }
+
+    async function saveSalonSettings() {
+      const name = document.getElementById('salon-name-input').value.trim();
+      if (!name) {
+        alert('Por favor introduce el nombre comercial de la peluquería.');
+        return;
+      }
+
+      const payload = {
+        name: name,
+        tagline: document.getElementById('salon-tagline-input').value.trim(),
+        legalName: document.getElementById('salon-legal-name-input').value.trim(),
+        cif: document.getElementById('salon-cif-input').value.trim().toUpperCase(),
+        phone: document.getElementById('salon-phone-input').value.trim(),
+        whatsapp: document.getElementById('salon-whatsapp-input').value.trim(),
+        email: document.getElementById('salon-email-input').value.trim(),
+        address: document.getElementById('salon-address-input').value.trim(),
+        schedule: document.getElementById('salon-schedule-input').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/salon/info', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          state.salonInfo = data.salonInfo;
+          applySalonInfo(state.salonInfo);
+          
+          const statusElem = document.getElementById('salon-save-status');
+          if (statusElem) {
+            statusElem.innerHTML = `<span class="text-emerald-600 font-bold flex items-center gap-1">✅ ¡Guardado con éxito! Título y datos de la peluquería actualizados.</span>`;
+            setTimeout(() => {
+              statusElem.innerText = 'Los cambios se guardan de forma permanente y se sincronizan en todo el sistema.';
+            }, 4000);
+          }
+          alert(`🎉 Datos de la peluquería actualizados correctamente.
+
+El título de la página ahora es:
+"${state.salonInfo.name} — Gestión Integral"`);
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Error al guardar datos del salón.');
+      }
+    }
+
+    // ========================================================================
+    // GESTIÓN DE ESTILISTAS (ALTAS Y BAJAS)
+    // ========================================================================
+    function renderAdminStaffTable() {
+      const container = document.getElementById('admin-staff-cards-container');
+      if (!container || !state.staff) return;
+
+      const total = state.staff.length;
+      const activeCount = state.staff.filter(s => s.isActive !== false).length;
+      const inactiveCount = total - activeCount;
+
+      const metricTotal = document.getElementById('staff-metric-total');
+      if (metricTotal) metricTotal.innerText = total;
+      const metricActive = document.getElementById('staff-metric-active');
+      if (metricActive) metricActive.innerText = activeCount;
+      const metricInactive = document.getElementById('staff-metric-inactive');
+      if (metricInactive) metricInactive.innerText = inactiveCount;
+
+      container.innerHTML = state.staff.map(s => {
+        const isActive = s.isActive !== false;
+        const initials = s.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const pendingApts = state.appointments.filter(a => a.staffId === s.id && a.status !== 'cancelled').length;
+
+        return `
+          <div class="luxury-card rounded-2xl p-5 border ${isActive ? 'border-stone-200' : 'border-rose-200 bg-rose-50/20'} flex flex-col justify-between gap-4 transition hover:shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white shadow-xs text-base" style="background-color: ${s.displayColor || '#8B5CF6'};">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h5 class="font-bold text-stone-900 text-sm">${s.name}</h5>
+                    ${isActive 
+                      ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ALTA (Activa)</span>` 
+                      : `<span class="inline-flex items-center gap-1 text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">🔴 DE BAJA</span>`
+                    }
+                  </div>
+                  <p class="text-xs text-indigo-700 font-medium">${s.specialty || 'Estilista'}</p>
+                  <p class="text-[11px] text-stone-500 font-mono-code">${s.chair || 'Sillón general'}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-stone-700 block">${pendingApts} citas</span>
+                <span class="text-[10px] text-stone-400">asignadas</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-[11px] py-2 border-y border-stone-100 text-stone-600">
+              <div><strong class="text-stone-700">Tel:</strong> ${s.phone || 'No indicado'}</div>
+              <div><strong class="text-stone-700">Color:</strong> <span class="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style="background-color: ${s.displayColor}"></span>${s.displayColor}</div>
+              <div class="col-span-2 text-[10px] text-stone-500 italic">${s.leaveReason ? 'Motivo baja: ' + s.leaveReason : (s.notes || 'En activo')}</div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <button type="button" onclick="openEditStaffModal('${s.id}')" class="text-xs text-stone-600 hover:text-stone-900 font-semibold px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-stone-50 transition cursor-pointer flex items-center gap-1">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+              </button>
+              
+              ${isActive ? `
+                <button type="button" onclick="toggleStaffStatus('${s.id}', true)" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                  <i data-lucide="user-x" class="w-3.5 h-3.5"></i> Tramitar Baja
+                </button>
+              ` : `
+                <button type="button" onclick="toggleStaffStatus('${s.id}', false)" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-3 py-1.5 rounded-xl border border-emerald-300 transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                  <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Dar de Alta (Reactivar)
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openNewStaffModal() {
+      const modal = document.getElementById('new-staff-modal');
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeNewStaffModal() {
+      const modal = document.getElementById('new-staff-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setStaffColorPreset(color) {
+      const input = document.getElementById('new-staff-color');
+      if (input) input.value = color;
+    }
+
+    async function submitNewStaff(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-staff-name').value.trim();
+      const specialty = document.getElementById('new-staff-specialty').value.trim();
+      const chair = document.getElementById('new-staff-chair').value.trim();
+      const phone = document.getElementById('new-staff-phone').value.trim();
+      const email = document.getElementById('new-staff-email').value.trim();
+      const displayColor = document.getElementById('new-staff-color').value;
+      const notes = document.getElementById('new-staff-notes').value.trim();
+
+      if (!name) {
+        alert('Por favor indica el nombre de la trabajadora.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, specialty, chair, phone, email, displayColor, notes })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert(`🎉 ¡Alta completada!
+
+Estilista: ${data.staff.name}
+Especialidad: ${data.staff.specialty}
+Puesto: ${data.staff.chair}
+
+La trabajadora ya está disponible en la agenda del salón y en el portal de clientas.`);
+          closeNewStaffModal();
+          e.target.reset();
+          await fetchInitialData();
+          renderAdminStaffTable();
+          renderBookingStylistSelectors();
+          renderBookingSlots(state.bookingCalendarStaffId);
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Error al registrar la trabajadora.');
+      }
+    }
+
+    async function toggleStaffStatus(staffId, isCurrentlyActive) {
+      const staffObj = state.staff.find(s => s.id === staffId);
+      if (!staffObj) return;
+
+      if (isCurrentlyActive) {
+        // Tramitar Baja
+        const pendingCount = state.appointments.filter(a => a.staffId === staffId && a.status !== 'cancelled').length;
+        const reason = prompt(
+          `🛑 Tramitar BAJA para ${staffObj.name}
+${pendingCount > 0 ? `⚠️ ATENCIÓN: Esta estilista tiene ${pendingCount} cita(s) asignadas actualmente.\n` : ''}
+Indica el motivo de la baja (ej. Baja médica, vacaciones, cese temporal):`,
+          'Baja médica temporal'
+        );
+
+        if (reason === null) return;
+
+        try {
+          const res = await fetch(`/api/staff/${staffId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive: false, reason: reason })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert(`✅ ${data.message}
+
+La estilista ha dejado de estar visible para nuevas reservas en el portal de clientas.`);
+            await fetchInitialData();
+            renderAdminStaffTable();
+            renderBookingStylistSelectors();
+            renderBookingSlots(state.bookingCalendarStaffId);
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (e) {
+          alert('Error al tramitar la baja.');
+        }
+      } else {
+        // Tramitar Alta / Reactivación
+        if (!confirm(`¿Confirmas que deseas dar de ALTA y reactivar a ${staffObj.name}? Volverá a estar disponible para recibir citas.`)) {
+          return;
+        }
+
+        try {
+          const res = await fetch(`/api/staff/${staffId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive: true })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert(`🎉 ${data.message}`);
+            await fetchInitialData();
+            renderAdminStaffTable();
+            renderBookingStylistSelectors();
+            renderBookingSlots(state.bookingCalendarStaffId);
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (e) {
+          alert('Error al reactivar a la trabajadora.');
+        }
+      }
+    }
+
+    function openEditStaffModal(staffId) {
+      const s = state.staff.find(x => x.id === staffId);
+      if (!s) return;
+
+      const newName = prompt('Nombre y Apellidos de la estilista:', s.name);
+      if (newName === null) return;
+      const newSpecialty = prompt('Especialidad:', s.specialty || '');
+      if (newSpecialty === null) return;
+      const newChair = prompt('Puesto / Sillón:', s.chair || '');
+      if (newChair === null) return;
+      const newPhone = prompt('Teléfono móvil:', s.phone || '');
+      if (newPhone === null) return;
+
+      fetch(`/api/staff/${staffId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName,
+          specialty: newSpecialty,
+          chair: newChair,
+          phone: newPhone
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ Datos de la estilista actualizados correctamente.');
+          fetchInitialData().then(() => {
+            renderAdminStaffTable();
+            renderBookingStylistSelectors();
+          });
+        }
+      })
+      .catch(() => alert('Error al actualizar datos.'));
+    }
+
+    function renderBookingStylistSelectors() {
+      const container = document.getElementById('booking-stylists-pills-container');
+      const select = document.getElementById('select-booking-staff');
+      if (!state.staff) return;
+
+      const activeStaff = state.staff.filter(s => s.isActive !== false);
+
+      if (container) {
+        if (activeStaff.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full p-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-xs text-amber-800">
+              ⚠️ No hay estilistas en activo disponibles en este momento.
+            </div>
+          `;
+        } else {
+          // Si la estilista seleccionada está de baja o no existe, cambiar a la primera activa
+          if (!activeStaff.some(s => s.id === state.bookingCalendarStaffId)) {
+            state.bookingCalendarStaffId = activeStaff[0].id;
+          }
+
+          container.innerHTML = activeStaff.map(s => {
+            const isSelected = state.bookingCalendarStaffId === s.id;
+            return `
+              <button type="button" 
+                onclick="changeBookingCalendarStylist('${s.id}')" 
+                id="cal-stf-btn-${s.id}" 
+                style="${isSelected ? `border-color: ${s.displayColor || '#8B5CF6'}; color: ${s.displayColor || '#8B5CF6'}; background-color: ${s.displayColor || '#8B5CF6'}10;` : ''}"
+                class="cal-stf-pill ${isSelected ? 'border-2 font-bold shadow-xs' : 'border border-stone-200 text-stone-600 font-semibold hover:border-stone-400'} bg-white py-2 px-3 rounded-xl text-xs text-center transition flex items-center justify-center gap-1.5 cursor-pointer">
+                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${s.displayColor || '#8B5CF6'};"></span>
+                <span class="truncate">${s.name}</span>
+              </button>
+            `;
+          }).join('');
+        }
+      }
+
+      if (select) {
+        if (activeStaff.length === 0) {
+          select.innerHTML = `<option value="">Sin estilistas activas disponibles</option>`;
+        } else {
+          select.innerHTML = activeStaff.map(s => `
+            <option value="${s.id}" ${state.bookingCalendarStaffId === s.id ? 'selected' : ''}>
+              ${s.name} (${s.specialty || 'Estilista'})
+            </option>
+          `).join('');
+        }
+      }
+
+      // Sincronizar badge de estilista activa
+      const currentActive = activeStaff.find(s => s.id === state.bookingCalendarStaffId);
+      const badge = document.getElementById('calendar-stylist-badge');
+      if (badge && currentActive) {
+        badge.innerText = `${currentActive.name} (${currentActive.specialty || 'Estilista'})`;
+      }
+
+      // Sincronizar selector del portal de trabajadoras
+      const workerSelect = document.getElementById('select-active-worker');
+      if (workerSelect) {
+        workerSelect.innerHTML = state.staff.map(s => `
+          <option value="${s.id}" ${state.activeStaffId === s.id ? 'selected' : ''}>
+            ${s.name} ${s.isActive === false ? '🔴 [DE BAJA]' : `(${s.specialty})`}
+          </option>
+        `).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+</script>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DAR DE ALTA NUEVA ESTILISTA -->
+  <!-- ========================================================================= -->
+  <div id="new-staff-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+        <h3 class="font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i>
+          Dar de Alta Nueva Estilista
+        </h3>
+        <button onclick="closeNewStaffModal()" class="text-stone-400 hover:text-stone-600 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitNewStaff(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">Nombre y Apellidos *</label>
+          <input type="text" id="new-staff-name" required placeholder="Ej. Lucía Navarro" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-900 font-medium focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">Especialidad Principal *</label>
+            <input type="text" id="new-staff-specialty" required placeholder="Ej. Balayage & Colorimetría" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-900 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">Puesto / Sillón Asignado</label>
+            <input type="text" id="new-staff-chair" placeholder="Ej. Sillón 4 (Color)" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-900 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">Teléfono Móvil</label>
+            <input type="tel" id="new-staff-phone" placeholder="Ej. +34 677 889 900" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-900 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">Email Profesional</label>
+            <input type="email" id="new-staff-email" placeholder="Ej. lucia@peluqueria.com" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-900 focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">Color Distintivo en Agenda</label>
+          <div class="flex items-center gap-3">
+            <input type="color" id="new-staff-color" value="#6366F1" class="w-10 h-10 rounded-lg cursor-pointer border border-stone-300 p-0.5">
+            <div class="flex gap-1.5 flex-wrap">
+              <button type="button" onclick="setStaffColorPreset('#8B5CF6')" class="w-6 h-6 rounded-full bg-[#8B5CF6] border-2 border-white shadow-xs cursor-pointer"></button>
+              <button type="button" onclick="setStaffColorPreset('#EC4899')" class="w-6 h-6 rounded-full bg-[#EC4899] border-2 border-white shadow-xs cursor-pointer"></button>
+              <button type="button" onclick="setStaffColorPreset('#10B981')" class="w-6 h-6 rounded-full bg-[#10B981] border-2 border-white shadow-xs cursor-pointer"></button>
+              <button type="button" onclick="setStaffColorPreset('#3B82F6')" class="w-6 h-6 rounded-full bg-[#3B82F6] border-2 border-white shadow-xs cursor-pointer"></button>
+              <button type="button" onclick="setStaffColorPreset('#F59E0B')" class="w-6 h-6 rounded-full bg-[#F59E0B] border-2 border-white shadow-xs cursor-pointer"></button>
+              <button type="button" onclick="setStaffColorPreset('#14B8A6')" class="w-6 h-6 rounded-full bg-[#14B8A6] border-2 border-white shadow-xs cursor-pointer"></button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">Notas / Observaciones</label>
+          <textarea id="new-staff-notes" rows="2" placeholder="Experiencia previa, disponibilidad..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2 text-stone-800 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-stone-100 flex justify-end gap-2">
+          <button type="button" onclick="closeNewStaffModal()" class="px-4 py-2 border border-stone-300 rounded-xl text-stone-600 font-semibold hover:bg-stone-50 cursor-pointer">Cancelar</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="check" class="w-4 h-4"></i> Guardar y Dar de Alta
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
 </html>
