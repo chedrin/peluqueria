@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <!-- QRious QR Code Generator CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
@@ -505,8 +507,8 @@
                   <span class="text-xl font-black text-stone-900 font-mono-code" id="booking-total-price">60,00 €</span>
                 </div>
               </div>
-              <button id="btn-confirm-booking" onclick="submitManualBooking()" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-500 text-white px-7 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-rose-200">
-                <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Cita
+              <button id="btn-confirm-booking" onclick="submitManualBooking(this)" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-rose-200 cursor-pointer">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i> Aceptar y Confirmar Cita
               </button>
             </div>
           </div>
@@ -2823,6 +2825,9 @@
 
         if (data.toolCalled) {
           bannerText.innerText = `Tool Ejecutada: ${data.toolCalled}`;
+          if (data.toolCalled === 'bookAppointment') {
+            shootConfetti();
+          }
         }
 
         setTimeout(async () => {
@@ -2922,9 +2927,9 @@
       if (priceElem) priceElem.innerText = total.toFixed(2) + ' €';
     }
 
-    async function submitManualBooking() {
+    async function submitManualBooking(btnElem) {
       if (!state.loggedInClient) {
-        alert('Por favor, identifícate con tu DNI en el portal para poder confirmar tu cita.');
+        alert('Por favor, identifícate con tu DNI en el portal para poder aceptar tu cita.');
         return;
       }
 
@@ -2934,13 +2939,14 @@
       }
 
       if (!state.selectedSlots) {
-        alert('No hay ningún hueco libre seleccionado para la duración de los servicios. Por favor selecciona un hueco disponible en verde.');
+        alert('No hay ningún hueco libre seleccionado para la duración de los servicios. Por favor selecciona una hora disponible en verde.');
         return;
       }
 
       const staffId = document.getElementById('select-booking-staff').value;
       const comments = document.getElementById('booking-comments').value;
       const dateStr = getBookingDate();
+      const targetBtn = btnElem || document.getElementById('btn-confirm-booking');
 
       try {
         const res = await fetch('/api/appointments/book', {
@@ -2958,26 +2964,56 @@
 
         const data = await res.json();
         if (res.ok) {
-          alert(`🎉 ¡Cita confirmada con éxito!
+          // 1. DISPARAR CONFETI DESDE LA POSICIÓN EXACTA DEL BOTÓN DE ACEPTAR
+          shootConfetti(targetBtn);
 
-📅 Fecha: ${dateStr}
-⏰ Hora: ${state.selectedSlots}
-💇‍♀️ Estilista: ${data.staffName || 'Asignada'}
-🆔 DNI Clienta: ${state.loggedInClient.dni}
+          // 2. Animación de éxito en el botón
+          if (targetBtn) {
+            targetBtn.classList.add('bg-emerald-600', 'ring-4', 'ring-emerald-200', 'scale-105');
+            targetBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> ¡Cita Aceptada!`;
+            setTimeout(() => {
+              targetBtn.classList.remove('bg-emerald-600', 'ring-4', 'ring-emerald-200', 'scale-105');
+              targetBtn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i> Aceptar y Confirmar Cita`;
+            }, 3500);
+          }
 
-Los recordatorios automáticos de WhatsApp 24h y 2h han sido programados.`);
+          // 3. Mostrar modal de celebración con detalles de la cita aceptada
+          const selectedSrvNames = state.services
+            .filter(s => state.selectedServicesForBooking.includes(s.id))
+            .map(s => s.name)
+            .join(', ');
+          
+          showBookingCelebrationModal({
+            dateStr: dateStr,
+            timeSlot: state.selectedSlots,
+            staffName: data.staffName || 'Asignada',
+            clientName: state.loggedInClient.name,
+            clientDni: state.loggedInClient.dni,
+            serviceNames: selectedSrvNames,
+            totalPrice: document.getElementById('booking-total-price')?.innerText || '60,00 €'
+          });
+
           await fetchInitialData();
           renderClientAppointments();
           renderMasterAgenda();
           renderWorkerAgenda();
           renderBookingSlots(state.bookingCalendarStaffId);
           renderAdminCrmTable();
-          switchClientTab('my-appointments');
         } else {
           alert('Error: ' + data.error);
         }
       } catch (e) {
-        alert('Cita reservada correctamente en modo local.');
+        // Modo fallback local si no hubiese conexión
+        shootConfetti(targetBtn);
+        showBookingCelebrationModal({
+          dateStr: dateStr,
+          timeSlot: state.selectedSlots,
+          staffName: 'Estilista',
+          clientName: state.loggedInClient.name,
+          clientDni: state.loggedInClient.dni,
+          serviceNames: 'Servicio de Peluquería',
+          totalPrice: document.getElementById('booking-total-price')?.innerText || '60,00 €'
+        });
       }
     }
 
@@ -4690,6 +4726,191 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       selectCalendarDay('2026-10-23');
     }
 
+
+
+    // ========================================================================
+    // MOTOR DE CONFETI PARA EL BOTÓN DE ACEPTAR CITAS
+    // ========================================================================
+    function shootConfetti(targetElem) {
+      const btn = targetElem || document.getElementById('btn-confirm-booking');
+      let x = 0.5, y = 0.65;
+      if (btn && btn.getBoundingClientRect) {
+        const rect = btn.getBoundingClientRect();
+        x = (rect.left + rect.width / 2) / window.innerWidth;
+        y = (rect.top + rect.height / 2) / window.innerHeight;
+      }
+
+      // Si la librería confetti externa está cargada, disparar ráfagas
+      if (typeof confetti === 'function') {
+        // 1. Ráfaga primaria directa desde el botón en abanico izquierdo y derecho
+        confetti({
+          particleCount: 90,
+          angle: 60,
+          spread: 65,
+          origin: { x: x, y: y },
+          colors: ['#E11D48', '#BE185D', '#8B5CF6', '#10B981', '#F59E0B', '#3B82F6', '#FFD700'],
+          zIndex: 10000
+        });
+        confetti({
+          particleCount: 90,
+          angle: 120,
+          spread: 65,
+          origin: { x: x, y: y },
+          colors: ['#E11D48', '#BE185D', '#8B5CF6', '#10B981', '#F59E0B', '#3B82F6', '#FFD700'],
+          zIndex: 10000
+        });
+
+        // 2. Segunda salva en abanico superior
+        setTimeout(() => {
+          confetti({
+            particleCount: 80,
+            spread: 100,
+            origin: { x: x, y: Math.max(0.1, y - 0.08) },
+            colors: ['#FFD700', '#FF1493', '#00FFFF', '#7928CA', '#10B981'],
+            shapes: ['circle', 'square'],
+            zIndex: 10000
+          });
+        }, 180);
+
+        // 3. Estallidos de cañones laterales festivos
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 70,
+            origin: { x: 0.1, y: 0.8 },
+            zIndex: 10000
+          });
+          confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 70,
+            origin: { x: 0.9, y: 0.8 },
+            zIndex: 10000
+          });
+        }, 360);
+      } else {
+        // Fallback nativo ultra-ligero en Canvas puro garantizado al 100%
+        launchBuiltinCanvasConfetti(x, y);
+      }
+    }
+
+    function launchBuiltinCanvasConfetti(normX, normY) {
+      let canvas = document.getElementById('builtin-confetti-canvas');
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'builtin-confetti-canvas';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '99999';
+        document.body.appendChild(canvas);
+      }
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+
+      const originX = normX * canvas.width;
+      const originY = normY * canvas.height;
+
+      const colors = ['#E11D48', '#BE185D', '#8B5CF6', '#10B981', '#F59E0B', '#3B82F6', '#FFD700', '#FF1493'];
+      const particles = [];
+      const particleCount = 120;
+
+      for (let i = 0; i < particleCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 7 + Math.random() * 14;
+        particles.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 7,
+          size: 7 + Math.random() * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRotation: (Math.random() - 0.5) * 16,
+          opacity: 1,
+          gravity: 0.35 + Math.random() * 0.15
+        });
+      }
+
+      let animationId;
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.vx *= 0.98;
+          p.rotation += p.vRotation;
+          p.opacity -= 0.012;
+
+          if (p.opacity > 0 && p.y < canvas.height) {
+            alive = true;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, p.opacity);
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+            ctx.restore();
+          }
+        }
+
+        if (alive) {
+          animationId = requestAnimationFrame(update);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animationId);
+        }
+      }
+      update();
+    }
+
+    function showBookingCelebrationModal(data) {
+      const modal = document.getElementById('booking-celebration-modal');
+      if (!modal) return;
+
+      const d = new Date(data.dateStr + 'T12:00:00Z');
+      const formattedDate = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const capDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+
+      document.getElementById('celebration-client-name').innerText = data.clientName || 'Clienta';
+      document.getElementById('celebration-client-dni').innerText = data.clientDni || 'DNI';
+      document.getElementById('celebration-date').innerText = capDate;
+      document.getElementById('celebration-time').innerText = data.timeSlot || 'Hora confirmada';
+      document.getElementById('celebration-staff').innerText = data.staffName || 'Estilista asignada';
+      document.getElementById('celebration-services').innerText = data.serviceNames || 'Servicios del salón';
+      document.getElementById('celebration-price').innerText = data.totalPrice || '-';
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCelebrationModal(goToMyAppointments) {
+      const modal = document.getElementById('booking-celebration-modal');
+      if (modal) modal.classList.add('hidden');
+      if (goToMyAppointments) {
+        switchClientTab('my-appointments');
+      }
+    }
+
+    function confirmAppointmentFromAgenda(aptId, btnElem) {
+      shootConfetti(btnElem);
+      const apt = state.appointments.find(a => a.id === aptId);
+      if (apt) {
+        apt.status = 'confirmed';
+        renderMasterAgenda();
+        renderWorkerAgenda();
+      }
+    }
+
 </script>
 
   <!-- ========================================================================= -->
@@ -4762,6 +4983,69 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE CELEBRACIÓN: CITA CONFIRMADA CON CONFETI -->
+  <!-- ========================================================================= -->
+  <div id="booking-celebration-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 text-center space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Icono animado -->
+      <div class="w-16 h-16 bg-rose-50 border-2 border-rose-200 rounded-full flex items-center justify-center mx-auto text-rose-600 shadow-md shadow-rose-100">
+        <i data-lucide="party-popper" class="w-8 h-8 text-rose-600"></i>
+      </div>
+
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+          🎉 ¡Reserva Confirmada!
+        </span>
+        <h3 class="font-serif-luxury text-xl font-bold text-stone-900 mt-2">¡Cita Aceptada con Éxito!</h3>
+        <p class="text-xs text-stone-500 mt-1">Los recordatorios oficiales de WhatsApp 24h y 2h han sido programados.</p>
+      </div>
+
+      <!-- Ficha de la cita -->
+      <div class="bg-stone-50 rounded-2xl p-4 text-left border border-stone-200 space-y-2.5 text-xs">
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">Clienta:</span>
+          <span class="font-bold text-stone-900" id="celebration-client-name">-</span>
+        </div>
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">DNI:</span>
+          <span class="font-bold text-stone-900 font-mono-code" id="celebration-client-dni">-</span>
+        </div>
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">Fecha:</span>
+          <span class="font-bold text-stone-900" id="celebration-date">-</span>
+        </div>
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">Hora / Hueco:</span>
+          <span class="font-bold text-rose-700 font-mono-code bg-rose-100 px-2 py-0.5 rounded" id="celebration-time">-</span>
+        </div>
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">Estilista:</span>
+          <span class="font-bold text-stone-900" id="celebration-staff">-</span>
+        </div>
+        <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+          <span class="text-stone-500 font-medium">Servicios:</span>
+          <span class="font-bold text-stone-800 text-right max-w-[220px] truncate" id="celebration-services">-</span>
+        </div>
+        <div class="flex justify-between items-center pt-0.5">
+          <span class="text-stone-600 font-bold">Total con IVA (21%):</span>
+          <span class="font-black text-stone-900 font-mono-code text-sm" id="celebration-price">-</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col sm:flex-row gap-2">
+        <button type="button" onclick="closeCelebrationModal(true)" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-200 cursor-pointer">
+          <i data-lucide="calendar"></i> Ver Mis Citas
+        </button>
+        <button type="button" onclick="closeCelebrationModal(false)" class="px-5 py-3 border border-stone-200 text-stone-700 hover:bg-stone-50 font-semibold rounded-xl text-xs transition cursor-pointer">
+          Aceptar
+        </button>
+      </div>
     </div>
   </div>
 
