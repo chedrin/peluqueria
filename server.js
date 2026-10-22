@@ -30,6 +30,8 @@ const db = {
       userId: 'usr-staff-1',
       name: 'Elena Gómez',
       displayColor: '#8B5CF6',
+      specialty: 'Colorimetría & Balayage',
+      chair: 'Sillón 1 (Color)',
       isAvailable: true,
       notes: 'Especialista en Balayage y Colorimetría avanzada',
       scheduleConfig: {
@@ -46,6 +48,8 @@ const db = {
       userId: 'usr-staff-2',
       name: 'Raquel Santos',
       displayColor: '#EC4899',
+      specialty: 'Cortes & Estilismo',
+      chair: 'Sillón 2 (Cortes)',
       isAvailable: true,
       notes: 'Corte de diseño, peinados y recogidos',
       scheduleConfig: {
@@ -62,6 +66,8 @@ const db = {
       userId: 'usr-staff-3',
       name: 'Carmen Vidal',
       displayColor: '#10B981',
+      specialty: 'Tratamientos & Salud Capilar',
+      chair: 'Sillón 3 (Tratamientos)',
       isAvailable: true,
       notes: 'Tratamientos capilares, keratina e hidratación profunda',
       scheduleConfig: {
@@ -100,11 +106,88 @@ const db = {
       name: 'Sofía Morales',
       phone: '34666666666',
       allergies: 'Sin alergias conocidas',
-      generalNotes: 'Cabello muy fino, corte en capas para aportar volumen.',
+      generalNotes: 'Cabello muy fino, corte en capas para aportar volumen. Cuero cabelludo normal.',
       loyaltyPoints: 50,
       googleReviewVerified: false,
       qrCodeHash: 'QR-SOFIA-88319-HASH',
       marketingConsent: true,
+    },
+    {
+      id: 'cli-3',
+      name: 'Carmen Sánchez',
+      phone: '34677777777',
+      allergies: 'Alergia al níquel (cuidado con tijeras/utensilios metálicos directos en cuero cabelludo)',
+      generalNotes: 'Prefiere cortes despuntados y flequillo cortina.',
+      loyaltyPoints: 75,
+      googleReviewVerified: true,
+      qrCodeHash: 'QR-CARMEN-99214-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-4',
+      name: 'Marta Domínguez',
+      phone: '34688888888',
+      allergies: 'Cuero cabelludo reactivo. Emplear champú calmante dermo-protector.',
+      generalNotes: 'Pelo castaño con tendencia a oxidar a tonos anaranjados. Usar matiz violeta.',
+      loyaltyPoints: 90,
+      googleReviewVerified: false,
+      qrCodeHash: 'QR-MARTA-11234-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-5',
+      name: 'Beatriz Navarro',
+      phone: '34699999999',
+      allergies: 'Sin alergias conocidas',
+      generalNotes: 'Le encanta el corte Bob simétrico bien pulido con plancha.',
+      loyaltyPoints: 40,
+      googleReviewVerified: false,
+      qrCodeHash: 'QR-BEATRIZ-33421-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-6',
+      name: 'Lucía Pardo',
+      phone: '34600112233',
+      allergies: 'Sin alergias',
+      generalNotes: 'Clienta de peinados y brushing semanal.',
+      loyaltyPoints: 110,
+      googleReviewVerified: false,
+      qrCodeHash: 'QR-LUCIA-55612-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-7',
+      name: 'Clara Sanz',
+      phone: '34622334455',
+      allergies: 'Decoloraciones previas caseras. Cabello castigado y quebradizo en puntas.',
+      generalNotes: 'Tratamiento Olaplex en cada visita. Prohibido decolorar puntas.',
+      loyaltyPoints: 160,
+      googleReviewVerified: true,
+      qrCodeHash: 'QR-CLARA-88712-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-8',
+      name: 'Andrea Gil',
+      phone: '34633445566',
+      allergies: 'Sin alergias conocidas',
+      generalNotes: 'Tinte 5.0 castaño natural para cobertura 100% canas.',
+      loyaltyPoints: 65,
+      googleReviewVerified: false,
+      qrCodeHash: 'QR-ANDREA-44512-HASH',
+      marketingConsent: true
+    },
+    {
+      id: 'cli-9',
+      name: 'Paula Ruiz',
+      phone: '34644556677',
+      allergies: 'Sin alergias',
+      generalNotes: 'Mantenimiento de puntas y corte recto regular.',
+      loyaltyPoints: 30,
+      googleReviewVerified: false,
+      qrCodeHash: 'QR-PAULA-66781-HASH',
+      marketingConsent: true
     }
   ],
   technicalRecords: [
@@ -118,6 +201,61 @@ const db = {
       exposureTimeMinutes: 35,
       observations: 'El tono quedó exactamente como en la foto de referencia. Raíz difuminada.',
       photoUrl: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'tec-2',
+      clientId: 'cli-2',
+      staffName: 'Raquel Santos',
+      date: '2026-09-28',
+      dyeFormula: 'No aplicó coloración química (solo corte y peinado)',
+      techniqueUsed: 'Corte Bob en capas invisibles para volumen, peinado con ondas al agua',
+      exposureTimeMinutes: 0,
+      observations: 'Cabello muy agradecido, responde bien al sérum de keratina en medios a puntas.',
+      photoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'tec-3',
+      clientId: 'cli-3',
+      staffName: 'Elena Gómez',
+      date: '2026-10-02',
+      dyeFormula: 'Reflejos 7.3 dorado con oxidante 10vol (30g)',
+      techniqueUsed: 'Mechas finas en corona y contorno facial',
+      exposureTimeMinutes: 20,
+      observations: 'Evitar contacto metálico por alergia al níquel. Uso de peines de carbono.',
+      photoUrl: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'tec-4',
+      clientId: 'cli-4',
+      staffName: 'Elena Gómez',
+      date: '2026-08-20',
+      dyeFormula: 'Blondme sin amoniaco + oxidante 20vol con matizador T-Ice',
+      techniqueUsed: 'Balayage a mano alzada',
+      exposureTimeMinutes: 40,
+      observations: 'Aclaró a nivel 9 limpio. Matizado perfecto sin reflejos amarillentos.',
+      photoUrl: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'tec-5',
+      clientId: 'cli-5',
+      staffName: 'Raquel Santos',
+      date: '2026-10-10',
+      dyeFormula: 'No aplicó coloración',
+      techniqueUsed: 'Corte a navaja en nuca y tijera dentada en laterales',
+      exposureTimeMinutes: 0,
+      observations: 'Le encanta el acabado liso pulido con aceite de argán.',
+      photoUrl: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'tec-6',
+      clientId: 'cli-7',
+      staffName: 'Carmen Vidal',
+      date: '2026-10-05',
+      dyeFormula: 'Tratamiento Olaplex Nº1 Bond Multiplier (15ml) + Nº2 Bond Perfector (30ml)',
+      techniqueUsed: 'Reconstrucción molecular capilar con campana de vapor ozonizado',
+      exposureTimeMinutes: 30,
+      observations: 'Recuperó un 80% de elasticidad en puntas. Continuar con mascarilla en casa.',
+      photoUrl: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&w=300&q=80'
     }
   ],
   products: [
@@ -126,9 +264,13 @@ const db = {
     { id: 'prd-3', sku: 'COS-003', name: 'Sérum Sellador de Puntas (100ml)', brand: 'Kérastase Elixir', price: 34.00, costPrice: 18.00, stock: 6, vatRate: 21.0, isShowcase: true, img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
     { id: 'prd-4', sku: 'INT-001', name: 'Tubo Tinte 6.1 Rubio Oscuro Ceniza (60g)', brand: 'Igora', price: 9.50, costPrice: 4.80, stock: 18, vatRate: 21.0, isShowcase: false, img: '' }
   ],
+  // CITAS REALISTAS Y DIFERENTES PARA CADA ESTILISTA
   appointments: [
+    // ------------------------------------------------------------------------
+    // AGENDA ELENA GÓMEZ (stf-1 - Colorimetría & Balayage)
+    // ------------------------------------------------------------------------
     {
-      id: 'apt-1',
+      id: 'apt-elena-1',
       clientId: 'cli-1',
       clientName: 'Laura Martínez',
       staffId: 'stf-1',
@@ -143,7 +285,56 @@ const db = {
       reminderSent2h: false,
     },
     {
-      id: 'apt-2',
+      id: 'apt-elena-2',
+      clientId: 'cli-3',
+      clientName: 'Carmen Sánchez',
+      staffId: 'stf-1',
+      staffName: 'Elena Gómez',
+      serviceIds: ['srv-1'],
+      serviceNames: 'Corte y Estilismo',
+      startTime: '2026-10-23T12:00:00.000Z',
+      endTime: '2026-10-23T12:30:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Corte y desfilado de flequillo cortina.',
+      reminderSent24h: true,
+      reminderSent2h: false,
+    },
+    {
+      id: 'apt-elena-3',
+      clientId: 'cli-4',
+      clientName: 'Marta Domínguez',
+      staffId: 'stf-1',
+      staffName: 'Elena Gómez',
+      serviceIds: ['srv-3'],
+      serviceNames: 'Mechas Balayage & Matiz',
+      startTime: '2026-10-23T16:00:00.000Z',
+      endTime: '2026-10-23T17:30:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Balayage rubio ceniza, matiz frío anti-reflejos dorados.',
+      reminderSent24h: false,
+      reminderSent2h: false,
+    },
+
+    // ------------------------------------------------------------------------
+    // AGENDA RAQUEL SANTOS (stf-2 - Cortes & Peinados)
+    // ------------------------------------------------------------------------
+    {
+      id: 'apt-raquel-1',
+      clientId: 'cli-5',
+      clientName: 'Beatriz Navarro',
+      staffId: 'stf-2',
+      staffName: 'Raquel Santos',
+      serviceIds: ['srv-1'],
+      serviceNames: 'Corte y Estilismo (Bob Simétrico)',
+      startTime: '2026-10-23T10:30:00.000Z',
+      endTime: '2026-10-23T11:15:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Repasar corte Bob y peinado liso.',
+      reminderSent24h: true,
+      reminderSent2h: false,
+    },
+    {
+      id: 'apt-raquel-2',
       clientId: 'cli-2',
       clientName: 'Sofía Morales',
       staffId: 'stf-2',
@@ -153,8 +344,72 @@ const db = {
       startTime: '2026-10-23T16:30:00.000Z',
       endTime: '2026-10-23T17:30:00.000Z',
       status: 'confirmed',
-      clientComments: 'Tiene una boda el sábado, probar ondas sueltas.',
+      clientComments: 'Tiene una boda el sábado, probar ondas sueltas con tenacilla.',
       reminderSent24h: true,
+      reminderSent2h: false,
+    },
+    {
+      id: 'apt-raquel-3',
+      clientId: 'cli-6',
+      clientName: 'Lucía Pardo',
+      staffId: 'stf-2',
+      staffName: 'Raquel Santos',
+      serviceIds: ['srv-4'],
+      serviceNames: 'Peinado & Brushing',
+      startTime: '2026-10-23T18:00:00.000Z',
+      endTime: '2026-10-23T18:30:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Peinado exprés antes de una cena.',
+      reminderSent24h: false,
+      reminderSent2h: false,
+    },
+
+    // ------------------------------------------------------------------------
+    // AGENDA CARMEN VIDAL (stf-3 - Tratamientos Capilares)
+    // ------------------------------------------------------------------------
+    {
+      id: 'apt-carmen-1',
+      clientId: 'cli-7',
+      clientName: 'Clara Sanz',
+      staffId: 'stf-3',
+      staffName: 'Carmen Vidal',
+      serviceIds: ['srv-5'],
+      serviceNames: 'Tratamiento Olaplex / Keratina',
+      startTime: '2026-10-23T09:30:00.000Z',
+      endTime: '2026-10-23T10:30:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Sesión mensual de nutrición profunda bajo vapor ozonizado.',
+      reminderSent24h: true,
+      reminderSent2h: false,
+    },
+    {
+      id: 'apt-carmen-2',
+      clientId: 'cli-8',
+      clientName: 'Andrea Gil',
+      staffId: 'stf-3',
+      staffName: 'Carmen Vidal',
+      serviceIds: ['srv-2', 'srv-5'],
+      serviceNames: 'Coloración Completa + Tratamiento Olaplex',
+      startTime: '2026-10-23T12:30:00.000Z',
+      endTime: '2026-10-23T14:00:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Tinte 5.0 castaño natural y protección de brillo.',
+      reminderSent24h: true,
+      reminderSent2h: false,
+    },
+    {
+      id: 'apt-carmen-3',
+      clientId: 'cli-9',
+      clientName: 'Paula Ruiz',
+      staffId: 'stf-3',
+      staffName: 'Carmen Vidal',
+      serviceIds: ['srv-1'],
+      serviceNames: 'Corte y Estilismo',
+      startTime: '2026-10-23T17:00:00.000Z',
+      endTime: '2026-10-23T17:30:00.000Z',
+      status: 'confirmed',
+      clientComments: 'Mantenimiento de puntas.',
+      reminderSent24h: false,
       reminderSent2h: false,
     }
   ],
@@ -254,14 +509,12 @@ app.post('/api/appointments/book', (req, res) => {
     return res.status(400).json({ error: 'Faltan parámetros obligatorios.' });
   }
 
-  // Calcular duración total sumando minutos de servicios seleccionados
   const selectedServices = db.services.filter(s => serviceIds.includes(s.id));
   const totalDuration = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
 
   const start = new Date(startTime);
   const end = new Date(start.getTime() + totalDuration * 60000);
 
-  // Asignar estilista: si es automática o específica
   let targetStaff = null;
   if (staffId && staffId !== 'any') {
     targetStaff = db.staff.find(s => s.id === staffId);
@@ -272,7 +525,6 @@ app.post('/api/appointments/book', (req, res) => {
       return res.status(409).json({ error: 'Conflicto de agenda: Ese hueco ya está ocupado para esta profesional.' });
     }
   } else {
-    // Buscar la primera estilista disponible sin conflicto
     targetStaff = db.staff.find(s => s.isAvailable && !hasOverlap(s.id, start, end));
     if (!targetStaff) {
       return res.status(409).json({ error: 'No hay ninguna profesional disponible en esa franja horaria.' });
@@ -300,7 +552,6 @@ app.post('/api/appointments/book', (req, res) => {
 
   db.appointments.push(newAppointment);
 
-  // Registro de auditoría
   db.appointmentAuditLogs.push({
     id: 'aud-' + Date.now(),
     appointmentId: newAppointment.id,
@@ -352,11 +603,9 @@ app.post('/api/staff/leave', (req, res) => {
   const targetStaff = db.staff.find(s => s.id === staffId);
   if (!targetStaff) return res.status(404).json({ error: 'Trabajadora no encontrada.' });
 
-  // 1. Desactivar trabajadora
   targetStaff.isAvailable = false;
   targetStaff.notes += ` [Baja médica: ${reason || 'Imprevisto de salud'}]`;
 
-  // 2. Extraer citas pendientes
   const affected = db.appointments.filter(a => 
     a.staffId === staffId && 
     (a.status === 'confirmed' || a.status === 'pending')
@@ -391,7 +640,6 @@ app.post('/api/staff/leave', (req, res) => {
         time: apt.startTime
       });
     } else {
-      // NIVEL 2 / 3: Derivar a reprogramación prioritaria con IA
       apt.status = 'rescheduling_required';
       apt.staffId = null;
       apt.staffName = 'Por asignar';
@@ -420,6 +668,10 @@ app.post('/api/staff/leave', (req, res) => {
 });
 
 // 7. CLIENTES Y EXPEDIENTES TÉCNICOS
+app.get('/api/clients', (req, res) => {
+  res.json(db.clients);
+});
+
 app.get('/api/clients/:id', (req, res) => {
   const client = db.clients.find(c => c.id === req.params.id);
   if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
@@ -428,9 +680,22 @@ app.get('/api/clients/:id', (req, res) => {
   res.json({ ...client, technicalRecords: records });
 });
 
+// Listar o filtrar registros técnicos
+app.get('/api/technical-records', (req, res) => {
+  const { clientId } = req.query;
+  if (clientId) {
+    return res.json(db.technicalRecords.filter(r => r.clientId === clientId));
+  }
+  res.json(db.technicalRecords);
+});
+
 // Guardar nuevo registro técnico
 app.post('/api/technical-records', (req, res) => {
   const { clientId, staffName, dyeFormula, techniqueUsed, exposureTimeMinutes, observations, photoUrl } = req.body;
+
+  if (!clientId || !dyeFormula) {
+    return res.status(400).json({ error: 'El ID de la clienta y la fórmula técnica son obligatorios.' });
+  }
 
   const newRecord = {
     id: 'tec-' + Date.now(),
@@ -438,14 +703,17 @@ app.post('/api/technical-records', (req, res) => {
     staffName: staffName || 'Estilista',
     date: new Date().toISOString().slice(0, 10),
     dyeFormula,
-    techniqueUsed,
+    techniqueUsed: techniqueUsed || 'Coloración Estándar',
     exposureTimeMinutes: Number(exposureTimeMinutes) || 30,
-    observations,
+    observations: observations || 'Aplicación técnica registrada.',
     photoUrl: photoUrl || 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=300&q=80'
   };
 
   db.technicalRecords.unshift(newRecord);
-  res.status(201).json(newRecord);
+
+  // Devolver el expediente completo actualizado de la clienta
+  const allRecords = db.technicalRecords.filter(r => r.clientId === clientId);
+  res.status(201).json({ success: true, newRecord, allRecords });
 });
 
 // 8. FIDELIZACIÓN: VALIDAR RESEÑA GOOGLE BUSINESS
@@ -485,14 +753,12 @@ app.post('/api/invoices', (req, res) => {
     return res.status(400).json({ error: 'La factura debe contener al menos una línea.' });
   }
 
-  // Obtener última factura de la serie para encadenar
   const seriesInvoices = db.invoices.filter(i => i.series === series);
   const nextNumber = seriesInvoices.length + 1;
   const previousHash = seriesInvoices.length > 0 
     ? seriesInvoices[seriesInvoices.length - 1].recordHash 
     : '0'.repeat(64);
 
-  // Calcular totales e IVA desglosado
   let totalTaxBase = 0;
   let totalVatAmount = 0;
   let totalAmount = 0;
@@ -549,7 +815,6 @@ app.post('/api/invoices', (req, res) => {
 
   db.invoices.push(newInvoice);
 
-  // Si estaba asociada a una cita, marcarla como completada
   if (appointmentId) {
     const apt = db.appointments.find(a => a.id === appointmentId);
     if (apt) apt.status = 'completed';
@@ -558,7 +823,6 @@ app.post('/api/invoices', (req, res) => {
   res.status(201).json(newInvoice);
 });
 
-// Listado de facturas para visor fiscal y exportación AEAT
 app.get('/api/invoices', (req, res) => {
   res.json(db.invoices);
 });
@@ -591,7 +855,6 @@ app.post('/api/ai/chat', (req, res) => {
   const text = (message || '').toLowerCase();
   const client = db.clients.find(c => c.id === clientId) || db.clients[0];
 
-  // Simular reasoning y tool calling
   let toolCalled = null;
   let reply = '';
 
@@ -602,18 +865,18 @@ app.post('/api/ai/chat', (req, res) => {
       `• **Coloración Completa**: 60 min (38,00 €)\n` +
       `• **Mechas Balayage & Matiz**: 90 min (65,00 €)\n` +
       `• **Tratamiento Olaplex / Keratina**: 45 min (35,00 €)\n\n` +
-      `¿Para qué día y hora te gustaría consultar hueco libre?`;
+      `¿Para qué estilista (Elena, Raquel o Carmen) y qué día te gustaría consultar hueco?`;
   } else if (text.includes('elena') || text.includes('raquel') || text.includes('carmen') || text.includes('viernes') || text.includes('mañana') || text.includes('hueco') || text.includes('hora')) {
     toolCalled = 'check_availability(service_ids=["srv-1", "srv-2"], staff="Elena", date="2026-10-23")';
     reply = `He consultado la agenda en directo para el viernes 23 con Elena:\n` +
-      `• **16:00** — Disponible ✅\n` +
+      `• **13:00** — Disponible ✅\n` +
       `• **17:30** — Disponible ✅\n` +
-      `*(A las 16:30 está ocupada por otra cita).*\n\n` +
+      `• **18:30** — Disponible ✅\n` +
+      `*(A las 10:00 y a las 16:00 tiene citas reservadas).* \n\n` +
       `¿Te reservo a las 17:30?`;
   } else if (text.includes('17:30') || text.includes('si') || text.includes('sí') || text.includes('reserva') || text.includes('confirma') || text.includes('perfecto')) {
     toolCalled = 'book_appointment(client_id="cli-1", staff_id="stf-1", start_time="2026-10-23T17:30:00Z")';
     
-    // Crear la cita en vivo
     const newApt = {
       id: 'apt-' + Date.now(),
       clientId: client.id,

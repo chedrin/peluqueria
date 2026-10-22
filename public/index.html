@@ -32,7 +32,6 @@
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 4px; }
     .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
 
-    /* Efectos de relieve suave */
     .luxury-card {
       background: #FFFFFF;
       border: 1px solid #E7E5E4;
@@ -47,7 +46,7 @@
 <body class="min-h-screen flex flex-col antialiased selection:bg-rose-100 selection:text-rose-900">
 
   <!-- ========================================================================= -->
-  <!-- BARRA SUPERIOR DE CONTROL RBAC (SELECTOR DE PORTALES - ESTILO CLARO) -->
+  <!-- BARRA SUPERIOR DE CONTROL RBAC (SELECTOR DE PORTALES) -->
   <!-- ========================================================================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50 px-4 py-3 shadow-xs">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -121,7 +120,6 @@
       <div id="cview-ai-chat" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 luxury-card rounded-2xl flex flex-col h-[600px] overflow-hidden">
           
-          <!-- Encabezado del Chat -->
           <div class="p-4 border-b border-stone-200 bg-stone-50/70 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-sm">
@@ -140,28 +138,24 @@
             </span>
           </div>
 
-          <!-- Mensajes del Chat -->
           <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 scrollbar-thin bg-stone-50/40">
-            <!-- Mensaje Inicial -->
             <div class="flex items-start gap-3">
               <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0 text-xs font-bold">
                 IA
               </div>
               <div class="bg-white border border-stone-200 rounded-2xl rounded-tl-xs p-4 max-w-[85%] text-sm text-stone-800 shadow-xs leading-relaxed">
-                ¡Hola Laura! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios como corte, mechas balayage o tinte, o dime qué día te gustaría venir. ¿En qué te ayudo hoy?
+                ¡Hola Laura! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios como corte, mechas balayage o tinte, o dime qué día y estilista prefieres. ¿En qué te ayudo hoy?
               </div>
             </div>
           </div>
 
-          <!-- Tool Call Banner Indicador -->
           <div id="tool-call-banner" class="hidden px-4 py-2 bg-indigo-50 border-t border-indigo-100 text-xs text-indigo-700 font-mono-code flex items-center gap-2">
             <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500 animate-spin"></i>
             <span id="tool-call-name">Ejecutando tool calling...</span>
           </div>
 
-          <!-- Formulario de Entrada del Chat -->
           <form id="chat-form" onsubmit="sendChatMessage(event)" class="p-3 bg-white border-t border-stone-200 flex gap-2">
-            <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes por la tarde con Elena..." class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
+            <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes con Elena o Raquel..." class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
             <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-sm shadow-rose-200">
               <span>Enviar</span>
               <i data-lucide="send" class="w-4 h-4"></i>
@@ -169,7 +163,6 @@
           </form>
         </div>
 
-        <!-- Panel Lateral: Atajos & Ficha Personal -->
         <div class="space-y-4">
           <div class="luxury-card rounded-2xl p-5">
             <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
@@ -210,23 +203,42 @@
         </div>
       </div>
 
-      <!-- VISTA 1B: CALENDARIO INTERACTIVO & RESERVA DIRECTA -->
+      <!-- VISTA 1B: CALENDARIO INTERACTIVO & RESERVA DIRECTA (HUECOS DINÁMICOS POR ESTILISTA) -->
       <div id="cview-calendar" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
-          <div class="flex items-center justify-between mb-5 border-b border-stone-100 pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-stone-100 pb-3 gap-2">
             <div>
               <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Disponibilidad en Tiempo Real</h3>
-              <p class="text-xs text-stone-500">Selecciona franja y servicios para consultar el cuadrante exacto</p>
+              <p class="text-xs text-stone-500">Cada estilista tiene su propia agenda y huecos libres diferenciados</p>
             </div>
-            <span class="text-xs bg-stone-100 text-stone-700 font-semibold px-3 py-1 rounded-full border border-stone-200">
+            <span class="text-xs bg-stone-100 text-stone-700 font-semibold px-3 py-1 rounded-full border border-stone-200 self-start sm:self-auto">
               Viernes, 23 de Octubre de 2026
             </span>
           </div>
 
-          <!-- Grid de Huecos Horarios -->
+          <!-- Selector Rápido de Estilista para ver su agenda específica -->
+          <div class="mb-5 bg-stone-50 p-3 rounded-xl border border-stone-200">
+            <label class="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center justify-between">
+              <span>Ver cuadrante y huecos libres de:</span>
+              <span class="text-[11px] text-rose-600 font-bold" id="calendar-stylist-badge">Elena Gómez (Color & Balayage)</span>
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="changeBookingCalendarStylist('stf-1')" id="cal-stf-btn-stf-1" class="cal-stf-pill active bg-white border-2 border-purple-500 text-purple-900 font-bold py-2 px-3 rounded-xl text-xs shadow-xs text-center transition">
+                💜 Elena Gómez
+              </button>
+              <button type="button" onclick="changeBookingCalendarStylist('stf-2')" id="cal-stf-btn-stf-2" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-pink-400 text-center transition">
+                💖 Raquel Santos
+              </button>
+              <button type="button" onclick="changeBookingCalendarStylist('stf-3')" id="cal-stf-btn-stf-3" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-emerald-400 text-center transition">
+                💚 Carmen Vidal
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid de Huecos Horarios (Calculados Dinámicamente según la estilista) -->
           <div class="mb-6">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5">
-              Franja Horaria Disponible (Huecos con Elena Gómez):
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5" id="slots-header-label">
+              Huecos de Elena Gómez para el Viernes 23 Oct:
             </label>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5" id="slots-grid">
               <!-- Renderizado dinámico -->
@@ -258,12 +270,11 @@
           <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Parámetros de Reserva</h4>
           <div class="space-y-3.5 text-xs text-stone-700">
             <div>
-              <span class="text-stone-500 font-medium block">Estilista Preferente:</span>
-              <select id="select-booking-staff" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-medium focus:outline-none focus:border-rose-500">
-                <option value="stf-1">Elena Gómez (Color & Balayage)</option>
-                <option value="stf-2">Raquel Santos (Corte & Peinado)</option>
-                <option value="stf-3">Carmen Vidal (Tratamientos)</option>
-                <option value="any">Cualquier estilista disponible</option>
+              <span class="text-stone-500 font-medium block">Estilista Seleccionada:</span>
+              <select id="select-booking-staff" onchange="onBookingStaffSelectChange()" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
+                <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
+                <option value="stf-3">Carmen Vidal (Tratamientos & Keratina)</option>
               </select>
             </div>
             <div>
@@ -287,7 +298,6 @@
             <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Club de Fidelización Losan
           </div>
           
-          <!-- Canvas QR Code con marco fino -->
           <div class="p-4 bg-white border border-stone-200 rounded-2xl shadow-sm mb-4">
             <canvas id="client-qr-canvas" width="180" height="180"></canvas>
           </div>
@@ -366,7 +376,7 @@
 
 
     <!-- ======================================================================= -->
-    <!-- PORTAL 2: PORTAL TRABAJADORAS (VISTA INDIVIDUAL Y EXPEDIENTES TÉCNICOS) -->
+    <!-- PORTAL 2: PORTAL TRABAJADORAS (AGENDA INDIVIDUAL & EXPEDIENTES TÉCNICOS) -->
     <!-- ======================================================================= -->
     <div id="portal-staff" class="hidden space-y-6">
       
@@ -393,65 +403,66 @@
         </div>
       </div>
 
-      <!-- Grid de Citas Asignadas y Ficha Técnica -->
+      <!-- Grid de Citas Asignadas y Ficha Técnica Dinámica -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Columna 1 & 2: Agenda Diaria Individual -->
         <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
-          <h3 class="text-base font-bold text-stone-900 mb-4 flex items-center justify-between font-serif-luxury text-lg">
-            <span>Tu Agenda para Hoy (Viernes 23 Oct)</span>
-            <span class="text-xs text-stone-500 font-sans font-normal" id="worker-appointment-count">2 citas programadas</span>
+          <h3 class="text-base font-bold text-stone-900 mb-2 flex items-center justify-between font-serif-luxury text-lg">
+            <span id="worker-agenda-title">Agenda de Elena Gómez (Viernes 23 Oct)</span>
+            <span class="text-xs text-stone-500 font-sans font-normal" id="worker-appointment-count">3 citas programadas</span>
           </h3>
+          <p class="text-xs text-stone-500 mb-4">Haz clic en cualquier cita para cargar y editar el expediente técnico de esa clienta.</p>
           <div class="space-y-3" id="worker-agenda-list">
             <!-- Citas asignadas a la trabajadora -->
           </div>
         </div>
 
-        <!-- Columna 3: Ficha Previa de la Clienta Seleccionada -->
+        <!-- Columna 3: Ficha Técnica Dinámica de la Clienta Seleccionada -->
         <div class="luxury-card rounded-2xl p-6 space-y-4">
           <div class="border-b border-stone-100 pb-3 flex justify-between items-center">
-            <h4 class="text-sm font-bold text-stone-900 flex items-center gap-2 font-serif-luxury">
-              <i data-lucide="clipboard-list" class="w-4 h-4 text-purple-600"></i> Ficha Técnica Previa
-            </h4>
-            <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">Histórico</span>
-          </div>
-
-          <div id="client-history-preview" class="space-y-3 text-xs">
-            <!-- Detalles cargados dinámicamente -->
-            <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900">
-              <strong class="block font-bold text-rose-700">⚠️ Alerta de Alergia:</strong>
-              Sensibilidad al amoniaco concentrado. Utilizar oxidante 20vol sin PPD.
-            </div>
-            <div class="p-3.5 bg-stone-50 border border-stone-200 rounded-xl space-y-1 text-stone-700">
-              <span class="text-stone-500 block">Fórmula de colorimetría anterior (15 Sep):</span>
-              <p class="font-mono-code text-stone-900 font-bold">6.1 (30g) + 7.0 (15g) con oxidante 20vol (45g)</p>
-              <p class="text-stone-500 mt-1">Técnica: Balayage suave con matiz perlado en bacha (12 min).</p>
-            </div>
-          </div>
-
-          <!-- Formulario Rápido Post-Servicio -->
-          <div class="border-t border-stone-200 pt-4 space-y-3">
-            <h5 class="text-xs font-bold text-stone-900 uppercase tracking-wider">Actualizar Expediente Post-Servicio</h5>
             <div>
-              <label class="block text-[11px] font-semibold text-stone-600">Nueva Fórmula Aplicada (Tinte / Gramaje):</label>
-              <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con 20vol" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
+              <h4 class="text-sm font-bold text-stone-900 flex items-center gap-2 font-serif-luxury text-base" id="tech-client-title">
+                Expediente: Laura Martínez
+              </h4>
+              <p class="text-[11px] text-stone-500 font-medium" id="tech-client-phone">Tel: 34655555555</p>
+            </div>
+            <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">Ficha Técnica</span>
+          </div>
+
+          <!-- Historial Dinámico de Fórmulas y Alergias -->
+          <div id="client-history-preview" class="space-y-3 text-xs max-h-72 overflow-y-auto scrollbar-thin pr-1">
+            <!-- Se carga dinámicamente con la clienta seleccionada -->
+          </div>
+
+          <!-- Formulario Rápido Post-Servicio (Actualiza de Inmediato la Ficha) -->
+          <div class="border-t border-stone-200 pt-4 space-y-3 bg-stone-50/70 p-3.5 rounded-xl border">
+            <div class="flex items-center justify-between">
+              <h5 class="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-purple-600"></i> Nuevo Registro Post-Servicio
+              </h5>
+              <span class="text-[10px] text-purple-700 font-semibold" id="form-target-client">Laura Martínez</span>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-stone-600">Fórmula Técnica / Productos Usados *:</label>
+              <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con oxidante 20vol" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-semibold text-stone-600">Técnica Usada:</label>
-                <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
+                <label class="block text-[11px] font-semibold text-stone-600">Técnica Aplicada:</label>
+                <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight / Balayage" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-stone-600">Exposición (min):</label>
-                <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
+                <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-semibold text-stone-600">Notas / Resultado:</label>
-              <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, clienta muy contenta..." class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500"></textarea>
+              <label class="block text-[11px] font-semibold text-stone-600">Observaciones Técnicas / Resultado:</label>
+              <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, matiz bien integrado en puntas..." class="w-full mt-1 bg-white border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500 shadow-2xs"></textarea>
             </div>
-            <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200">
-              <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar en Expediente
+            <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar y Actualizar Expediente
             </button>
           </div>
         </div>
@@ -581,7 +592,6 @@
             <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">Caja Principal 01</span>
           </div>
 
-          <!-- Selección de Cita a Cobrar -->
           <div>
             <label class="block text-xs font-semibold text-stone-600 mb-1">Cargar Cita Pendiente de Cobro:</label>
             <select id="tpv-appointment-select" onchange="loadAppointmentIntoTpv()" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
@@ -589,7 +599,6 @@
             </select>
           </div>
 
-          <!-- Tabla de Conceptos de Venta -->
           <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
             <table class="w-full text-xs text-left">
               <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
@@ -608,7 +617,6 @@
             </table>
           </div>
 
-          <!-- Añadir Productos o Servicios Extra -->
           <div class="flex gap-2">
             <select id="tpv-quick-service" class="bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium flex-1">
               <option value="">+ Añadir Servicio al Ticket...</option>
@@ -622,7 +630,6 @@
           </div>
         </div>
 
-        <!-- Panel de Liquidación y Pago -->
         <div class="luxury-card rounded-2xl p-6 space-y-5 flex flex-col justify-between">
           <div class="space-y-4">
             <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Desglose Fiscal (Ley Antifraude)</h4>
@@ -646,7 +653,6 @@
               </div>
             </div>
 
-            <!-- Canje de Puntos de Fidelización -->
             <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-xs">
               <div class="flex justify-between items-center">
                 <span class="text-stone-600 font-medium">Canjear Puntos de la Clienta:</span>
@@ -659,7 +665,6 @@
               </div>
             </div>
 
-            <!-- Método de Pago -->
             <div>
               <label class="block text-xs font-semibold text-stone-600 mb-1.5">Método de Pago:</label>
               <div class="grid grid-cols-3 gap-2 text-xs">
@@ -698,7 +703,6 @@
             </button>
           </div>
 
-          <!-- Tabla de Facturas Encadenadas -->
           <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin">
             <table class="w-full text-xs text-left">
               <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
@@ -719,7 +723,6 @@
           </div>
         </div>
 
-        <!-- Visor de Factura / Ticket Fiscal Veri*Factu -->
         <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div class="bg-white text-stone-900 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative font-mono-code text-xs border border-stone-200">
             <button onclick="closeTicketModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700">
@@ -822,7 +825,7 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- MODAL DE NOTIFICACIONES WHATSAPP (SIMULADOR INTERACTIVO 24H / 2H) -->
+  <!-- MODAL DE NOTIFICACIONES WHATSAPP -->
   <!-- ========================================================================= -->
   <div id="whatsapp-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white border border-stone-200 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-xl relative">
@@ -856,7 +859,10 @@
       activePortal: 'client',
       activeClientTab: 'ai-chat',
       activeAdminTab: 'agenda-master',
-      activeStaffId: 'stf-1',
+      activeStaffId: 'stf-1', // Estilista activa en Portal Trabajadoras
+      bookingCalendarStaffId: 'stf-1', // Estilista seleccionada para ver huecos en Calendario
+      selectedClientId: 'cli-1', // Clienta activa en el expediente técnico
+      selectedAppointmentId: null,
       selectedSlots: '17:30',
       selectedServicesForBooking: ['srv-1', 'srv-2'],
       tpvItems: [
@@ -866,15 +872,14 @@
       tpvPaymentMethod: 'card',
       tpvDiscountPoints: 0,
       
-      // Datos
+      // Colecciones
       services: [],
       staff: [],
       appointments: [],
       products: [],
       invoices: [],
-      clients: [
-        { id: 'cli-1', name: 'Laura Martínez', phone: '34655555555', points: 120, qrHash: 'QR-LAURA-77492-HASH', allergies: 'Sensibilidad al amoniaco', reviewDone: false }
-      ]
+      clients: [],
+      technicalRecords: []
     };
 
     // ========================================================================
@@ -884,7 +889,7 @@
       lucide.createIcons();
       await fetchInitialData();
       renderClientQR();
-      renderBookingSlots();
+      renderBookingSlots(state.bookingCalendarStaffId);
       renderServicesChecklist();
       renderShowcaseProducts();
       renderClientAppointments();
@@ -897,12 +902,14 @@
 
     async function fetchInitialData() {
       try {
-        const [resSrv, resStf, resApt, resPrd, resInv] = await Promise.all([
+        const [resSrv, resStf, resApt, resPrd, resInv, resCli, resTec] = await Promise.all([
           fetch('/api/services'),
           fetch('/api/staff'),
           fetch('/api/appointments'),
           fetch('/api/products'),
-          fetch('/api/invoices')
+          fetch('/api/invoices'),
+          fetch('/api/clients'),
+          fetch('/api/technical-records')
         ]);
 
         state.services = await resSrv.json();
@@ -910,9 +917,11 @@
         state.appointments = await resApt.json();
         state.products = await resPrd.json();
         state.invoices = await resInv.json();
+        state.clients = await resCli.json();
+        state.technicalRecords = await resTec.json();
       } catch (e) {
         console.warn('Ejecutando en modo cliente autónomo (sin backend REST activo).');
-        // Fallback datos locales
+        // Datos por defecto
         state.services = [
           { id: 'srv-1', name: 'Corte y Estilismo', durationMinutes: 30, price: 22.00 },
           { id: 'srv-2', name: 'Coloración Completa (Tinte)', durationMinutes: 60, price: 38.00 },
@@ -921,34 +930,134 @@
           { id: 'srv-5', name: 'Tratamiento Olaplex / Keratina', durationMinutes: 45, price: 35.00 },
         ];
         state.staff = [
-          { id: 'stf-1', name: 'Elena Gómez', isAvailable: true, displayColor: '#8B5CF6' },
-          { id: 'stf-2', name: 'Raquel Santos', isAvailable: true, displayColor: '#EC4899' },
-          { id: 'stf-3', name: 'Carmen Vidal', isAvailable: true, displayColor: '#10B981' },
+          { id: 'stf-1', name: 'Elena Gómez', isAvailable: true, specialty: 'Colorimetría & Balayage' },
+          { id: 'stf-2', name: 'Raquel Santos', isAvailable: true, specialty: 'Cortes & Estilismo' },
+          { id: 'stf-3', name: 'Carmen Vidal', isAvailable: true, specialty: 'Tratamientos & Keratina' },
+        ];
+        state.clients = [
+          { id: 'cli-1', name: 'Laura Martínez', phone: '34655555555', allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)', points: 120, qrHash: 'QR-LAURA-77492-HASH' },
+          { id: 'cli-2', name: 'Sofía Morales', phone: '34666666666', allergies: 'Sin alergias conocidas. Cabello muy fino.', points: 50, qrHash: 'QR-SOFIA-88319-HASH' },
+          { id: 'cli-3', name: 'Carmen Sánchez', phone: '34677777777', allergies: 'Alergia al níquel.', points: 75, qrHash: 'QR-CARMEN-99214-HASH' },
+          { id: 'cli-4', name: 'Marta Domínguez', phone: '34688888888', allergies: 'Cuero cabelludo reactivo.', points: 90, qrHash: 'QR-MARTA-11234-HASH' },
+          { id: 'cli-5', name: 'Beatriz Navarro', phone: '34699999999', allergies: 'Sin alergias conocidas.', points: 40, qrHash: 'QR-BEATRIZ-33421-HASH' },
+          { id: 'cli-6', name: 'Lucía Pardo', phone: '34600112233', allergies: 'Sin alergias.', points: 110, qrHash: 'QR-LUCIA-55612-HASH' },
+          { id: 'cli-7', name: 'Clara Sanz', phone: '34622334455', allergies: 'Puntas quebradizas por decoloración casera previa.', points: 160, qrHash: 'QR-CLARA-88712-HASH' }
+        ];
+        state.technicalRecords = [
+          {
+            id: 'tec-1',
+            clientId: 'cli-1',
+            staffName: 'Elena Gómez',
+            date: '2026-09-15',
+            dyeFormula: '6.1 (30g) + 7.0 (15g) con oxidante 20vol (45g) marca Igora Royal',
+            techniqueUsed: 'Balayage suave con matiz perlado en bacha durante 12 minutos',
+            exposureTimeMinutes: 35,
+            observations: 'El tono quedó exactamente como en la foto de referencia. Raíz difuminada.'
+          },
+          {
+            id: 'tec-2',
+            clientId: 'cli-2',
+            staffName: 'Raquel Santos',
+            date: '2026-09-28',
+            dyeFormula: 'No aplicó coloración química (solo corte y peinado)',
+            techniqueUsed: 'Corte Bob en capas invisibles para volumen, peinado con ondas al agua',
+            exposureTimeMinutes: 0,
+            observations: 'Cabello muy agradecido, responde bien al sérum de keratina en medios a puntas.'
+          },
+          {
+            id: 'tec-5',
+            clientId: 'cli-5',
+            staffName: 'Raquel Santos',
+            date: '2026-10-10',
+            dyeFormula: 'No aplicó coloración',
+            techniqueUsed: 'Corte a navaja en nuca y tijera dentada en laterales',
+            exposureTimeMinutes: 0,
+            observations: 'Le encanta el acabado liso pulido con aceite de argán.'
+          },
+          {
+            id: 'tec-6',
+            clientId: 'cli-7',
+            staffName: 'Carmen Vidal',
+            date: '2026-10-05',
+            dyeFormula: 'Tratamiento Olaplex Nº1 Bond Multiplier (15ml) + Nº2 Bond Perfector (30ml)',
+            techniqueUsed: 'Reconstrucción molecular capilar con campana de vapor ozonizado',
+            exposureTimeMinutes: 30,
+            observations: 'Recuperó un 80% de elasticidad en puntas. Continuar con mascarilla en casa.'
+          }
         ];
         state.appointments = [
           {
-            id: 'apt-1',
+            id: 'apt-elena-1',
             clientId: 'cli-1',
             clientName: 'Laura Martínez',
             staffId: 'stf-1',
             staffName: 'Elena Gómez',
-            serviceNames: 'Coloración Completa + Corte',
+            serviceNames: 'Coloración Completa (Tinte) + Corte y Estilismo',
             startTime: '2026-10-23T10:00:00.000Z',
             endTime: '2026-10-23T11:30:00.000Z',
             status: 'confirmed',
-            clientComments: 'Repetir tono cobrizo suave.'
+            clientComments: 'Repetir la fórmula de septiembre con reflejos más claros.'
           },
           {
-            id: 'apt-2',
+            id: 'apt-elena-2',
+            clientId: 'cli-3',
+            clientName: 'Carmen Sánchez',
+            staffId: 'stf-1',
+            staffName: 'Elena Gómez',
+            serviceNames: 'Corte y Estilismo',
+            startTime: '2026-10-23T12:00:00.000Z',
+            endTime: '2026-10-23T12:30:00.000Z',
+            status: 'confirmed',
+            clientComments: 'Corte y desfilado de flequillo cortina.'
+          },
+          {
+            id: 'apt-elena-3',
+            clientId: 'cli-4',
+            clientName: 'Marta Domínguez',
+            staffId: 'stf-1',
+            staffName: 'Elena Gómez',
+            serviceNames: 'Mechas Balayage & Matiz',
+            startTime: '2026-10-23T16:00:00.000Z',
+            endTime: '2026-10-23T17:30:00.000Z',
+            status: 'confirmed',
+            clientComments: 'Balayage rubio ceniza, matiz frío.'
+          },
+          {
+            id: 'apt-raquel-1',
+            clientId: 'cli-5',
+            clientName: 'Beatriz Navarro',
+            staffId: 'stf-2',
+            staffName: 'Raquel Santos',
+            serviceNames: 'Corte y Estilismo (Bob Simétrico)',
+            startTime: '2026-10-23T10:30:00.000Z',
+            endTime: '2026-10-23T11:15:00.000Z',
+            status: 'confirmed',
+            clientComments: 'Repasar corte Bob y peinado liso.'
+          },
+          {
+            id: 'apt-raquel-2',
             clientId: 'cli-2',
             clientName: 'Sofía Morales',
             staffId: 'stf-2',
             staffName: 'Raquel Santos',
-            serviceNames: 'Corte y Estilismo',
+            serviceNames: 'Corte y Estilismo + Peinado & Brushing',
             startTime: '2026-10-23T16:30:00.000Z',
             endTime: '2026-10-23T17:30:00.000Z',
             status: 'confirmed',
-            clientComments: 'Ondas para una boda.'
+            clientComments: 'Tiene una boda el sábado, probar ondas sueltas.'
+          },
+          {
+            id: 'apt-carmen-1',
+            clientId: 'cli-7',
+            clientName: 'Clara Sanz',
+            staffId: 'stf-3',
+            staffName: 'Carmen Vidal',
+            serviceIds: ['srv-5'],
+            serviceNames: 'Tratamiento Olaplex / Keratina',
+            startTime: '2026-10-23T09:30:00.000Z',
+            endTime: '2026-10-23T10:30:00.000Z',
+            status: 'confirmed',
+            clientComments: 'Sesión mensual de nutrición profunda bajo vapor ozonizado.'
           }
         ];
         state.products = [
@@ -979,13 +1088,11 @@
     function switchPortal(portal) {
       state.activePortal = portal;
       
-      // Botones del header en tema claro
       document.querySelectorAll('#btn-portal-client, #btn-portal-staff, #btn-portal-admin').forEach(btn => {
         btn.classList.remove('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
         btn.classList.add('text-stone-600');
       });
 
-      // Ocultar vistas
       document.getElementById('portal-client').classList.add('hidden');
       document.getElementById('portal-staff').classList.add('hidden');
       document.getElementById('portal-admin').classList.add('hidden');
@@ -1015,6 +1122,10 @@
 
       document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-loyalty, #cview-showcase, #cview-my-appointments').forEach(el => el.classList.add('hidden'));
       document.getElementById('cview-' + tab).classList.remove('hidden');
+
+      if (tab === 'calendar') {
+        renderBookingSlots(state.bookingCalendarStaffId);
+      }
       lucide.createIcons();
     }
 
@@ -1029,6 +1140,282 @@
       document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock').forEach(el => el.classList.add('hidden'));
       document.getElementById('aview-' + (tab.split('-')[0])).classList.remove('hidden');
       lucide.createIcons();
+    }
+
+    // ========================================================================
+    // PORTAL CLIENTAS: CALENDARIO CON HUECOS DINÁMICOS POR ESTILISTA
+    // ========================================================================
+    function changeBookingCalendarStylist(staffId) {
+      state.bookingCalendarStaffId = staffId;
+      document.getElementById('select-booking-staff').value = staffId;
+
+      document.querySelectorAll('.cal-stf-pill').forEach(btn => {
+        btn.classList.remove('border-2', 'border-purple-500', 'text-purple-900', 'border-pink-500', 'text-pink-900', 'border-emerald-500', 'text-emerald-900', 'font-bold');
+        btn.classList.add('border', 'border-stone-200', 'text-stone-600', 'font-semibold');
+      });
+
+      const activeBtn = document.getElementById('cal-stf-btn-' + staffId);
+      if (activeBtn) {
+        if (staffId === 'stf-1') activeBtn.classList.add('border-2', 'border-purple-500', 'text-purple-900', 'font-bold');
+        if (staffId === 'stf-2') activeBtn.classList.add('border-2', 'border-pink-500', 'text-pink-900', 'font-bold');
+        if (staffId === 'stf-3') activeBtn.classList.add('border-2', 'border-emerald-500', 'text-emerald-900', 'font-bold');
+      }
+
+      const stfObj = state.staff.find(s => s.id === staffId);
+      if (stfObj) {
+        document.getElementById('calendar-stylist-badge').innerText = `${stfObj.name} (${stfObj.specialty || 'Estilista'})`;
+        document.getElementById('slots-header-label').innerText = `Huecos de ${stfObj.name} para el Viernes 23 Oct:`;
+      }
+
+      renderBookingSlots(staffId);
+    }
+
+    function onBookingStaffSelectChange() {
+      const selectedId = document.getElementById('select-booking-staff').value;
+      changeBookingCalendarStylist(selectedId);
+    }
+
+    function renderBookingSlots(staffId = 'stf-1') {
+      const allSlots = ['09:30', '10:00', '10:30', '11:30', '12:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30'];
+      const staffApts = state.appointments.filter(a => a.staffId === staffId && a.status !== 'cancelled');
+
+      // Determinar si una hora solapa con alguna cita de esa estilista
+      const slotsWithStatus = allSlots.map(timeStr => {
+        const [h, m] = timeStr.split(':').map(Number);
+        const slotTimeMs = new Date('2026-10-23T00:00:00.000Z').setUTCHours(h, m, 0, 0);
+
+        const isBusy = staffApts.some(a => {
+          const startMs = new Date(a.startTime).getTime();
+          const endMs = new Date(a.endTime).getTime();
+          return slotTimeMs >= startMs && slotTimeMs < endMs;
+        });
+
+        return { time: timeStr, busy: isBusy };
+      });
+
+      // Si la franja actualmente seleccionada está ocupada para esta estilista, elegir la primera libre
+      const currentSelected = slotsWithStatus.find(s => s.time === state.selectedSlots);
+      if (!currentSelected || currentSelected.busy) {
+        const firstFree = slotsWithStatus.find(s => !s.busy);
+        if (firstFree) state.selectedSlots = firstFree.time;
+      }
+
+      const container = document.getElementById('slots-grid');
+      container.innerHTML = slotsWithStatus.map(s => `
+        <button type="button" onclick="selectSlot('${s.time}', ${s.busy})" class="p-2.5 rounded-xl text-xs font-semibold border transition text-center ${
+          s.busy 
+            ? 'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed line-through' 
+            : state.selectedSlots === s.time 
+              ? 'bg-rose-600 border-rose-600 text-white shadow-sm shadow-rose-200' 
+              : 'bg-white border-stone-200 text-stone-700 hover:border-rose-400 hover:bg-rose-50/50'
+        }">
+          ${s.time} ${s.busy ? '(Ocupado)' : '✅ Libre'}
+        </button>
+      `).join('');
+    }
+
+    function selectSlot(time, busy) {
+      if (busy) return;
+      state.selectedSlots = time;
+      renderBookingSlots(state.bookingCalendarStaffId);
+    }
+
+    // ========================================================================
+    // PORTAL TRABAJADORAS: AGENDA Y EXPEDIENTES TÉCNICOS DINÁMICOS
+    // ========================================================================
+    function changeActiveWorker() {
+      state.activeStaffId = document.getElementById('select-active-worker').value;
+      const worker = state.staff.find(s => s.id === state.activeStaffId);
+      document.getElementById('staff-avatar').innerText = worker ? worker.name.split(' ').map(n=>n[0]).join('') : 'ST';
+      
+      const titleElem = document.getElementById('worker-agenda-title');
+      if (titleElem && worker) {
+        titleElem.innerText = `Agenda de ${worker.name} (Viernes 23 Oct)`;
+      }
+
+      renderWorkerAgenda();
+    }
+
+    function renderWorkerAgenda() {
+      const container = document.getElementById('worker-agenda-list');
+      const myApts = state.appointments.filter(a => a.staffId === state.activeStaffId && a.status !== 'cancelled');
+      document.getElementById('worker-appointment-count').innerText = `${myApts.length} cita(s) programada(s)`;
+
+      if (!myApts.length) {
+        container.innerHTML = `
+          <div class="p-6 bg-stone-50 rounded-2xl text-center border border-dashed border-stone-300">
+            <p class="text-xs font-semibold text-stone-600 mb-1">Sin citas asignadas para hoy</p>
+            <p class="text-[11px] text-stone-400">Esta estilista tiene libre la jornada actual o aún no se han programado reservas.</p>
+          </div>
+        `;
+        // Si no hay citas, limpiar expediente o cargar clienta 1
+        renderClientTechnicalProfile('cli-1');
+        return;
+      }
+
+      // Si no hay cita seleccionada o no pertenece a esta estilista, seleccionar la primera
+      const currentSelectedExists = myApts.some(a => a.id === state.selectedAppointmentId);
+      if (!currentSelectedExists) {
+        state.selectedAppointmentId = myApts[0].id;
+        state.selectedClientId = myApts[0].clientId;
+      }
+
+      container.innerHTML = myApts.map(a => {
+        const isSelected = a.id === state.selectedAppointmentId;
+        return `
+          <div onclick="selectClientForTechnicalRecord('${a.clientId}', '${a.id}')" class="p-4 rounded-xl flex items-center justify-between gap-4 cursor-pointer transition ${
+            isSelected 
+              ? 'bg-purple-50/80 border-2 border-purple-500 shadow-sm' 
+              : 'bg-white border border-stone-200 hover:border-stone-300 shadow-2xs'
+          }">
+            <div class="flex items-center gap-3.5">
+              <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200">
+                <span class="text-xs font-bold text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                <span class="text-[10px] text-stone-400">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h5 class="text-sm font-bold text-stone-900">${a.clientName}</h5>
+                  ${isSelected ? '<span class="text-[10px] bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full">Activa</span>' : ''}
+                </div>
+                <p class="text-xs text-stone-500">${a.serviceNames}</p>
+                ${a.clientComments ? `<p class="text-[11px] text-stone-400 italic mt-0.5">"${a.clientComments}"</p>` : ''}
+              </div>
+            </div>
+            <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+              isSelected ? 'bg-purple-600 text-white shadow-xs' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+            }">
+              <i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Ver Ficha
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      renderClientTechnicalProfile(state.selectedClientId);
+      lucide.createIcons();
+    }
+
+    function selectClientForTechnicalRecord(clientId, aptId) {
+      state.selectedClientId = clientId;
+      if (aptId) state.selectedAppointmentId = aptId;
+      renderWorkerAgenda();
+    }
+
+    function renderClientTechnicalProfile(clientId) {
+      const client = state.clients.find(c => c.id === clientId) || state.clients[0];
+      const records = state.technicalRecords.filter(r => r.clientId === clientId);
+
+      document.getElementById('tech-client-title').innerText = `Expediente: ${client ? client.name : 'Clienta'}`;
+      document.getElementById('tech-client-phone').innerText = `Tel: ${client ? client.phone : 'N/A'}`;
+      document.getElementById('form-target-client').innerText = client ? client.name : 'Clienta';
+
+      const previewContainer = document.getElementById('client-history-preview');
+      
+      let html = '';
+
+      // 1. Alerta de Alergias
+      if (client && client.allergies && !client.allergies.toLowerCase().includes('sin alergias')) {
+        html += `
+          <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900">
+            <strong class="block font-bold text-rose-700 flex items-center gap-1.5">
+              <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-600"></i> Alerta de Alergias / Sensibilidad:
+            </strong>
+            <p class="mt-1 font-medium">${client.allergies}</p>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+            <span>Sin alergias químicas registradas para esta clienta.</span>
+          </div>
+        `;
+      }
+
+      // 2. Histórico de Fórmulas y Trabajos Anteriores
+      if (records.length === 0) {
+        html += `
+          <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl text-stone-500 text-center">
+            <p class="font-medium">No hay fórmulas previas registradas.</p>
+            <p class="text-[11px] text-stone-400 mt-1">Usa el formulario inferior para registrar su primera colorimetría o corte.</p>
+          </div>
+        `;
+      } else {
+        html += records.map((rec, idx) => `
+          <div class="p-3.5 bg-stone-50 border border-stone-200 rounded-xl space-y-1.5 text-stone-700 relative">
+            <div class="flex items-center justify-between border-b border-stone-200/60 pb-1.5 mb-1.5">
+              <div class="flex items-center gap-1.5 font-semibold text-stone-900">
+                <i data-lucide="palette" class="w-3.5 h-3.5 text-purple-600"></i>
+                <span>${rec.techniqueUsed || 'Tratamiento Técnico'}</span>
+              </div>
+              <span class="text-[10px] text-stone-500 font-mono-code">${rec.date} · ${rec.staffName}</span>
+            </div>
+            <div>
+              <span class="text-stone-400 text-[10px] uppercase font-bold block">Fórmula aplicada:</span>
+              <p class="font-mono-code text-stone-900 font-bold bg-white p-2 rounded-lg border border-stone-200 text-xs">${rec.dyeFormula}</p>
+            </div>
+            ${rec.exposureTimeMinutes > 0 ? `<p class="text-[11px] text-stone-500">⏱️ Tiempo de exposición: <strong class="text-stone-700">${rec.exposureTimeMinutes} min</strong></p>` : ''}
+            ${rec.observations ? `<p class="text-[11px] text-stone-600 bg-stone-100/60 p-2 rounded-lg italic">"${rec.observations}"</p>` : ''}
+          </div>
+        `).join('');
+      }
+
+      previewContainer.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    async function saveTechnicalRecord() {
+      const formula = document.getElementById('post-dye-formula').value.trim();
+      const technique = document.getElementById('post-technique').value.trim();
+      const exposure = document.getElementById('post-exposure').value.trim();
+      const notes = document.getElementById('post-notes').value.trim();
+
+      if (!formula) {
+        alert('Por favor, indica al menos la fórmula técnica o productos usados.');
+        return;
+      }
+
+      const worker = state.staff.find(s => s.id === state.activeStaffId) || { name: 'Estilista' };
+      const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
+
+      const newRecordObj = {
+        id: 'tec-' + Date.now(),
+        clientId: client.id,
+        staffName: worker.name,
+        date: new Date().toISOString().slice(0, 10),
+        dyeFormula: formula,
+        techniqueUsed: technique || 'Coloración Estándar',
+        exposureTimeMinutes: Number(exposure) || 30,
+        observations: notes || 'Aplicación técnica registrada satisfactoriamente.'
+      };
+
+      try {
+        const res = await fetch('/api/technical-records', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRecordObj)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          // Añadir al estado local y re-renderizar de inmediato
+          state.technicalRecords.unshift(data.newRecord || newRecordObj);
+        } else {
+          state.technicalRecords.unshift(newRecordObj);
+        }
+      } catch (e) {
+        state.technicalRecords.unshift(newRecordObj);
+      }
+
+      // 1. Re-renderizar la ficha técnica de la clienta en pantalla para que el cambio sea visible de inmediato
+      renderClientTechnicalProfile(client.id);
+
+      // 2. Limpiar formulario
+      document.getElementById('post-dye-formula').value = '';
+      document.getElementById('post-technique').value = '';
+      document.getElementById('post-notes').value = '';
+
+      alert(`✅ ¡Expediente técnico de ${client.name} actualizado con éxito!\nLa nueva fórmula se ha añadido a su historial permanente.`);
     }
 
     // ========================================================================
@@ -1067,6 +1454,7 @@
           renderClientAppointments();
           renderMasterAgenda();
           renderWorkerAgenda();
+          renderBookingSlots(state.bookingCalendarStaffId);
         }, 700);
 
       } catch (err) {
@@ -1116,39 +1504,8 @@
     }
 
     // ========================================================================
-    // CALENDARIO Y RESERVAS MANUALES
+    // CHECKLIST DE SERVICIOS
     // ========================================================================
-    function renderBookingSlots() {
-      const slots = [
-        { time: '10:00', busy: true },
-        { time: '11:30', busy: true },
-        { time: '13:00', busy: false },
-        { time: '16:00', busy: false },
-        { time: '16:30', busy: true },
-        { time: '17:30', busy: false },
-        { time: '18:30', busy: false }
-      ];
-
-      const container = document.getElementById('slots-grid');
-      container.innerHTML = slots.map(s => `
-        <button type="button" onclick="selectSlot('${s.time}', ${s.busy})" class="p-2.5 rounded-xl text-xs font-semibold border transition text-center ${
-          s.busy 
-            ? 'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed line-through' 
-            : state.selectedSlots === s.time 
-              ? 'bg-rose-600 border-rose-600 text-white shadow-sm shadow-rose-200' 
-              : 'bg-white border-stone-200 text-stone-700 hover:border-rose-400 hover:bg-rose-50/50'
-        }">
-          ${s.time} ${s.busy ? '(Ocupado)' : '✅ Libre'}
-        </button>
-      `).join('');
-    }
-
-    function selectSlot(time, busy) {
-      if (busy) return;
-      state.selectedSlots = time;
-      renderBookingSlots();
-    }
-
     function renderServicesChecklist() {
       const container = document.getElementById('services-checklist');
       container.innerHTML = state.services.map(s => {
@@ -1196,7 +1553,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             clientId: 'cli-1',
-            staffId: staffId === 'any' ? 'stf-1' : staffId,
+            staffId: staffId,
             serviceIds: state.selectedServicesForBooking,
             startTime: `2026-10-23T${state.selectedSlots}:00.000Z`,
             clientComments: comments
@@ -1208,6 +1565,7 @@
           renderClientAppointments();
           renderMasterAgenda();
           renderWorkerAgenda();
+          renderBookingSlots(state.bookingCalendarStaffId);
           switchClientTab('my-appointments');
         } else {
           const err = await res.json();
@@ -1224,7 +1582,7 @@
     function renderClientQR() {
       new QRious({
         element: document.getElementById('client-qr-canvas'),
-        value: 'https://tu-peluqueria.com/fidelizacion/' + state.clients[0].qrHash,
+        value: 'https://tu-peluqueria.com/fidelizacion/' + (state.clients[0]?.qrHash || 'QR-HASH'),
         size: 180,
         background: '#ffffff',
         foreground: '#1c1917'
@@ -1382,84 +1740,6 @@
     }
 
     // ========================================================================
-    // PORTAL TRABAJADORAS (AGENDA INDIVIDUAL & EXPEDIENTES TÉCNICOS)
-    // ========================================================================
-    function changeActiveWorker() {
-      state.activeStaffId = document.getElementById('select-active-worker').value;
-      const worker = state.staff.find(s => s.id === state.activeStaffId);
-      document.getElementById('staff-avatar').innerText = worker ? worker.name.split(' ').map(n=>n[0]).join('') : 'ST';
-      renderWorkerAgenda();
-    }
-
-    function renderWorkerAgenda() {
-      const container = document.getElementById('worker-agenda-list');
-      const myApts = state.appointments.filter(a => a.staffId === state.activeStaffId && a.status !== 'cancelled');
-      document.getElementById('worker-appointment-count').innerText = `${myApts.length} cita(s) programada(s)`;
-
-      if (!myApts.length) {
-        container.innerHTML = '<p class="text-xs text-stone-400 p-4 bg-stone-50 rounded-xl text-center">No tienes citas asignadas para esta jornada.</p>';
-        return;
-      }
-
-      container.innerHTML = myApts.map(a => `
-        <div class="p-4 bg-white border border-stone-200 rounded-xl flex items-center justify-between gap-4 shadow-2xs hover:border-stone-300 transition">
-          <div class="flex items-center gap-3.5">
-            <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200">
-              <span class="text-xs font-bold text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-              <span class="text-[10px] text-stone-400">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-            </div>
-            <div>
-              <h5 class="text-sm font-bold text-stone-900">${a.clientName}</h5>
-              <p class="text-xs text-stone-500">${a.serviceNames}</p>
-              ${a.clientComments ? `<p class="text-[11px] text-stone-400 italic mt-0.5">"${a.clientComments}"</p>` : ''}
-            </div>
-          </div>
-          <button onclick="selectClientForTechnicalRecord('${a.clientId}')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
-            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Ficha Técnica
-          </button>
-        </div>
-      `).join('');
-      lucide.createIcons();
-    }
-
-    function selectClientForTechnicalRecord(clientId) {
-      alert(`Ficha técnica cargada para la clienta. Consulta sus alergias y fórmulas anteriores en el panel derecho.`);
-    }
-
-    async function saveTechnicalRecord() {
-      const formula = document.getElementById('post-dye-formula').value;
-      const technique = document.getElementById('post-technique').value;
-      const exposure = document.getElementById('post-exposure').value;
-      const notes = document.getElementById('post-notes').value;
-
-      if (!formula) {
-        alert('Por favor, indica al menos la fórmula de tinte o productos usados.');
-        return;
-      }
-
-      try {
-        await fetch('/api/technical-records', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            clientId: 'cli-1',
-            staffName: 'Elena Gómez',
-            dyeFormula: formula,
-            techniqueUsed: technique || 'Coloración Estándar',
-            exposureTimeMinutes: exposure || 30,
-            observations: notes || 'Aplicación satisfactoria.'
-          })
-        });
-        alert('¡Expediente técnico actualizado con éxito en la base de datos!');
-        document.getElementById('post-dye-formula').value = '';
-        document.getElementById('post-technique').value = '';
-        document.getElementById('post-notes').value = '';
-      } catch (e) {
-        alert('Expediente técnico guardado localmente.');
-      }
-    }
-
-    // ========================================================================
     // PANEL ADMINISTRACIÓN & PROTOCOLO DE BAJA MÉDICA
     // ========================================================================
     function renderMasterAgenda() {
@@ -1505,7 +1785,6 @@
         });
         const data = await res.json();
 
-        // Mostrar resumen
         const card = document.getElementById('leave-summary-card');
         card.classList.remove('hidden');
         document.getElementById('leave-timestamp').innerText = new Date().toLocaleTimeString('es-ES');
@@ -1535,6 +1814,7 @@
         await fetchInitialData();
         renderMasterAgenda();
         renderWorkerAgenda();
+        renderBookingSlots(state.bookingCalendarStaffId);
         alert('Protocolo de baja médica ejecutado con éxito.');
 
       } catch (e) {
@@ -1562,7 +1842,6 @@
         </tr>
       `).join('');
 
-      // Desglose fiscal exacto
       let grossTotal = state.tpvItems.reduce((acc, it) => acc + (it.quantity * it.unitPrice), 0);
       const discount = state.tpvDiscountPoints;
       const finalGross = Math.max(0, grossTotal - discount);
@@ -1592,6 +1871,33 @@
       const prdSelect = document.getElementById('tpv-quick-product');
       prdSelect.innerHTML = '<option value="">+ Añadir Producto de Muestra...</option>' + 
         state.products.map(p => `<option value="prd:${p.id}">${p.name} (${p.price.toFixed(2)} €)</option>`).join('');
+      
+      const aptSelect = document.getElementById('tpv-appointment-select');
+      if (aptSelect) {
+        aptSelect.innerHTML = '<option value="">-- Cobro manual de servicios o cosméticos --</option>' + 
+          state.appointments.filter(a => a.status === 'confirmed').map(a => 
+            `<option value="${a.id}">Cita: ${a.clientName} (${a.serviceNames}) - ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</option>`
+          ).join('');
+      }
+    }
+
+    function loadAppointmentIntoTpv() {
+      const aptId = document.getElementById('tpv-appointment-select').value;
+      if (!aptId) return;
+
+      const apt = state.appointments.find(a => a.id === aptId);
+      if (!apt) return;
+
+      state.tpvItems = [];
+      const services = state.services.filter(s => (apt.serviceIds || []).includes(s.id));
+      if (services.length > 0) {
+        services.forEach(s => {
+          state.tpvItems.push({ concept: s.name, quantity: 1, unitPrice: s.price, vatRate: 21.0 });
+        });
+      } else {
+        state.tpvItems.push({ concept: apt.serviceNames || 'Servicio de Peluquería', quantity: 1, unitPrice: 35.00, vatRate: 21.0 });
+      }
+      renderTpvTable();
     }
 
     function addTpvQuickItem() {
@@ -1613,11 +1919,11 @@
     }
 
     function applyLoyaltyPointsDiscount(points) {
-      if (state.clients[0].points < points) {
+      if ((state.clients[0]?.points || 0) < points) {
         alert('Saldo de puntos insuficiente.');
         return;
       }
-      state.tpvDiscountPoints = (points / 100) * 5.0; // 5€
+      state.tpvDiscountPoints = (points / 100) * 5.0;
       state.clients[0].points -= points;
       renderTpvTable();
       alert(`¡Aplicado descuento de 5,00 € por canje de ${points} puntos!`);
@@ -1638,6 +1944,8 @@
         return;
       }
 
+      const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
+
       try {
         const res = await fetch('/api/invoices', {
           method: 'POST',
@@ -1645,7 +1953,7 @@
           body: JSON.stringify({
             series: 'FS2026',
             type: 'simplified',
-            clientId: 'cli-1',
+            clientId: client ? client.id : 'cli-1',
             items: state.tpvItems,
             paymentMethod: state.tpvPaymentMethod
           })
@@ -1655,7 +1963,6 @@
         await fetchInitialData();
         renderInvoicesTable();
 
-        // Mostrar ticket térmico
         showTicketModal(invoice);
         state.tpvItems = [];
         state.tpvDiscountPoints = 0;
