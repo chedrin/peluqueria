@@ -974,6 +974,26 @@ app.get('/api/availability', (req, res) => {
     });
   }
 
+  const dateObj = new Date(dateStr + 'T12:00:00Z');
+  const dayOfWeek = dateObj.getUTCDay(); // 0 = Domingo, 6 = Sábado
+
+  // Domingo: Salón Cerrado
+  if (dayOfWeek === 0) {
+    return res.json({
+      staffId: staff.id,
+      staffName: staff.name,
+      date: dateStr,
+      durationMinutes,
+      isClosed: true,
+      availableCount: 0,
+      slots: allIntervals.map(timeStr => ({
+        time: timeStr,
+        available: false,
+        reason: 'El salón permanece cerrado los domingos por descanso semanal.'
+      }))
+    });
+  }
+
   const staffApts = db.appointments.filter(a => 
     a.staffId === staffId && 
     a.status !== 'cancelled' && 
@@ -988,6 +1008,15 @@ app.get('/api/availability', (req, res) => {
     const slotStartMs = new Date(`${dateStr}T${timeStr}:00.000Z`).getTime();
     const slotEndMs = slotStartMs + durationMinutes * 60000;
     const endStr = new Date(slotEndMs).toISOString().slice(11, 16);
+
+    // Sábados solo turno de mañana (cierre 14:00)
+    if (dayOfWeek === 6 && timeStr >= '14:00') {
+      return {
+        time: timeStr,
+        available: false,
+        reason: 'Los sábados el salón no abre por la tarde (cierre a las 14:00).'
+      };
+    }
 
     // 1. Verificar límites de turno
     const isMorning = timeStr < '14:00';

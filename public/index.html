@@ -358,15 +358,13 @@
           <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-stone-100 pb-3 gap-2">
               <div>
-                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Disponibilidad en Tiempo Real</h3>
-                <p class="text-xs text-stone-500">Huecos calculados en directo según la duración exacta de los servicios seleccionados</p>
+                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+                  <i data-lucide="calendar-check-2" class="w-5 h-5 text-rose-600"></i>
+                  Disponibilidad en Tiempo Real & Reserva de Citas
+                </h3>
+                <p class="text-xs text-stone-500">Selecciona el día en el calendario de meses y elige la hora libre que prefieras en tiempo real</p>
               </div>
-              <div class="flex items-center gap-2 self-start sm:self-auto bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-xl">
-                <label for="calendar-booking-date" class="text-xs text-stone-600 font-bold flex items-center gap-1">
-                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-stone-500"></i> Fecha:
-                </label>
-                <input type="date" id="calendar-booking-date" value="2026-10-23" onchange="onBookingDateChange()" class="bg-white border border-stone-300 text-stone-900 font-bold text-xs rounded-lg px-2.5 py-1 focus:outline-none focus:border-rose-500 shadow-2xs">
-              </div>
+              <input type="hidden" id="calendar-booking-date" value="2026-10-23">
             </div>
 
             <!-- Selector Rápido de Estilista para ver su agenda específica -->
@@ -398,6 +396,75 @@
               </div>
             </div>
 
+            <!-- ================================================================= -->
+            <!-- 3. CALENDARIO MENSUAL COMPLETO (SELECCIÓN DE DÍA) -->
+            <!-- ================================================================= -->
+            <div class="mb-6 space-y-3 bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-4 h-4 text-rose-600"></i> 3. Calendario Mensual — Selecciona el Día de tu Cita:
+                  </label>
+                  <p class="text-[11px] text-stone-500 mt-0.5">Navega entre los meses y haz clic en el día que deseas acudir para consultar sus horas libres.</p>
+                </div>
+
+                <!-- Controles de Navegación de Meses -->
+                <div class="flex items-center gap-1.5 self-start sm:self-auto bg-stone-50 p-1 rounded-xl border border-stone-200 shadow-2xs">
+                  <button type="button" onclick="calendarPrevMonth()" class="p-1.5 rounded-lg hover:bg-white hover:text-stone-900 text-stone-600 transition cursor-pointer" title="Mes Anterior">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                  </button>
+
+                  <span id="calendar-month-year-label" class="text-xs sm:text-sm font-bold text-stone-900 font-serif-luxury px-3 min-w-[140px] text-center select-none">
+                    Octubre 2026
+                  </span>
+
+                  <button type="button" onclick="calendarNextMonth()" class="p-1.5 rounded-lg hover:bg-white hover:text-stone-900 text-stone-600 transition cursor-pointer" title="Mes Siguiente">
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                  </button>
+
+                  <button type="button" onclick="calendarGoToToday()" class="text-[11px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1 rounded-lg transition cursor-pointer ml-1">
+                    Hoy
+                  </button>
+                </div>
+              </div>
+
+              <!-- Días de la Semana (L M X J V S D) -->
+              <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-stone-500 uppercase tracking-wider py-1.5 border-b border-stone-100 bg-stone-50/60 rounded-lg select-none">
+                <div>Lun</div>
+                <div>Mar</div>
+                <div>Mié</div>
+                <div>Jue</div>
+                <div>Vie</div>
+                <div class="text-stone-700">Sáb</div>
+                <div class="text-rose-500">Dom</div>
+              </div>
+
+              <!-- Matriz Dinámica de Días del Mes -->
+              <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 pt-1">
+                <!-- Se genera dinámicamente con renderMonthCalendar() -->
+              </div>
+
+              <!-- Leyenda del Calendario -->
+              <div class="flex flex-wrap items-center justify-between text-[11px] text-stone-500 pt-3 border-t border-stone-100 gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                  <span class="font-bold text-stone-700">Día Seleccionado</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span>Abierto (09:30 - 19:30)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  <span>Sábados (09:00 - 14:00)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-stone-300"></span>
+                  <span>Domingos Cerrado / Días Pasados</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Grid de Huecos Horarios (Calculados Dinámicamente según la estilista y la duración) -->
             <div class="mb-6 space-y-2">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -419,11 +486,19 @@
             <!-- Resumen y Confirmación -->
             <div class="mt-6 pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-xs text-stone-500">Hueco seleccionado:</span>
-                  <span class="text-xs font-bold text-rose-700 font-mono-code bg-rose-50 px-2.5 py-0.5 rounded-md border border-rose-200" id="booking-summary-slot">
-                    12:30 - 14:00 (90m)
-                  </span>
+                <div class="space-y-1 mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-stone-500">Día seleccionado:</span>
+                    <span class="text-xs font-bold text-stone-800 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200" id="booking-summary-date">
+                      Viernes, 23 de Octubre de 2026
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-stone-500">Hora seleccionada:</span>
+                    <span class="text-xs font-bold text-rose-700 font-mono-code bg-rose-50 px-2.5 py-0.5 rounded-md border border-rose-200" id="booking-summary-slot">
+                      12:30 - 14:00 (90m)
+                    </span>
+                  </div>
                 </div>
                 <div class="flex items-baseline gap-2">
                   <span class="text-xs text-stone-500">Total con IVA (21%):</span>
@@ -1733,6 +1808,7 @@
 
       renderClientSession();
       renderBookingStylistSelectors();
+      renderMonthCalendar();
       renderBookingSlots(state.bookingCalendarStaffId);
       renderServicesChecklist();
       renderShowcaseProducts();
@@ -2005,6 +2081,8 @@
       if (targetView) targetView.classList.remove('hidden');
 
       if (tab === 'calendar') {
+        renderBookingStylistSelectors();
+        renderMonthCalendar();
         renderBookingSlots(state.bookingCalendarStaffId);
       } else if (tab === 'history') {
         renderClientTechnicalHistory();
@@ -2113,8 +2191,16 @@
       const headerLabel = document.getElementById('slots-header-label');
       if (headerLabel && stfObj) {
         const d = new Date(dateStr + 'T12:00:00Z');
-        const dayStr = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
-        headerLabel.innerText = `Huecos de ${stfObj.name} (${dayStr.toUpperCase()}): `;
+        const dayStr = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const capitalizedDay = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
+        headerLabel.innerHTML = `<i data-lucide="clock" class="w-4 h-4 text-purple-600"></i> 4. Huecos Libres de ${stfObj.name} para el <u>${capitalizedDay}</u>:`;
+      }
+      
+      const summaryDate = document.getElementById('booking-summary-date');
+      if (summaryDate) {
+        const d = new Date(dateStr + 'T12:00:00Z');
+        const formatted = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        summaryDate.innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
       }
 
       let slotsData = [];
@@ -4435,6 +4521,173 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       }
 
       lucide.createIcons();
+    }
+
+
+
+    // ========================================================================
+    // CALENDARIO MENSUAL COMPLETO INTERACTIVO
+    // ========================================================================
+    state.calendarYear = 2026;
+    state.calendarMonth = 9; // 0-indexado: 9 = Octubre
+    state.selectedBookingDate = '2026-10-23';
+
+    const MONTH_NAMES_ES = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    function getBookingDate() {
+      return state.selectedBookingDate || '2026-10-23';
+    }
+
+    function renderMonthCalendar() {
+      const container = document.getElementById('calendar-days-grid');
+      const label = document.getElementById('calendar-month-year-label');
+      if (!container) return;
+
+      const y = state.calendarYear;
+      const m = state.calendarMonth;
+
+      if (label) {
+        label.innerText = `${MONTH_NAMES_ES[m]} ${y}`;
+      }
+
+      // 1 de mes en UTC para evitar desfases de zona horaria
+      const firstDay = new Date(Date.UTC(y, m, 1));
+      // Convertir a semana que empieza en Lunes (0=Lun, 1=Mar, ..., 6=Dom)
+      const firstDayMondayIndex = (firstDay.getUTCDay() + 6) % 7;
+      const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      const daysInPrevMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+
+      const todayStr = '2026-10-23';
+      const selectedStr = state.selectedBookingDate || todayStr;
+
+      let cellsHtml = '';
+
+      // 1. Días del mes anterior (relleno)
+      for (let i = firstDayMondayIndex - 1; i >= 0; i--) {
+        const prevDayNum = daysInPrevMonth - i;
+        cellsHtml += `
+          <div class="p-1.5 min-h-[56px] rounded-xl border border-dashed border-stone-200/50 bg-stone-50/30 text-stone-300 flex flex-col items-center justify-center opacity-40 select-none">
+            <span class="text-xs font-mono-code">${prevDayNum}</span>
+          </div>
+        `;
+      }
+
+      // 2. Días del mes actual
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dayStr = String(d).padStart(2, '0');
+        const monthStr = String(m + 1).padStart(2, '0');
+        const dateIso = `${y}-${monthStr}-${dayStr}`;
+
+        const dateObj = new Date(Date.UTC(y, m, d));
+        const dayOfWeek = (dateObj.getUTCDay() + 6) % 7; // 0=Lun ... 6=Dom
+
+        const isPast = dateIso < todayStr;
+        const isSunday = dayOfWeek === 6; // Domingo
+        const isSaturday = dayOfWeek === 5; // Sábado
+        const isToday = dateIso === todayStr;
+        const isSelected = dateIso === selectedStr;
+
+        if (isPast) {
+          cellsHtml += `
+            <div class="p-1.5 min-h-[56px] rounded-xl border border-stone-100 bg-stone-50/50 text-stone-300 flex flex-col items-center justify-center gap-0.5 cursor-not-allowed select-none line-through" title="Fecha pasada">
+              <span class="text-xs font-mono-code">${d}</span>
+              <span class="text-[9px] no-underline text-stone-300">Pasado</span>
+            </div>
+          `;
+        } else if (isSunday) {
+          cellsHtml += `
+            <div class="p-1.5 min-h-[56px] rounded-xl border border-rose-100/60 bg-rose-50/20 text-rose-300 flex flex-col items-center justify-center gap-0.5 cursor-not-allowed select-none" title="Domingo cerrado">
+              <span class="text-xs font-mono-code font-bold text-rose-400/80">${d}</span>
+              <span class="text-[9px] font-medium text-rose-400">Cerrado</span>
+            </div>
+          `;
+        } else if (isSelected) {
+          cellsHtml += `
+            <button type="button" 
+              onclick="selectCalendarDay('${dateIso}')" 
+              class="p-1.5 min-h-[56px] rounded-xl border-2 border-rose-600 bg-rose-600 text-white font-bold flex flex-col items-center justify-center gap-0.5 shadow-md shadow-rose-200 ring-2 ring-rose-400 cursor-pointer transition transform scale-102">
+              <span class="text-sm font-mono-code">${d}</span>
+              <span class="text-[9px] font-semibold text-rose-100">
+                ${isToday ? 'Hoy (Elegido)' : 'Elegido'}
+              </span>
+            </button>
+          `;
+        } else {
+          cellsHtml += `
+            <button type="button" 
+              onclick="selectCalendarDay('${dateIso}')" 
+              class="p-1.5 min-h-[56px] rounded-xl border border-stone-200 bg-white hover:border-rose-400 hover:bg-rose-50/60 text-stone-800 flex flex-col items-center justify-center gap-0.5 cursor-pointer transition shadow-2xs hover:shadow-xs group">
+              <span class="text-xs font-mono-code font-bold text-stone-900 group-hover:text-rose-600">${d}</span>
+              <span class="text-[9px] font-medium ${isSaturday ? 'text-amber-600' : 'text-emerald-600'}">
+                ${isToday ? 'Hoy' : (isSaturday ? '09-14h' : 'Abierto')}
+              </span>
+            </button>
+          `;
+        }
+      }
+
+      // 3. Días del mes siguiente (relleno de fila)
+      const totalRendered = firstDayMondayIndex + daysInMonth;
+      const remainingCells = (7 - (totalRendered % 7)) % 7;
+      for (let nextDay = 1; nextDay <= remainingCells; nextDay++) {
+        cellsHtml += `
+          <div class="p-1.5 min-h-[56px] rounded-xl border border-dashed border-stone-200/50 bg-stone-50/30 text-stone-300 flex flex-col items-center justify-center opacity-40 select-none">
+            <span class="text-xs font-mono-code">${nextDay}</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = cellsHtml;
+      lucide.createIcons();
+    }
+
+    function selectCalendarDay(dateIso) {
+      state.selectedBookingDate = dateIso;
+      const dateInput = document.getElementById('calendar-booking-date');
+      if (dateInput) dateInput.value = dateIso;
+
+      // Actualizar etiqueta del resumen con formato amigable
+      const summaryDate = document.getElementById('booking-summary-date');
+      if (summaryDate) {
+        const d = new Date(dateIso + 'T12:00:00Z');
+        const formatted = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        summaryDate.innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      }
+
+      // Re-renderizar cuadrícula del calendario mensual para actualizar el día activo
+      renderMonthCalendar();
+
+      // Recalcular inmediatamente las horas libres para este día
+      renderBookingSlots(state.bookingCalendarStaffId);
+    }
+
+    function calendarPrevMonth() {
+      if (state.calendarMonth === 0) {
+        state.calendarMonth = 11;
+        state.calendarYear--;
+      } else {
+        state.calendarMonth--;
+      }
+      renderMonthCalendar();
+    }
+
+    function calendarNextMonth() {
+      if (state.calendarMonth === 11) {
+        state.calendarMonth = 0;
+        state.calendarYear++;
+      } else {
+        state.calendarMonth++;
+      }
+      renderMonthCalendar();
+    }
+
+    function calendarGoToToday() {
+      state.calendarYear = 2026;
+      state.calendarMonth = 9; // Octubre
+      selectCalendarDay('2026-10-23');
     }
 
 </script>
