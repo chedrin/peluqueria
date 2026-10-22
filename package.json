@@ -1,0 +1,24 @@
+{
+  "name": "peluqueria-integral-app",
+  "version": "1.0.0",
+  "description": "Aplicación integral de gestión de peluquerías con agente IA, RBAC de 3 portales y módulo fiscal Veri*Factu (Ley Antifraude 11/2021)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "peluqueria",
+    "verifactu",
+    "ley-antifraude",
+    "citas-ia",
+    "rbac",
+    "tpv"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}
