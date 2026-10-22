@@ -96,280 +96,440 @@
     <!-- PORTAL 1: PORTAL CLIENTAS (PWA / MOBILE FIRST) -->
     <!-- ======================================================================= -->
     <div id="portal-client" class="space-y-6">
-      
-      <!-- Sub-navegación Portal Clientas -->
-      <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
-        <button onclick="switchClientTab('ai-chat')" id="tab-c-ai-chat" class="client-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
-          <i data-lucide="bot" class="w-4 h-4 text-rose-500"></i> Agente IA de Citas
-        </button>
-        <button onclick="switchClientTab('calendar')" id="tab-c-calendar" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="calendar" class="w-4 h-4 text-stone-500"></i> Calendario & Huecos Libres
-        </button>
-        <button onclick="switchClientTab('loyalty')" id="tab-c-loyalty" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="qr-code" class="w-4 h-4 text-stone-500"></i> Fidelización QR & Reseñas Google
-        </button>
-        <button onclick="switchClientTab('showcase')" id="tab-c-showcase" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="shopping-bag" class="w-4 h-4 text-stone-500"></i> Tienda Escaparate
-        </button>
-        <button onclick="switchClientTab('my-appointments')" id="tab-c-my-appointments" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="clock" class="w-4 h-4 text-stone-500"></i> Mis Citas & WhatsApp
-        </button>
-      </div>
 
-      <!-- VISTA 1A: CHAT AGENTE IA -->
-      <div id="cview-ai-chat" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 luxury-card rounded-2xl flex flex-col h-[600px] overflow-hidden">
-          
-          <div class="p-4 border-b border-stone-200 bg-stone-50/70 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-sm">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
+      <!-- ===================================================================== -->
+      <!-- PANTALLA DE ACCESO / ONBOARDING CON DNI (ID FUNDAMENTAL)              -->
+      <!-- Se muestra cuando la clienta NO está identificada en sesión           -->
+      <!-- ===================================================================== -->
+      <div id="client-auth-view" class="luxury-card rounded-3xl p-6 sm:p-10 max-w-2xl mx-auto shadow-sm transition-all">
+        <div class="text-center max-w-lg mx-auto mb-8">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-500 via-rose-400 to-amber-300 flex items-center justify-center text-white mx-auto mb-4 shadow-md shadow-rose-200">
+            <i data-lucide="id-card" class="w-8 h-8"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-stone-900 font-serif-luxury tracking-tight">Acceso Clientas — Identificación con DNI</h2>
+          <p class="text-xs sm:text-sm text-stone-500 mt-2 leading-relaxed">
+            En Peluquería Losan, tu <strong class="text-stone-800">DNI o NIE</strong> es tu identificador fundamental. Con él accedes a tu historial permanente de fórmulas de tinte, cortes, citas y saldo de puntos.
+          </p>
+        </div>
+
+        <!-- Formulario Principal de Acceso por DNI -->
+        <form id="form-client-auth" onsubmit="handleClientAuthSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5 flex items-center justify-between">
+              <span>Introduce tu DNI o NIE *</span>
+              <span class="text-[11px] font-normal text-rose-600">ID fundamental en base de datos</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                <i data-lucide="fingerprint" class="w-5 h-5"></i>
+              </div>
+              <input type="text" id="auth-input-dni" placeholder="Ej: 12345678Z o X1234567L" required
+                class="w-full pl-11 pr-4 py-3 bg-stone-50 border border-stone-300 rounded-xl text-sm font-mono-code font-bold text-stone-900 uppercase placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition shadow-2xs">
+            </div>
+          </div>
+
+          <!-- Campos Desplegables de Registro Rápido (Si es nueva clienta) -->
+          <div id="auth-new-client-fields" class="hidden space-y-3 pt-3 border-t border-stone-200/70 bg-rose-50/40 p-4 rounded-xl border border-rose-200/60">
+            <div class="flex items-center gap-2 text-xs font-bold text-rose-800 bg-white p-2.5 rounded-lg border border-rose-200 shadow-2xs">
+              <i data-lucide="sparkles" class="w-4 h-4 text-rose-500 flex-shrink-0"></i>
+              <span>¡Primera vez en el salón! Completa tus datos para crear tu ficha técnica (+20 pts de regalo):</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-stone-600 mb-1">Nombre y Apellidos *</label>
+                <input type="text" id="auth-input-name" placeholder="Ej: María López"
+                  class="w-full px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-rose-500">
               </div>
               <div>
-                <h3 class="text-sm font-bold text-stone-900">Asistente Virtual de Citas</h3>
-                <span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Gemini 2.5 Flash con Function Calling en directo
+                <label class="block text-[11px] font-semibold text-stone-600 mb-1">Teléfono Móvil *</label>
+                <input type="tel" id="auth-input-phone" placeholder="Ej: 34612345678"
+                  class="w-full px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-rose-500">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-stone-600 mb-1">Alergias o Sensibilidad Capilar (Opcional)</label>
+              <input type="text" id="auth-input-allergies" placeholder="Ej: Sensibilidad al amoniaco, sin alergias..."
+                class="w-full px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-rose-500">
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="auth-submit-btn" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-rose-200">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Acceder a mi Historial con DNI
+            </button>
+          </div>
+        </form>
+
+        <!-- Accesos de prueba rápida con clientas registradas -->
+        <div class="mt-8 pt-6 border-t border-stone-200">
+          <p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3 text-center">
+            O selecciona una clienta registrada para probar al instante:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <button type="button" onclick="quickLoginWithDni('12345678Z')" class="p-3 bg-stone-50 hover:bg-rose-50/60 border border-stone-200 hover:border-rose-300 rounded-xl text-left transition flex items-center justify-between group">
+              <div>
+                <span class="font-bold text-stone-900 group-hover:text-rose-700 block">Laura Martínez</span>
+                <span class="text-[11px] text-stone-500 font-mono-code">DNI: 12345678Z</span>
+              </div>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">120 pts</span>
+            </button>
+            <button type="button" onclick="quickLoginWithDni('87654321X')" class="p-3 bg-stone-50 hover:bg-rose-50/60 border border-stone-200 hover:border-rose-300 rounded-xl text-left transition flex items-center justify-between group">
+              <div>
+                <span class="font-bold text-stone-900 group-hover:text-rose-700 block">Sofía Morales</span>
+                <span class="text-[11px] text-stone-500 font-mono-code">DNI: 87654321X</span>
+              </div>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">50 pts</span>
+            </button>
+            <button type="button" onclick="quickLoginWithDni('45678912C')" class="p-3 bg-stone-50 hover:bg-rose-50/60 border border-stone-200 hover:border-rose-300 rounded-xl text-left transition flex items-center justify-between group">
+              <div>
+                <span class="font-bold text-stone-900 group-hover:text-rose-700 block">Carmen Sánchez</span>
+                <span class="text-[11px] text-stone-500 font-mono-code">DNI: 45678912C</span>
+              </div>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">75 pts</span>
+            </button>
+            <button type="button" onclick="quickLoginWithDni('98732165S')" class="p-3 bg-stone-50 hover:bg-rose-50/60 border border-stone-200 hover:border-rose-300 rounded-xl text-left transition flex items-center justify-between group">
+              <div>
+                <span class="font-bold text-stone-900 group-hover:text-rose-700 block">Clara Sanz</span>
+                <span class="text-[11px] text-stone-500 font-mono-code">DNI: 98732165S</span>
+              </div>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">160 pts</span>
+            </button>
+          </div>
+          <div class="mt-3 text-center">
+            <button type="button" onclick="showNewClientRegistration()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold underline">
+              + O registrar una nueva clienta desde cero
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PANEL COMPLETO DE LA CLIENTA IDENTIFICADA (DASHBOARD)                 -->
+      <!-- Se muestra cuando state.loggedInClient !== null                       -->
+      <!-- ===================================================================== -->
+      <div id="client-dashboard-view" class="hidden space-y-6">
+
+        <!-- Barra de Sesión de la Clienta Activa -->
+        <div class="luxury-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-rose-50/20 to-amber-50/20 border border-stone-200">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center font-bold text-base shadow-xs" id="session-client-avatar">
+              LM
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-base font-bold text-stone-900" id="session-client-name">Laura Martínez</h3>
+                <span class="text-xs font-mono-code font-bold bg-stone-100 text-stone-800 px-2.5 py-0.5 rounded-full border border-stone-300" id="session-client-dni">
+                  DNI: 12345678Z
+                </span>
+                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200" id="session-client-points">
+                  120 pts (6,00 € dto.)
                 </span>
               </div>
+              <p class="text-xs text-stone-500 mt-0.5" id="session-client-info">
+                Tel: 34655555555 · Alergias: Sensibilidad al amoniaco
+              </p>
             </div>
-            <span class="text-xs bg-stone-100 text-stone-600 px-3 py-1 rounded-full border border-stone-200 font-medium">
-              Clienta: Laura Martínez
+          </div>
+          <button onclick="logoutClient()" class="text-xs font-semibold text-stone-600 hover:text-rose-700 hover:bg-stone-100 px-3.5 py-2 rounded-xl border border-stone-200 flex items-center gap-1.5 transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Cambiar Clienta / Salir
+          </button>
+        </div>
+
+        <!-- Sub-navegación Portal Clientas -->
+        <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
+          <button onclick="switchClientTab('ai-chat')" id="tab-c-ai-chat" class="client-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+            <i data-lucide="bot" class="w-4 h-4 text-rose-500"></i> Agente IA de Citas
+          </button>
+          <button onclick="switchClientTab('calendar')" id="tab-c-calendar" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="calendar" class="w-4 h-4 text-stone-500"></i> Calendario & Huecos Libres
+          </button>
+          <button onclick="switchClientTab('loyalty')" id="tab-c-loyalty" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="qr-code" class="w-4 h-4 text-stone-500"></i> Fidelización QR & Reseñas Google
+          </button>
+          <button onclick="switchClientTab('showcase')" id="tab-c-showcase" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-stone-500"></i> Tienda Escaparate
+          </button>
+          <button onclick="switchClientTab('my-appointments')" id="tab-c-my-appointments" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="clock" class="w-4 h-4 text-stone-500"></i> Mis Citas & WhatsApp
+          </button>
+          <button onclick="switchClientTab('history')" id="tab-c-history" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+            <i data-lucide="history" class="w-4 h-4 text-stone-500"></i> Mi Historial de Fórmulas
+          </button>
+        </div>
+
+        <!-- VISTA 1A: CHAT AGENTE IA -->
+        <div id="cview-ai-chat" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 luxury-card rounded-2xl flex flex-col h-[600px] overflow-hidden">
+            
+            <div class="p-4 border-b border-stone-200 bg-stone-50/70 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-sm">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-stone-900">Asistente Virtual de Citas</h3>
+                  <span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Gemini 2.5 Flash con Function Calling en directo
+                  </span>
+                </div>
+              </div>
+              <span class="text-xs bg-stone-100 text-stone-700 px-3 py-1 rounded-full border border-stone-200 font-medium" id="chat-client-badge">
+                Clienta: Laura Martínez
+              </span>
+            </div>
+
+            <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 scrollbar-thin bg-stone-50/40">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  IA
+                </div>
+                <div class="bg-white border border-stone-200 rounded-2xl rounded-tl-xs p-4 max-w-[85%] text-sm text-stone-800 shadow-xs leading-relaxed" id="chat-welcome-bubble">
+                  ¡Hola! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios como corte, mechas balayage o tinte, o dime qué día y estilista prefieres. ¿En qué te ayudo hoy?
+                </div>
+              </div>
+            </div>
+
+            <div id="tool-call-banner" class="hidden px-4 py-2 bg-indigo-50 border-t border-indigo-100 text-xs text-indigo-700 font-mono-code flex items-center gap-2">
+              <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500 animate-spin"></i>
+              <span id="tool-call-name">Ejecutando tool calling...</span>
+            </div>
+
+            <form id="chat-form" onsubmit="sendChatMessage(event)" class="p-3 bg-white border-t border-stone-200 flex gap-2">
+              <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes con Elena o Raquel..." class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
+              <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-sm shadow-rose-200">
+                <span>Enviar</span>
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+
+          <div class="space-y-4">
+            <div class="luxury-card rounded-2xl p-5">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Sugerencias Rápidas para el Chat
+              </h4>
+              <div class="space-y-2">
+                <button onclick="presetChat('Quiero ver los precios y servicios disponibles')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
+                  📋 "Quiero ver los precios y servicios disponibles"
+                </button>
+                <button onclick="presetChat('¿Qué huecos libres tiene Elena para tinte y corte este viernes?')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
+                  🕒 "¿Qué huecos tiene Elena el viernes para tinte y corte?"
+                </button>
+                <button onclick="presetChat('Confírmame la cita con Elena a las 17:30')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
+                  ✅ "Confírmame la cita con Elena a las 17:30"
+                </button>
+              </div>
+            </div>
+
+            <div class="luxury-card rounded-2xl p-5">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Tu Ficha Personal en Salón
+              </h4>
+              <div class="text-xs space-y-2.5 text-stone-700">
+                <div class="flex justify-between border-b border-stone-100 pb-2">
+                  <span class="text-stone-500">Puntos de fidelización:</span>
+                  <span class="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200" id="client-points-badge">120 pts (6,00 € dto.)</span>
+                </div>
+                <div class="flex justify-between border-b border-stone-100 pb-2">
+                  <span class="text-stone-500">Alergias registradas:</span>
+                  <span class="text-rose-600 font-semibold text-right" id="client-allergies-badge">Sensibilidad al amoniaco</span>
+                </div>
+                <div class="flex justify-between pb-1">
+                  <span class="text-stone-500">Última fórmula técnica:</span>
+                  <span class="text-stone-800 font-mono-code text-right font-medium" id="client-last-formula-badge">6.1 (30g) + 7.0 (15g)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1B: CALENDARIO INTERACTIVO & RESERVA DIRECTA (HUECOS DINÁMICOS POR ESTILISTA) -->
+        <div id="cview-calendar" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-stone-100 pb-3 gap-2">
+              <div>
+                <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Disponibilidad en Tiempo Real</h3>
+                <p class="text-xs text-stone-500">Cada estilista tiene su propia agenda y huecos libres diferenciados</p>
+              </div>
+              <span class="text-xs bg-stone-100 text-stone-700 font-semibold px-3 py-1 rounded-full border border-stone-200 self-start sm:self-auto">
+                Viernes, 23 de Octubre de 2026
+              </span>
+            </div>
+
+            <!-- Selector Rápido de Estilista para ver su agenda específica -->
+            <div class="mb-5 bg-stone-50 p-3 rounded-xl border border-stone-200">
+              <label class="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center justify-between">
+                <span>Ver cuadrante y huecos libres de:</span>
+                <span class="text-[11px] text-rose-600 font-bold" id="calendar-stylist-badge">Elena Gómez (Color & Balayage)</span>
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="changeBookingCalendarStylist('stf-1')" id="cal-stf-btn-stf-1" class="cal-stf-pill active bg-white border-2 border-purple-500 text-purple-900 font-bold py-2 px-3 rounded-xl text-xs shadow-xs text-center transition">
+                  💜 Elena Gómez
+                </button>
+                <button type="button" onclick="changeBookingCalendarStylist('stf-2')" id="cal-stf-btn-stf-2" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-pink-400 text-center transition">
+                  💖 Raquel Santos
+                </button>
+                <button type="button" onclick="changeBookingCalendarStylist('stf-3')" id="cal-stf-btn-stf-3" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-emerald-400 text-center transition">
+                  💚 Carmen Vidal
+                </button>
+              </div>
+            </div>
+
+            <!-- Grid de Huecos Horarios (Calculados Dinámicamente según la estilista) -->
+            <div class="mb-6">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5" id="slots-header-label">
+                Huecos de Elena Gómez para el Viernes 23 Oct:
+              </label>
+              <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5" id="slots-grid">
+                <!-- Renderizado dinámico -->
+              </div>
+            </div>
+
+            <!-- Selección de Servicios -->
+            <div class="space-y-3">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500">Servicios a Realizar:</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="services-checklist">
+                <!-- Renderizado dinámico -->
+              </div>
+            </div>
+
+            <!-- Resumen y Confirmación -->
+            <div class="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between">
+              <div>
+                <span class="text-xs text-stone-500 block">Total Estimado con IVA (21%):</span>
+                <span class="text-xl font-bold text-stone-900" id="booking-total-price">0,00 €</span>
+              </div>
+              <button onclick="submitManualBooking()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-sm shadow-rose-200">
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Cita
+              </button>
+            </div>
+          </div>
+
+          <!-- Parámetros de Reserva -->
+          <div class="luxury-card rounded-2xl p-6 space-y-4">
+            <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Parámetros de Reserva</h4>
+            <div class="space-y-3.5 text-xs text-stone-700">
+              <div>
+                <span class="text-stone-500 font-medium block">Estilista Seleccionada:</span>
+                <select id="select-booking-staff" onchange="onBookingStaffSelectChange()" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                  <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
+                  <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
+                  <option value="stf-3">Carmen Vidal (Tratamientos & Keratina)</option>
+                </select>
+              </div>
+              <div>
+                <span class="text-stone-500 font-medium block">Observaciones / Peticiones:</span>
+                <textarea id="booking-comments" rows="3" placeholder="Ej: Me gustaría mantener el largo y repasar el tono cobrizo..." class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-500"></textarea>
+              </div>
+            </div>
+            <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-800 leading-relaxed flex items-start gap-2">
+              <i data-lucide="bell-ring" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <strong>Avisos automatizados:</strong> Se enviará recordatorio oficial por WhatsApp 24h y 2h antes de tu cita según la configuración del salón.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1C: FIDELIZACIÓN QR & RESEÑAS GOOGLE -->
+        <div id="cview-loyalty" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="luxury-card rounded-2xl p-6 flex flex-col items-center text-center">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold mb-4">
+              <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Club de Fidelización Losan
+            </div>
+            
+            <div class="p-4 bg-white border border-stone-200 rounded-2xl shadow-sm mb-4">
+              <canvas id="client-qr-canvas" width="180" height="180"></canvas>
+            </div>
+            
+            <h3 class="text-lg font-bold text-stone-900 mb-0.5" id="qr-client-name">Laura Martínez</h3>
+            <p class="text-xs font-mono-code text-stone-400 mb-4" id="qr-hash-display">QR-12345678Z-HASH</p>
+
+            <div class="w-full bg-stone-50 border border-stone-200 rounded-xl p-4 flex items-center justify-between">
+              <div class="text-left">
+                <span class="text-xs text-stone-500 block">Saldo Actual de Puntos:</span>
+                <span class="text-2xl font-black text-amber-600 font-mono-code" id="loyalty-balance-display">120 pts</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-stone-500 block">Equivalencia TPV:</span>
+                <span class="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200" id="loyalty-euro-value">6,00 € dto.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="luxury-card rounded-2xl p-6 space-y-5">
+            <div>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+                <i data-lucide="star" class="w-5 h-5 text-amber-400 fill-amber-400"></i>
+                Reseña Verificada en Google Business
+              </h3>
+              <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+                Comparte tu experiencia en Google Maps y recibe <strong class="text-amber-700 font-bold">+50 puntos directos</strong> (2,50 € de descuento directo aplicable en cualquier servicio o producto de muestra).
+              </p>
+            </div>
+
+            <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
+              <div class="flex items-center gap-2 text-xs text-stone-700">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                <span>Validación automática anti-fraude vinculada a tu perfil</span>
+              </div>
+              <div id="google-review-status-box" class="text-xs text-stone-500">
+                Estado: <span id="review-status-badge" class="font-semibold text-stone-800">Pendiente de publicar</span>
+              </div>
+              <button id="btn-submit-google-review" onclick="simulateGoogleReviewVerification()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-blue-200">
+                <i data-lucide="external-link" class="w-4 h-4"></i> Publicar Reseña y Reclamar +50 Puntos
+              </button>
+            </div>
+
+            <div class="text-[11px] text-stone-400 leading-relaxed border-t border-stone-100 pt-3">
+              * Los puntos se canjean directamente en caja al abonar cualquier servicio de peluquería o cosmético. No tienen fecha de caducidad.
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1D: TIENDA ESCAPARATE -->
+        <div id="cview-showcase" class="hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Catálogo de Productos Cosméticos de Muestra</h3>
+              <p class="text-xs text-stone-500">Productos profesionales recomendados por nuestras estilistas para el cuidado de tu cabello en casa.</p>
+            </div>
+            <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">
+              Modo: Reserva para recogida en salón
             </span>
           </div>
 
-          <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 scrollbar-thin bg-stone-50/40">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0 text-xs font-bold">
-                IA
-              </div>
-              <div class="bg-white border border-stone-200 rounded-2xl rounded-tl-xs p-4 max-w-[85%] text-sm text-stone-800 shadow-xs leading-relaxed">
-                ¡Hola Laura! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios como corte, mechas balayage o tinte, o dime qué día y estilista prefieres. ¿En qué te ayudo hoy?
-              </div>
-            </div>
-          </div>
-
-          <div id="tool-call-banner" class="hidden px-4 py-2 bg-indigo-50 border-t border-indigo-100 text-xs text-indigo-700 font-mono-code flex items-center gap-2">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500 animate-spin"></i>
-            <span id="tool-call-name">Ejecutando tool calling...</span>
-          </div>
-
-          <form id="chat-form" onsubmit="sendChatMessage(event)" class="p-3 bg-white border-t border-stone-200 flex gap-2">
-            <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes con Elena o Raquel..." class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
-            <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-sm shadow-rose-200">
-              <span>Enviar</span>
-              <i data-lucide="send" class="w-4 h-4"></i>
-            </button>
-          </form>
-        </div>
-
-        <div class="space-y-4">
-          <div class="luxury-card rounded-2xl p-5">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
-              <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Sugerencias Rápidas para el Chat
-            </h4>
-            <div class="space-y-2">
-              <button onclick="presetChat('Quiero ver los precios y servicios disponibles')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
-                📋 "Quiero ver los precios y servicios disponibles"
-              </button>
-              <button onclick="presetChat('¿Qué huecos libres tiene Elena para tinte y corte este viernes?')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
-                🕒 "¿Qué huecos tiene Elena el viernes para tinte y corte?"
-              </button>
-              <button onclick="presetChat('Confírmame la cita con Elena a las 17:30')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
-                ✅ "Confírmame la cita con Elena a las 17:30"
-              </button>
-            </div>
-          </div>
-
-          <div class="luxury-card rounded-2xl p-5">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
-              <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Tu Ficha Personal en Salón
-            </h4>
-            <div class="text-xs space-y-2.5 text-stone-700">
-              <div class="flex justify-between border-b border-stone-100 pb-2">
-                <span class="text-stone-500">Puntos de fidelización:</span>
-                <span class="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200" id="client-points-badge">120 pts (6,00 € dto.)</span>
-              </div>
-              <div class="flex justify-between border-b border-stone-100 pb-2">
-                <span class="text-stone-500">Alergias registradas:</span>
-                <span class="text-rose-600 font-semibold text-right">Sensibilidad al amoniaco</span>
-              </div>
-              <div class="flex justify-between pb-1">
-                <span class="text-stone-500">Última fórmula técnica:</span>
-                <span class="text-stone-800 font-mono-code text-right font-medium">6.1 (30g) + 7.0 (15g)</span>
-              </div>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="showcase-grid">
+            <!-- Renderizado dinámico de productos -->
           </div>
         </div>
-      </div>
 
-      <!-- VISTA 1B: CALENDARIO INTERACTIVO & RESERVA DIRECTA (HUECOS DINÁMICOS POR ESTILISTA) -->
-      <div id="cview-calendar" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 border-b border-stone-100 pb-3 gap-2">
+        <!-- VISTA 1E: MIS CITAS & WHATSAPP -->
+        <div id="cview-my-appointments" class="hidden space-y-4">
+          <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Tus Próximas Citas y Automatizaciones</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="client-appointments-list">
+            <!-- Renderizado dinámico -->
+          </div>
+        </div>
+
+        <!-- VISTA 1F: MI HISTORIAL TÉCNICO & FÓRMULAS (HISTORIAL PERMANENTE CON DNI) -->
+        <div id="cview-history" class="hidden space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-stone-200 pb-3">
             <div>
-              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Disponibilidad en Tiempo Real</h3>
-              <p class="text-xs text-stone-500">Cada estilista tiene su propia agenda y huecos libres diferenciados</p>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Tu Historial de Fórmulas y Colorimetría</h3>
+              <p class="text-xs text-stone-500">Todas las mezclas técnicas, tintes, balayages y tratamientos aplicados a tu cabello en Peluquería Losan.</p>
             </div>
-            <span class="text-xs bg-stone-100 text-stone-700 font-semibold px-3 py-1 rounded-full border border-stone-200 self-start sm:self-auto">
-              Viernes, 23 de Octubre de 2026
+            <span class="text-xs bg-purple-50 text-purple-700 font-semibold px-3 py-1 rounded-full border border-purple-200">
+              Expediente Cripto-Verificado
             </span>
           </div>
 
-          <!-- Selector Rápido de Estilista para ver su agenda específica -->
-          <div class="mb-5 bg-stone-50 p-3 rounded-xl border border-stone-200">
-            <label class="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center justify-between">
-              <span>Ver cuadrante y huecos libres de:</span>
-              <span class="text-[11px] text-rose-600 font-bold" id="calendar-stylist-badge">Elena Gómez (Color & Balayage)</span>
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="changeBookingCalendarStylist('stf-1')" id="cal-stf-btn-stf-1" class="cal-stf-pill active bg-white border-2 border-purple-500 text-purple-900 font-bold py-2 px-3 rounded-xl text-xs shadow-xs text-center transition">
-                💜 Elena Gómez
-              </button>
-              <button type="button" onclick="changeBookingCalendarStylist('stf-2')" id="cal-stf-btn-stf-2" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-pink-400 text-center transition">
-                💖 Raquel Santos
-              </button>
-              <button type="button" onclick="changeBookingCalendarStylist('stf-3')" id="cal-stf-btn-stf-3" class="cal-stf-pill bg-white border border-stone-200 text-stone-600 font-semibold py-2 px-3 rounded-xl text-xs hover:border-emerald-400 text-center transition">
-                💚 Carmen Vidal
-              </button>
-            </div>
-          </div>
-
-          <!-- Grid de Huecos Horarios (Calculados Dinámicamente según la estilista) -->
-          <div class="mb-6">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5" id="slots-header-label">
-              Huecos de Elena Gómez para el Viernes 23 Oct:
-            </label>
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5" id="slots-grid">
-              <!-- Renderizado dinámico -->
-            </div>
-          </div>
-
-          <!-- Selección de Servicios -->
-          <div class="space-y-3">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500">Servicios a Realizar:</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="services-checklist">
-              <!-- Renderizado dinámico -->
-            </div>
-          </div>
-
-          <!-- Resumen y Confirmación -->
-          <div class="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between">
-            <div>
-              <span class="text-xs text-stone-500 block">Total Estimado con IVA (21%):</span>
-              <span class="text-xl font-bold text-stone-900" id="booking-total-price">0,00 €</span>
-            </div>
-            <button onclick="submitManualBooking()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-sm shadow-rose-200">
-              <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Cita
-            </button>
+          <div class="space-y-4" id="client-history-list">
+            <!-- Renderizado dinámico del histórico de fórmulas -->
           </div>
         </div>
 
-        <!-- Parámetros de Reserva -->
-        <div class="luxury-card rounded-2xl p-6 space-y-4">
-          <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Parámetros de Reserva</h4>
-          <div class="space-y-3.5 text-xs text-stone-700">
-            <div>
-              <span class="text-stone-500 font-medium block">Estilista Seleccionada:</span>
-              <select id="select-booking-staff" onchange="onBookingStaffSelectChange()" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-medium focus:outline-none focus:border-rose-500">
-                <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
-                <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
-                <option value="stf-3">Carmen Vidal (Tratamientos & Keratina)</option>
-              </select>
-            </div>
-            <div>
-              <span class="text-stone-500 font-medium block">Observaciones / Peticiones:</span>
-              <textarea id="booking-comments" rows="3" placeholder="Ej: Me gustaría mantener el largo y repasar el tono cobrizo..." class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-500"></textarea>
-            </div>
-          </div>
-          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-800 leading-relaxed flex items-start gap-2">
-            <i data-lucide="bell-ring" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-            <div>
-              <strong>Avisos automatizados:</strong> Se enviará recordatorio oficial por WhatsApp 24h y 2h antes de tu cita según la configuración del salón.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- VISTA 1C: FIDELIZACIÓN QR & RESEÑAS GOOGLE -->
-      <div id="cview-loyalty" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="luxury-card rounded-2xl p-6 flex flex-col items-center text-center">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold mb-4">
-            <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Club de Fidelización Losan
-          </div>
-          
-          <div class="p-4 bg-white border border-stone-200 rounded-2xl shadow-sm mb-4">
-            <canvas id="client-qr-canvas" width="180" height="180"></canvas>
-          </div>
-          
-          <h3 class="text-lg font-bold text-stone-900 mb-0.5" id="qr-client-name">Laura Martínez</h3>
-          <p class="text-xs font-mono-code text-stone-400 mb-4" id="qr-hash-display">QR-LAURA-77492-HASH</p>
-
-          <div class="w-full bg-stone-50 border border-stone-200 rounded-xl p-4 flex items-center justify-between">
-            <div class="text-left">
-              <span class="text-xs text-stone-500 block">Saldo Actual de Puntos:</span>
-              <span class="text-2xl font-black text-amber-600 font-mono-code" id="loyalty-balance-display">120 pts</span>
-            </div>
-            <div class="text-right">
-              <span class="text-xs text-stone-500 block">Equivalencia TPV:</span>
-              <span class="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200" id="loyalty-euro-value">6,00 € dto.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="luxury-card rounded-2xl p-6 space-y-5">
-          <div>
-            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
-              <i data-lucide="star" class="w-5 h-5 text-amber-400 fill-amber-400"></i>
-              Reseña Verificada en Google Business
-            </h3>
-            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
-              Comparte tu experiencia en Google Maps y recibe <strong class="text-amber-700 font-bold">+50 puntos directos</strong> (2,50 € de descuento directo aplicable en cualquier servicio o producto de muestra).
-            </p>
-          </div>
-
-          <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
-            <div class="flex items-center gap-2 text-xs text-stone-700">
-              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-              <span>Validación automática anti-fraude vinculada a tu perfil</span>
-            </div>
-            <div id="google-review-status-box" class="text-xs text-stone-500">
-              Estado: <span id="review-status-badge" class="font-semibold text-stone-800">Pendiente de publicar</span>
-            </div>
-            <button id="btn-submit-google-review" onclick="simulateGoogleReviewVerification()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-blue-200">
-              <i data-lucide="external-link" class="w-4 h-4"></i> Publicar Reseña y Reclamar +50 Puntos
-            </button>
-          </div>
-
-          <div class="text-[11px] text-stone-400 leading-relaxed border-t border-stone-100 pt-3">
-            * Los puntos se canjean directamente en caja al abonar cualquier servicio de peluquería o cosmético. No tienen fecha de caducidad.
-          </div>
-        </div>
-      </div>
-
-      <!-- VISTA 1D: TIENDA ESCAPARATE -->
-      <div id="cview-showcase" class="hidden space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Catálogo de Productos Cosméticos de Muestra</h3>
-            <p class="text-xs text-stone-500">Productos profesionales recomendados por nuestras estilistas para el cuidado de tu cabello en casa.</p>
-          </div>
-          <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">
-            Modo: Reserva para recogida en salón
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="showcase-grid">
-          <!-- Renderizado dinámico de productos -->
-        </div>
-      </div>
-
-      <!-- VISTA 1E: MIS CITAS & WHATSAPP -->
-      <div id="cview-my-appointments" class="hidden space-y-4">
-        <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Tus Próximas Citas y Automatizaciones</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="client-appointments-list">
-          <!-- Renderizado dinámico -->
-        </div>
       </div>
 
     </div>
@@ -490,6 +650,9 @@
         </button>
         <button onclick="switchAdminTab('stock')" id="tab-a-stock" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
           <i data-lucide="boxes" class="w-4 h-4 text-stone-500"></i> Control de Stock
+        </button>
+        <button onclick="switchAdminTab('crm')" id="tab-a-crm" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="users" class="w-4 h-4 text-stone-500"></i> CRM / Clientas & DNI
         </button>
       </div>
 
@@ -820,6 +983,41 @@
         </div>
       </div>
 
+      <!-- VISTA 3E: CRM CLIENTAS 360° & HISTORIAL POR DNI -->
+      <div id="aview-crm" class="hidden luxury-card rounded-2xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-stone-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
+              Base de Datos CRM — Ficha 360° de Clientas (DNI como ID Fundamental)
+            </h3>
+            <p class="text-xs text-stone-500">Registro histórico centralizado de clientes, fórmulas de tinte, RGPD y puntos de fidelización.</p>
+          </div>
+          <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-full border border-indigo-200" id="crm-total-count">
+            Total Registradas
+          </span>
+        </div>
+
+        <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
+              <tr>
+                <th class="p-3">DNI / NIE (ID Fundamental)</th>
+                <th class="p-3">Nombre y Apellidos</th>
+                <th class="p-3">Teléfono</th>
+                <th class="p-3 text-center">Puntos Fidelización</th>
+                <th class="p-3">Alergias / Historial Técnico</th>
+                <th class="p-3 text-center">Reseña Google</th>
+                <th class="p-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="crm-tbody" class="divide-y divide-stone-100 text-stone-800 bg-white">
+              <!-- Filas de CRM dinámicas -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -865,6 +1063,7 @@
       selectedAppointmentId: null,
       selectedSlots: '17:30',
       selectedServicesForBooking: ['srv-1', 'srv-2'],
+      loggedInClient: null, // Clienta autenticada mediante DNI (ID fundamental)
       tpvItems: [
         { concept: 'Corte y Estilismo', quantity: 1, unitPrice: 22.00, vatRate: 21.0 },
         { concept: 'Coloración Completa (Tinte)', quantity: 1, unitPrice: 38.00, vatRate: 21.0 }
@@ -888,16 +1087,26 @@
     window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       await fetchInitialData();
-      renderClientQR();
+
+      // Recuperar sesión persistente de clienta si existe en localStorage
+      const savedDni = localStorage.getItem('peluqueria_client_dni');
+      if (savedDni) {
+        const found = state.clients.find(c => c.dni && c.dni.toUpperCase() === savedDni.toUpperCase());
+        if (found) {
+          state.loggedInClient = found;
+        }
+      }
+
+      renderClientSession();
       renderBookingSlots(state.bookingCalendarStaffId);
       renderServicesChecklist();
       renderShowcaseProducts();
-      renderClientAppointments();
       renderWorkerAgenda();
       renderMasterAgenda();
       renderTpvTable();
       renderInvoicesTable();
       renderStockTable();
+      renderAdminCrmTable();
     });
 
     async function fetchInitialData() {
@@ -919,6 +1128,12 @@
         state.invoices = await resInv.json();
         state.clients = await resCli.json();
         state.technicalRecords = await resTec.json();
+
+        // Si ya hay una clienta logueada, actualizar su objeto en memoria
+        if (state.loggedInClient) {
+          const fresh = state.clients.find(c => c.id === state.loggedInClient.id || (c.dni && c.dni.toUpperCase() === state.loggedInClient.dni.toUpperCase()));
+          if (fresh) state.loggedInClient = fresh;
+        }
       } catch (e) {
         console.warn('Ejecutando en modo cliente autónomo (sin backend REST activo).');
         // Datos por defecto
@@ -935,13 +1150,13 @@
           { id: 'stf-3', name: 'Carmen Vidal', isAvailable: true, specialty: 'Tratamientos & Keratina' },
         ];
         state.clients = [
-          { id: 'cli-1', name: 'Laura Martínez', phone: '34655555555', allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)', points: 120, qrHash: 'QR-LAURA-77492-HASH' },
-          { id: 'cli-2', name: 'Sofía Morales', phone: '34666666666', allergies: 'Sin alergias conocidas. Cabello muy fino.', points: 50, qrHash: 'QR-SOFIA-88319-HASH' },
-          { id: 'cli-3', name: 'Carmen Sánchez', phone: '34677777777', allergies: 'Alergia al níquel.', points: 75, qrHash: 'QR-CARMEN-99214-HASH' },
-          { id: 'cli-4', name: 'Marta Domínguez', phone: '34688888888', allergies: 'Cuero cabelludo reactivo.', points: 90, qrHash: 'QR-MARTA-11234-HASH' },
-          { id: 'cli-5', name: 'Beatriz Navarro', phone: '34699999999', allergies: 'Sin alergias conocidas.', points: 40, qrHash: 'QR-BEATRIZ-33421-HASH' },
-          { id: 'cli-6', name: 'Lucía Pardo', phone: '34600112233', allergies: 'Sin alergias.', points: 110, qrHash: 'QR-LUCIA-55612-HASH' },
-          { id: 'cli-7', name: 'Clara Sanz', phone: '34622334455', allergies: 'Puntas quebradizas por decoloración casera previa.', points: 160, qrHash: 'QR-CLARA-88712-HASH' }
+          { id: 'cli-1', dni: '12345678Z', name: 'Laura Martínez', phone: '34655555555', allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)', points: 120, loyaltyPoints: 120, qrCodeHash: 'QR-12345678Z-HASH' },
+          { id: 'cli-2', dni: '87654321X', name: 'Sofía Morales', phone: '34666666666', allergies: 'Sin alergias conocidas. Cabello muy fino.', points: 50, loyaltyPoints: 50, qrCodeHash: 'QR-87654321X-HASH' },
+          { id: 'cli-3', dni: '45678912C', name: 'Carmen Sánchez', phone: '34677777777', allergies: 'Alergia al níquel.', points: 75, loyaltyPoints: 75, qrCodeHash: 'QR-45678912C-HASH' },
+          { id: 'cli-4', dni: '78912345M', name: 'Marta Domínguez', phone: '34688888888', allergies: 'Cuero cabelludo reactivo.', points: 90, loyaltyPoints: 90, qrHash: 'QR-78912345M-HASH' },
+          { id: 'cli-5', dni: '32165498B', name: 'Beatriz Navarro', phone: '34699999999', allergies: 'Sin alergias conocidas.', points: 40, loyaltyPoints: 40, qrHash: 'QR-32165498B-HASH' },
+          { id: 'cli-6', dni: '65498732L', name: 'Lucía Pardo', phone: '34600112233', allergies: 'Sin alergias.', points: 110, loyaltyPoints: 110, qrHash: 'QR-65498732L-HASH' },
+          { id: 'cli-7', dni: '98732165S', name: 'Clara Sanz', phone: '34622334455', allergies: 'Puntas quebradizas por decoloración casera previa.', points: 160, loyaltyPoints: 160, qrHash: 'QR-98732165S-HASH' }
         ];
         state.technicalRecords = [
           {
@@ -1118,27 +1333,44 @@
         b.classList.remove('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
         b.classList.add('text-stone-600');
       });
-      document.getElementById('tab-c-' + tab).classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
+      const activeBtn = document.getElementById('tab-c-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
+      }
 
-      document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-loyalty, #cview-showcase, #cview-my-appointments').forEach(el => el.classList.add('hidden'));
-      document.getElementById('cview-' + tab).classList.remove('hidden');
+      document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-loyalty, #cview-showcase, #cview-my-appointments, #cview-history').forEach(el => el.classList.add('hidden'));
+      const targetView = document.getElementById('cview-' + tab);
+      if (targetView) targetView.classList.remove('hidden');
 
       if (tab === 'calendar') {
         renderBookingSlots(state.bookingCalendarStaffId);
+      } else if (tab === 'history') {
+        renderClientTechnicalHistory();
+      } else if (tab === 'my-appointments') {
+        renderClientAppointments();
       }
       lucide.createIcons();
     }
 
     function switchAdminTab(tab) {
       state.activeAdminTab = tab;
+      const tabKey = tab.split('-')[0];
       document.querySelectorAll('.admin-tab').forEach(b => {
         b.classList.remove('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
         b.classList.add('text-stone-600');
       });
-      document.getElementById('tab-a-' + (tab.split('-')[0])).classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
+      const activeBtn = document.getElementById('tab-a-' + tabKey);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
+      }
 
-      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock').forEach(el => el.classList.add('hidden'));
-      document.getElementById('aview-' + (tab.split('-')[0])).classList.remove('hidden');
+      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm').forEach(el => el.classList.add('hidden'));
+      const targetView = document.getElementById('aview-' + tabKey);
+      if (targetView) targetView.classList.remove('hidden');
+
+      if (tabKey === 'crm') {
+        renderAdminCrmTable();
+      }
       lucide.createIcons();
     }
 
@@ -1306,7 +1538,7 @@
       const records = state.technicalRecords.filter(r => r.clientId === clientId);
 
       document.getElementById('tech-client-title').innerText = `Expediente: ${client ? client.name : 'Clienta'}`;
-      document.getElementById('tech-client-phone').innerText = `Tel: ${client ? client.phone : 'N/A'}`;
+      document.getElementById('tech-client-phone').innerText = `DNI: ${client ? (client.dni || 'Sin DNI') : 'N/A'} · Tel: ${client ? client.phone : 'N/A'}`;
       document.getElementById('form-target-client').innerText = client ? client.name : 'Clienta';
 
       const previewContainer = document.getElementById('client-history-preview');
@@ -1398,7 +1630,6 @@
 
         if (res.ok) {
           const data = await res.json();
-          // Añadir al estado local y re-renderizar de inmediato
           state.technicalRecords.unshift(data.newRecord || newRecordObj);
         } else {
           state.technicalRecords.unshift(newRecordObj);
@@ -1407,15 +1638,266 @@
         state.technicalRecords.unshift(newRecordObj);
       }
 
-      // 1. Re-renderizar la ficha técnica de la clienta en pantalla para que el cambio sea visible de inmediato
+      // Re-renderizar expediente y actualizar vista de la clienta si está activa
       renderClientTechnicalProfile(client.id);
+      if (state.loggedInClient && state.loggedInClient.id === client.id) {
+        renderClientSession();
+      }
 
-      // 2. Limpiar formulario
       document.getElementById('post-dye-formula').value = '';
       document.getElementById('post-technique').value = '';
       document.getElementById('post-notes').value = '';
 
-      alert(`✅ ¡Expediente técnico de ${client.name} actualizado con éxito!\nLa nueva fórmula se ha añadido a su historial permanente.`);
+      alert(`✅ ¡Expediente técnico de ${client.name} (DNI: ${client.dni || 'Registrado'}) actualizado con éxito!\nLa nueva fórmula se ha añadido a su historial permanente.`);
+    }
+
+    // ========================================================================
+    // AUTENTICACIÓN / ONBOARDING CON DNI (ID FUNDAMENTAL)
+    // ========================================================================
+    async function handleClientAuthSubmit(e) {
+      e.preventDefault();
+      const dni = document.getElementById('auth-input-dni').value.trim();
+      const name = document.getElementById('auth-input-name').value.trim();
+      const phone = document.getElementById('auth-input-phone').value.trim();
+      const allergies = document.getElementById('auth-input-allergies').value.trim();
+
+      await loginClientWithDni(dni, name, phone, allergies);
+    }
+
+    async function loginClientWithDni(dni, name = '', phone = '', allergies = '') {
+      const cleanDni = dni.trim().toUpperCase().replace(/[\s-]/g, '');
+      if (!cleanDni) {
+        alert('Por favor, introduce un DNI o NIE válido.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/clients/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dni: cleanDni, name, phone, allergies })
+        });
+        const data = await res.json();
+
+        if (res.status === 404 && data.needsRegistration) {
+          showNewClientRegistration(cleanDni, data.message);
+          return;
+        }
+
+        if (!res.ok) {
+          alert(data.error || 'Error al autenticar');
+          return;
+        }
+
+        state.loggedInClient = data.client;
+        localStorage.setItem('peluqueria_client_dni', cleanDni);
+
+        // Sincronizar en state.clients
+        const idx = state.clients.findIndex(c => c.id === data.client.id || (c.dni && c.dni.toUpperCase() === cleanDni));
+        if (idx >= 0) {
+          state.clients[idx] = data.client;
+        } else {
+          state.clients.push(data.client);
+        }
+
+        await fetchInitialData();
+        renderClientSession();
+        renderAdminCrmTable();
+        alert(data.message);
+
+      } catch (err) {
+        // Modo local offline
+        let localClient = state.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+        if (!localClient) {
+          if (!name) {
+            showNewClientRegistration(cleanDni, 'DNI no encontrado. Introduce tu nombre y teléfono para registrar tu ficha con 20 puntos de bienvenida.');
+            return;
+          }
+          localClient = {
+            id: 'cli-' + Date.now(),
+            dni: cleanDni,
+            name: name,
+            phone: phone || '',
+            allergies: allergies || 'Sin alergias',
+            loyaltyPoints: 20,
+            googleReviewVerified: false,
+            qrCodeHash: 'QR-' + cleanDni + '-HASH',
+            marketingConsent: true
+          };
+          state.clients.push(localClient);
+        }
+        state.loggedInClient = localClient;
+        localStorage.setItem('peluqueria_client_dni', cleanDni);
+        renderClientSession();
+        renderAdminCrmTable();
+      }
+    }
+
+    function quickLoginWithDni(dni) {
+      document.getElementById('auth-input-dni').value = dni;
+      loginClientWithDni(dni);
+    }
+
+    function showNewClientRegistration(dni = '', msg = '') {
+      const fields = document.getElementById('auth-new-client-fields');
+      fields.classList.remove('hidden');
+      if (dni) document.getElementById('auth-input-dni').value = dni;
+      document.getElementById('auth-input-name').focus();
+      document.getElementById('auth-submit-btn').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4"></i> Crear Ficha y Acceder (+20 pts de regalo)`;
+      if (msg) alert(msg);
+      lucide.createIcons();
+    }
+
+    function logoutClient() {
+      state.loggedInClient = null;
+      localStorage.removeItem('peluqueria_client_dni');
+      document.getElementById('client-dashboard-view').classList.add('hidden');
+      document.getElementById('client-auth-view').classList.remove('hidden');
+      document.getElementById('auth-new-client-fields').classList.add('hidden');
+      document.getElementById('auth-input-dni').value = '';
+      document.getElementById('auth-submit-btn').innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Acceder a mi Historial con DNI`;
+      lucide.createIcons();
+    }
+
+    function renderClientSession() {
+      if (!state.loggedInClient) {
+        document.getElementById('client-dashboard-view').classList.add('hidden');
+        document.getElementById('client-auth-view').classList.remove('hidden');
+        return;
+      }
+
+      document.getElementById('client-auth-view').classList.add('hidden');
+      document.getElementById('client-dashboard-view').classList.remove('hidden');
+
+      const c = state.loggedInClient;
+      const initials = c.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('session-client-avatar').innerText = initials || 'CL';
+      document.getElementById('session-client-name').innerText = c.name;
+      document.getElementById('session-client-dni').innerText = `DNI: ${c.dni || 'Sin DNI'}`;
+      
+      const pts = c.loyaltyPoints !== undefined ? c.loyaltyPoints : (c.points || 0);
+      const dto = ((pts / 100) * 5.0).toFixed(2);
+      document.getElementById('session-client-points').innerText = `${pts} pts (${dto} € dto.)`;
+      document.getElementById('session-client-info').innerText = `Tel: ${c.phone || 'Sin teléfono'} · Alergias: ${c.allergies || 'Sin alergias'}`;
+
+      // Actualizar burbuja y badges de Agente IA
+      const chatClientBadge = document.getElementById('chat-client-badge');
+      if (chatClientBadge) chatClientBadge.innerText = `Clienta: ${c.name} (${c.dni})`;
+      
+      const chatWelcome = document.getElementById('chat-welcome-bubble');
+      if (chatWelcome) {
+        chatWelcome.innerText = `¡Hola, ${c.name}! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios o consúltame huecos libres con Elena, Raquel o Carmen. ¿En qué te ayudo hoy?`;
+      }
+
+      const clientPointsBadge = document.getElementById('client-points-badge');
+      if (clientPointsBadge) clientPointsBadge.innerText = `${pts} pts (${dto} € dto.)`;
+
+      const clientAllergiesBadge = document.getElementById('client-allergies-badge');
+      if (clientAllergiesBadge) clientAllergiesBadge.innerText = c.allergies || 'Sin alergias';
+
+      const myRecords = state.technicalRecords.filter(r => r.clientId === c.id);
+      const lastFormulaBadge = document.getElementById('client-last-formula-badge');
+      if (lastFormulaBadge) {
+        lastFormulaBadge.innerText = myRecords.length > 0 ? myRecords[0].dyeFormula : 'Sin fórmula previa';
+      }
+
+      // Actualizar Fidelización QR
+      const qrName = document.getElementById('qr-client-name');
+      if (qrName) qrName.innerText = c.name;
+      const qrHashDisplay = document.getElementById('qr-hash-display');
+      if (qrHashDisplay) qrHashDisplay.innerText = c.qrCodeHash || ('QR-' + c.dni + '-HASH');
+      const loyaltyDisplay = document.getElementById('loyalty-balance-display');
+      if (loyaltyDisplay) loyaltyDisplay.innerText = `${pts} pts`;
+      const loyaltyEuro = document.getElementById('loyalty-euro-value');
+      if (loyaltyEuro) loyaltyEuro.innerText = `${dto} € dto.`;
+
+      // Renderizar QRious
+      new QRious({
+        element: document.getElementById('client-qr-canvas'),
+        value: 'https://tu-peluqueria.com/fidelizacion/' + (c.qrCodeHash || ('QR-' + c.dni + '-HASH')),
+        size: 180,
+        background: '#ffffff',
+        foreground: '#1c1917'
+      });
+
+      // Estado de Reseña en Google
+      const reviewBadge = document.getElementById('review-status-badge');
+      const reviewBtn = document.getElementById('btn-submit-google-review');
+      if (c.googleReviewVerified) {
+        if (reviewBadge) {
+          reviewBadge.className = 'font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200';
+          reviewBadge.innerText = '✅ Reseña verificada (+50 pts aplicados)';
+        }
+        if (reviewBtn) {
+          reviewBtn.className = 'w-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed';
+          reviewBtn.disabled = true;
+          reviewBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Bonificación Cobrada`;
+        }
+      } else {
+        if (reviewBadge) {
+          reviewBadge.className = 'font-semibold text-stone-800';
+          reviewBadge.innerText = 'Pendiente de publicar';
+        }
+        if (reviewBtn) {
+          reviewBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-blue-200';
+          reviewBtn.disabled = false;
+          reviewBtn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Publicar Reseña y Reclamar +50 Puntos`;
+        }
+      }
+
+      // Renderizar Citas e Historial Técnico
+      renderClientAppointments();
+      renderClientTechnicalHistory();
+
+      lucide.createIcons();
+    }
+
+    function renderClientTechnicalHistory() {
+      const container = document.getElementById('client-history-list');
+      if (!container) return;
+
+      if (!state.loggedInClient) {
+        container.innerHTML = '<p class="text-xs text-stone-400">Inicia sesión con tu DNI para ver tu expediente técnico.</p>';
+        return;
+      }
+
+      const myRecords = state.technicalRecords.filter(r => r.clientId === state.loggedInClient.id);
+
+      if (myRecords.length === 0) {
+        container.innerHTML = `
+          <div class="luxury-card rounded-2xl p-8 text-center max-w-lg mx-auto border border-dashed border-stone-300">
+            <div class="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="palette" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-stone-900 mb-1">Sin historial de fórmulas previas</h4>
+            <p class="text-xs text-stone-500">En cuanto tu estilista aplique un color, balayage o tratamiento en el salón, las fórmulas exactas quedarán registradas en tu expediente vinculado a tu DNI ${state.loggedInClient.dni}.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = myRecords.map((rec, idx) => `
+        <div class="luxury-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-stone-100 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <span class="text-xs font-bold text-stone-900">${rec.techniqueUsed || 'Coloración & Tratamiento'}</span>
+            </div>
+            <span class="text-[11px] font-mono-code text-stone-500">📅 ${rec.date} · 💇‍♀️ ${rec.staffName}</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-stone-400 block mb-1">Fórmula Técnica Aplicada:</span>
+            <div class="p-2.5 bg-stone-50 rounded-xl border border-stone-200 font-mono-code text-xs text-stone-900 font-semibold">
+              🧪 ${rec.dyeFormula}
+            </div>
+          </div>
+          ${rec.exposureTimeMinutes > 0 ? `<p class="text-[11px] text-stone-500">⏱️ Tiempo de exposición: <strong class="text-stone-700">${rec.exposureTimeMinutes} minutos</strong></p>` : ''}
+          ${rec.observations ? `<p class="text-xs text-stone-600 italic bg-amber-50/40 p-2.5 rounded-xl border border-amber-100/60">"${rec.observations}"</p>` : ''}
+        </div>
+      `).join('');
+
+      lucide.createIcons();
     }
 
     // ========================================================================
@@ -1426,6 +1908,11 @@
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
       if (!text) return;
+
+      if (!state.loggedInClient) {
+        alert('Debes identificarte con tu DNI para conversar con tu asistente de citas personalizado.');
+        return;
+      }
 
       appendChatMessage('client', text);
       input.value = '';
@@ -1439,7 +1926,11 @@
         const res = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, clientId: 'cli-1' })
+          body: JSON.stringify({ 
+            message: text, 
+            clientId: state.loggedInClient.id,
+            clientDni: state.loggedInClient.dni
+          })
         });
         const data = await res.json();
 
@@ -1455,11 +1946,13 @@
           renderMasterAgenda();
           renderWorkerAgenda();
           renderBookingSlots(state.bookingCalendarStaffId);
+          renderClientTechnicalHistory();
+          renderAdminCrmTable();
         }, 700);
 
       } catch (err) {
         banner.classList.add('hidden');
-        appendChatMessage('ai', 'He reservado tu cita para este viernes 23 a las 17:30 con Elena Gómez. ¡Queda registrada con éxito!');
+        appendChatMessage('ai', `He reservado tu cita para este viernes 23 a las 17:30 con Elena Gómez para ${state.loggedInClient.name}. ¡Queda registrada con éxito!`);
       }
     }
 
@@ -1540,6 +2033,11 @@
     }
 
     async function submitManualBooking() {
+      if (!state.loggedInClient) {
+        alert('Por favor, identifícate con tu DNI en el portal para poder confirmar tu cita.');
+        return;
+      }
+
       if (!state.selectedServicesForBooking.length) {
         alert('Por favor, selecciona al menos un servicio.');
         return;
@@ -1552,7 +2050,8 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            clientId: 'cli-1',
+            clientId: state.loggedInClient.id,
+            clientDni: state.loggedInClient.dni,
             staffId: staffId,
             serviceIds: state.selectedServicesForBooking,
             startTime: `2026-10-23T${state.selectedSlots}:00.000Z`,
@@ -1566,6 +2065,7 @@
           renderMasterAgenda();
           renderWorkerAgenda();
           renderBookingSlots(state.bookingCalendarStaffId);
+          renderAdminCrmTable();
           switchClientTab('my-appointments');
         } else {
           const err = await res.json();
@@ -1580,9 +2080,10 @@
     // FIDELIZACIÓN QR & RESEÑAS GOOGLE
     // ========================================================================
     function renderClientQR() {
+      if (!state.loggedInClient) return;
       new QRious({
         element: document.getElementById('client-qr-canvas'),
-        value: 'https://tu-peluqueria.com/fidelizacion/' + (state.clients[0]?.qrHash || 'QR-HASH'),
+        value: 'https://tu-peluqueria.com/fidelizacion/' + (state.loggedInClient.qrCodeHash || ('QR-' + state.loggedInClient.dni + '-HASH')),
         size: 180,
         background: '#ffffff',
         foreground: '#1c1917'
@@ -1590,6 +2091,11 @@
     }
 
     async function simulateGoogleReviewVerification() {
+      if (!state.loggedInClient) {
+        alert('Debes identificarte con tu DNI.');
+        return;
+      }
+
       const btn = document.getElementById('btn-submit-google-review');
       btn.disabled = true;
       btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Verificando reseña con Google Business API...`;
@@ -1599,26 +2105,30 @@
         const res = await fetch('/api/loyalty/google-review', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clientId: 'cli-1' })
+          body: JSON.stringify({ clientId: state.loggedInClient.id })
         });
         const data = await res.json();
         if (res.ok) {
-          state.clients[0].points = data.newBalance;
-          state.clients[0].reviewDone = true;
-          document.getElementById('loyalty-balance-display').innerText = `${data.newBalance} pts`;
-          document.getElementById('client-points-badge').innerText = `${data.newBalance} pts (${(data.newBalance/100*5).toFixed(2)} € dto.)`;
-          document.getElementById('tpv-client-points-badge').innerText = `${data.newBalance} pts disp.`;
-          document.getElementById('review-status-badge').className = 'font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200';
-          document.getElementById('review-status-badge').innerText = '✅ Reseña verificada (+50 pts aplicados)';
-          btn.className = 'w-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed';
-          btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Bonificación Cobrada`;
+          state.loggedInClient.loyaltyPoints = data.newBalance;
+          state.loggedInClient.googleReviewVerified = true;
+
+          const cl = state.clients.find(c => c.id === state.loggedInClient.id);
+          if (cl) {
+            cl.loyaltyPoints = data.newBalance;
+            cl.googleReviewVerified = true;
+          }
+
+          renderClientSession();
+          renderAdminCrmTable();
           alert('¡Enhorabuena! Google Business Profile ha confirmado tu reseña de 5 estrellas. Se han añadido +50 puntos a tu cuenta.');
         } else {
           alert(data.error);
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="external-link" class="w-4 h-4"></i> Publicar Reseña y Reclamar +50 Puntos`;
         }
       } catch (e) {
-        state.clients[0].points += 50;
-        document.getElementById('loyalty-balance-display').innerText = `${state.clients[0].points} pts`;
+        state.loggedInClient.loyaltyPoints = (state.loggedInClient.loyaltyPoints || 0) + 50;
+        renderClientSession();
         alert('Reseña verificada y +50 puntos concedidos en local.');
       }
       lucide.createIcons();
@@ -1652,11 +2162,12 @@
     }
 
     async function reserveProduct(productId) {
+      const clientName = state.loggedInClient ? state.loggedInClient.name : 'Laura Martínez';
       try {
         const res = await fetch('/api/products/reserve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, quantity: 1, clientName: 'Laura Martínez' })
+          body: JSON.stringify({ productId, quantity: 1, clientName })
         });
         const data = await res.json();
         if (res.ok) {
@@ -1668,7 +2179,7 @@
           alert('Error: ' + data.error);
         }
       } catch (e) {
-        alert('Producto reservado para recoger en salón.');
+        alert('Producto reservado para recoger en salón a nombre de ' + clientName + '.');
       }
     }
 
@@ -1677,10 +2188,27 @@
     // ========================================================================
     function renderClientAppointments() {
       const container = document.getElementById('client-appointments-list');
-      const clientApts = state.appointments.filter(a => a.clientId === 'cli-1' || a.clientName.includes('Laura'));
+      if (!container) return;
+
+      if (!state.loggedInClient) {
+        container.innerHTML = '<p class="text-xs text-stone-400 p-2">Identifícate con tu DNI para ver tus citas.</p>';
+        return;
+      }
+
+      const c = state.loggedInClient;
+      const clientApts = state.appointments.filter(a => 
+        a.clientId === c.id || 
+        (a.clientDni && a.clientDni.toUpperCase() === c.dni.toUpperCase()) ||
+        (a.clientName && a.clientName.toLowerCase() === c.name.toLowerCase())
+      );
 
       if (!clientApts.length) {
-        container.innerHTML = '<p class="text-xs text-stone-400 p-2">No tienes citas activas programadas.</p>';
+        container.innerHTML = `
+          <div class="p-8 text-center bg-stone-50 rounded-2xl border border-dashed border-stone-300 col-span-2">
+            <p class="text-xs font-semibold text-stone-600 mb-1">No tienes citas activas programadas</p>
+            <p class="text-[11px] text-stone-400">Puedes reservar una cita con tu estilista preferida usando nuestro Agente IA o en el Calendario de huecos libres.</p>
+          </div>
+        `;
         return;
       }
 
@@ -1697,13 +2225,14 @@
           <div class="text-xs text-stone-600 space-y-1">
             <p>📅 <strong>Fecha:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</p>
             <p>💇‍♀️ <strong>Estilista:</strong> ${a.staffName}</p>
+            <p>🆔 <strong>DNI Clienta:</strong> <span class="font-mono-code font-bold">${a.clientDni || c.dni}</span></p>
             ${a.clientComments ? `<p class="italic text-stone-500">"${a.clientComments}"</p>` : ''}
           </div>
           <div class="border-t border-stone-100 pt-2 flex gap-2">
-            <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
+            <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
               <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 24h
             </button>
-            <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
+            <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
               <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 2h
             </button>
           </div>
@@ -1716,10 +2245,11 @@
       const apt = state.appointments.find(a => a.id === aptId);
       const timeStr = apt ? new Date(apt.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}) : '17:30';
       const body = document.getElementById('whatsapp-body');
+      const clientName = state.loggedInClient ? state.loggedInClient.name : (apt ? apt.clientName : 'Laura');
       
       if (type === '24h') {
         body.innerHTML = `
-          <p class="font-bold text-stone-900 mb-1">¡Hola Laura! 👋</p>
+          <p class="font-bold text-stone-900 mb-1">¡Hola ${clientName}! 👋</p>
           <p>Te recordamos tu cita de mañana a las <strong>${timeStr}</strong> en Peluquería Losan con <strong>${apt ? apt.staffName : 'Elena Gómez'}</strong>.</p>
           <p class="mt-2 text-stone-500">Servicios: ${apt ? apt.serviceNames : 'Tinte + Corte'}.</p>
           <div class="mt-3 p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-[11px] text-emerald-800">
@@ -1728,8 +2258,8 @@
         `;
       } else {
         body.innerHTML = `
-          <p class="font-bold text-stone-900 mb-1">¡Nos vemos en 2 horas! ⏰</p>
-          <p>Tu estilista te estará esperando en el salón a las <strong>${timeStr}</strong>. ¡Ya tenemos listo tu expediente de colorimetría!</p>
+          <p class="font-bold text-stone-900 mb-1">¡Nos vemos en 2 horas, ${clientName}! ⏰</p>
+          <p>Tu estilista te estará esperando en el salón a las <strong>${timeStr}</strong>. ¡Ya tenemos listo tu expediente de colorimetría con tu DNI!</p>
         `;
       }
       document.getElementById('whatsapp-modal').classList.remove('hidden');
@@ -2078,6 +2608,67 @@
         p.stock += 5;
         renderStockTable();
         renderShowcaseProducts();
+      }
+    }
+
+    // ========================================================================
+    // CRM: FICHA 360° CLIENTAS & DNI
+    // ========================================================================
+    function renderAdminCrmTable() {
+      const tbody = document.getElementById('crm-tbody');
+      if (!tbody) return;
+
+      const totalCountElem = document.getElementById('crm-total-count');
+      if (totalCountElem) {
+        totalCountElem.innerText = `${state.clients.length} Clientas Registradas`;
+      }
+
+      tbody.innerHTML = state.clients.map(c => {
+        const pts = c.loyaltyPoints !== undefined ? c.loyaltyPoints : (c.points || 0);
+        const dto = ((pts / 100) * 5.0).toFixed(2);
+        return `
+          <tr class="hover:bg-stone-50 transition">
+            <td class="p-3 font-mono-code font-bold text-stone-900">${c.dni || 'Sin DNI'}</td>
+            <td class="p-3 font-semibold text-stone-900">${c.name}</td>
+            <td class="p-3 text-stone-500 font-mono-code">${c.phone || 'N/A'}</td>
+            <td class="p-3 text-center">
+              <span class="inline-block bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full text-xs font-bold border border-amber-200">
+                ⭐ ${pts} pts (${dto} €)
+              </span>
+            </td>
+            <td class="p-3 text-xs text-stone-600 max-w-xs">
+              <span class="${c.allergies && !c.allergies.toLowerCase().includes('sin') ? 'text-rose-600 font-semibold' : 'text-stone-500'}">
+                ${c.allergies || 'Sin alergias'}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              ${c.googleReviewVerified 
+                ? '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200">✅ Verificada</span>' 
+                : '<span class="text-stone-400 text-[10px]">Pendiente</span>'
+              }
+            </td>
+            <td class="p-3 text-center space-x-1">
+              <button onclick="quickSelectClientForTpv('${c.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg text-xs font-semibold transition">
+                Cobrar TPV
+              </button>
+              <button onclick="quickLoginWithDni('${c.dni}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg text-xs font-semibold transition">
+                Ver como Clienta
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function quickSelectClientForTpv(clientId) {
+      state.selectedClientId = clientId;
+      switchPortal('admin');
+      switchAdminTab('pos-tpv');
+      const client = state.clients.find(c => c.id === clientId);
+      if (client) {
+        const pts = client.loyaltyPoints !== undefined ? client.loyaltyPoints : (client.points || 0);
+        document.getElementById('tpv-client-points-badge').innerText = `${pts} pts disp.`;
+        alert(`Clienta ${client.name} (DNI: ${client.dni}) seleccionada en el TPV.`);
       }
     }
   </script>

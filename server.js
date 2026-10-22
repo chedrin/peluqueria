@@ -90,6 +90,7 @@ const db = {
   clients: [
     {
       id: 'cli-1',
+      dni: '12345678Z',
       userId: 'usr-client-1',
       name: 'Laura Martínez',
       phone: '34655555555',
@@ -97,96 +98,104 @@ const db = {
       generalNotes: 'Prefiere tonos cobrizos sutiles. Suele pedir café con leche sin azúcar.',
       loyaltyPoints: 120,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-LAURA-77492-HASH',
+      qrCodeHash: 'QR-12345678Z-77492-HASH',
       marketingConsent: true,
     },
     {
       id: 'cli-2',
+      dni: '87654321X',
       userId: 'usr-client-2',
       name: 'Sofía Morales',
       phone: '34666666666',
-      allergies: 'Sin alergias conocidas',
+      allergies: 'Sin alergias conocidas. Cabello muy fino.',
       generalNotes: 'Cabello muy fino, corte en capas para aportar volumen. Cuero cabelludo normal.',
       loyaltyPoints: 50,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-SOFIA-88319-HASH',
+      qrCodeHash: 'QR-87654321X-88319-HASH',
       marketingConsent: true,
     },
     {
       id: 'cli-3',
+      dni: '45678912C',
       name: 'Carmen Sánchez',
       phone: '34677777777',
       allergies: 'Alergia al níquel (cuidado con tijeras/utensilios metálicos directos en cuero cabelludo)',
       generalNotes: 'Prefiere cortes despuntados y flequillo cortina.',
       loyaltyPoints: 75,
       googleReviewVerified: true,
-      qrCodeHash: 'QR-CARMEN-99214-HASH',
+      qrCodeHash: 'QR-45678912C-99214-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-4',
+      dni: '78912345M',
       name: 'Marta Domínguez',
       phone: '34688888888',
       allergies: 'Cuero cabelludo reactivo. Emplear champú calmante dermo-protector.',
       generalNotes: 'Pelo castaño con tendencia a oxidar a tonos anaranjados. Usar matiz violeta.',
       loyaltyPoints: 90,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-MARTA-11234-HASH',
+      qrCodeHash: 'QR-78912345M-11234-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-5',
+      dni: '32165498B',
       name: 'Beatriz Navarro',
       phone: '34699999999',
       allergies: 'Sin alergias conocidas',
       generalNotes: 'Le encanta el corte Bob simétrico bien pulido con plancha.',
       loyaltyPoints: 40,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-BEATRIZ-33421-HASH',
+      qrCodeHash: 'QR-32165498B-33421-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-6',
+      dni: '65498732L',
       name: 'Lucía Pardo',
       phone: '34600112233',
       allergies: 'Sin alergias',
       generalNotes: 'Clienta de peinados y brushing semanal.',
       loyaltyPoints: 110,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-LUCIA-55612-HASH',
+      qrCodeHash: 'QR-65498732L-55612-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-7',
+      dni: '98732165S',
       name: 'Clara Sanz',
       phone: '34622334455',
       allergies: 'Decoloraciones previas caseras. Cabello castigado y quebradizo en puntas.',
       generalNotes: 'Tratamiento Olaplex en cada visita. Prohibido decolorar puntas.',
       loyaltyPoints: 160,
       googleReviewVerified: true,
-      qrCodeHash: 'QR-CLARA-88712-HASH',
+      qrCodeHash: 'QR-98732165S-88712-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-8',
+      dni: '15975346A',
       name: 'Andrea Gil',
       phone: '34633445566',
       allergies: 'Sin alergias conocidas',
       generalNotes: 'Tinte 5.0 castaño natural para cobertura 100% canas.',
       loyaltyPoints: 65,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-ANDREA-44512-HASH',
+      qrCodeHash: 'QR-15975346A-44512-HASH',
       marketingConsent: true
     },
     {
       id: 'cli-9',
+      dni: '75315948P',
       name: 'Paula Ruiz',
       phone: '34644556677',
       allergies: 'Sin alergias',
       generalNotes: 'Mantenimiento de puntas y corte recto regular.',
       loyaltyPoints: 30,
       googleReviewVerified: false,
-      qrCodeHash: 'QR-PAULA-66781-HASH',
+      qrCodeHash: 'QR-75315948P-66781-HASH',
       marketingConsent: true
     }
   ],
@@ -272,6 +281,7 @@ const db = {
     {
       id: 'apt-elena-1',
       clientId: 'cli-1',
+      clientDni: '12345678Z',
       clientName: 'Laura Martínez',
       staffId: 'stf-1',
       staffName: 'Elena Gómez',
@@ -287,6 +297,7 @@ const db = {
     {
       id: 'apt-elena-2',
       clientId: 'cli-3',
+      clientDni: '45678912C',
       clientName: 'Carmen Sánchez',
       staffId: 'stf-1',
       staffName: 'Elena Gómez',
@@ -302,6 +313,7 @@ const db = {
     {
       id: 'apt-elena-3',
       clientId: 'cli-4',
+      clientDni: '78912345M',
       clientName: 'Marta Domínguez',
       staffId: 'stf-1',
       staffName: 'Elena Gómez',
@@ -321,6 +333,7 @@ const db = {
     {
       id: 'apt-raquel-1',
       clientId: 'cli-5',
+      clientDni: '32165498B',
       clientName: 'Beatriz Navarro',
       staffId: 'stf-2',
       staffName: 'Raquel Santos',
@@ -336,6 +349,7 @@ const db = {
     {
       id: 'apt-raquel-2',
       clientId: 'cli-2',
+      clientDni: '87654321X',
       clientName: 'Sofía Morales',
       staffId: 'stf-2',
       staffName: 'Raquel Santos',
@@ -351,6 +365,7 @@ const db = {
     {
       id: 'apt-raquel-3',
       clientId: 'cli-6',
+      clientDni: '65498732L',
       clientName: 'Lucía Pardo',
       staffId: 'stf-2',
       staffName: 'Raquel Santos',
@@ -370,6 +385,7 @@ const db = {
     {
       id: 'apt-carmen-1',
       clientId: 'cli-7',
+      clientDni: '98732165S',
       clientName: 'Clara Sanz',
       staffId: 'stf-3',
       staffName: 'Carmen Vidal',
@@ -385,6 +401,7 @@ const db = {
     {
       id: 'apt-carmen-2',
       clientId: 'cli-8',
+      clientDni: '15975346A',
       clientName: 'Andrea Gil',
       staffId: 'stf-3',
       staffName: 'Carmen Vidal',
@@ -400,6 +417,7 @@ const db = {
     {
       id: 'apt-carmen-3',
       clientId: 'cli-9',
+      clientDni: '75315948P',
       clientName: 'Paula Ruiz',
       staffId: 'stf-3',
       staffName: 'Carmen Vidal',
@@ -503,9 +521,9 @@ function hasOverlap(staffId, start, end, excludeAptId = null) {
 
 // 4. Crear Cita
 app.post('/api/appointments/book', (req, res) => {
-  const { clientId, staffId, serviceIds, startTime, clientComments } = req.body;
+  const { clientId, clientDni, staffId, serviceIds, startTime, clientComments } = req.body;
 
-  if (!clientId || !serviceIds || !serviceIds.length || !startTime) {
+  if ((!clientId && !clientDni) || !serviceIds || !serviceIds.length || !startTime) {
     return res.status(400).json({ error: 'Faltan parámetros obligatorios.' });
   }
 
@@ -531,11 +549,22 @@ app.post('/api/appointments/book', (req, res) => {
     }
   }
 
-  const client = db.clients.find(c => c.id === clientId) || { name: 'Clienta' };
+  let client = null;
+  if (clientDni) {
+    const cleanDni = clientDni.trim().toUpperCase().replace(/[\s-]/g, '');
+    client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  }
+  if (!client && clientId) {
+    client = db.clients.find(c => c.id === clientId);
+  }
+  if (!client) {
+    client = { id: clientId || 'cli-anon', name: 'Clienta', dni: clientDni || '' };
+  }
 
   const newAppointment = {
     id: 'apt-' + Date.now(),
-    clientId,
+    clientId: client.id,
+    clientDni: client.dni || '',
     clientName: client.name,
     staffId: targetStaff.id,
     staffName: targetStaff.name,
@@ -667,9 +696,105 @@ app.post('/api/staff/leave', (req, res) => {
   });
 });
 
-// 7. CLIENTES Y EXPEDIENTES TÉCNICOS
+// 7. CLIENTES Y EXPEDIENTES TÉCNICOS (DNI COMO IDENTIFICADOR FUNDAMENTAL)
 app.get('/api/clients', (req, res) => {
   res.json(db.clients);
+});
+
+// Autenticación / Acceso / Registro de clientas por DNI (ID Fundamental)
+app.post('/api/clients/auth', (req, res) => {
+  const { dni, name, phone, allergies, generalNotes } = req.body;
+  if (!dni || !dni.trim()) {
+    return res.status(400).json({ error: 'El DNI o NIE es obligatorio para acceder.' });
+  }
+
+  const cleanDni = dni.trim().toUpperCase().replace(/[\s-]/g, '');
+  let client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+
+  if (client) {
+    // Si viene información adicional para actualizar en base de datos
+    if (name && name.trim()) client.name = name.trim();
+    if (phone && phone.trim()) client.phone = phone.trim();
+    if (allergies !== undefined && allergies.trim()) client.allergies = allergies.trim();
+    if (generalNotes !== undefined && generalNotes.trim()) client.generalNotes = generalNotes.trim();
+
+    const appointments = db.appointments.filter(a => a.clientId === client.id || a.clientDni === cleanDni);
+    const technicalRecords = db.technicalRecords.filter(r => r.clientId === client.id);
+
+    return res.json({
+      success: true,
+      isNew: false,
+      message: `¡Bienvenida de nuevo, ${client.name}! Tu historial y puntos están listos.`,
+      client,
+      appointments,
+      technicalRecords
+    });
+  }
+
+  // Si no existe y no han enviado el nombre, indicar que se requiere completar datos
+  if (!name || !name.trim()) {
+    return res.status(404).json({
+      exists: false,
+      needsRegistration: true,
+      dni: cleanDni,
+      message: 'Este DNI no consta aún en la base de datos. Completa tu nombre y teléfono para registrarte y empezar tu historial (+20 puntos de regalo).'
+    });
+  }
+
+  // Registrar nueva clienta con su DNI como ID fundamental
+  const newId = 'cli-' + Date.now();
+  const newClient = {
+    id: newId,
+    dni: cleanDni,
+    name: name.trim(),
+    phone: phone ? phone.trim() : '',
+    allergies: allergies ? allergies.trim() : 'Sin alergias conocidas',
+    generalNotes: generalNotes ? generalNotes.trim() : 'Nueva clienta registrada con DNI',
+    loyaltyPoints: 20, // Bonificación de bienvenida (1,00 € dto.)
+    googleReviewVerified: false,
+    qrCodeHash: `QR-${cleanDni}-${Math.floor(10000 + Math.random() * 90000)}-HASH`,
+    marketingConsent: true,
+    createdAt: new Date().toISOString()
+  };
+
+  db.clients.push(newClient);
+
+  db.loyaltyTransactions.push({
+    id: 'loy-' + Date.now(),
+    clientId: newClient.id,
+    delta: 20,
+    newBalance: 20,
+    reason: 'WELCOME_BONUS',
+    date: new Date().toISOString()
+  });
+
+  res.status(201).json({
+    success: true,
+    isNew: true,
+    message: `¡Bienvenida a Peluquería Losan, ${newClient.name}! Tu ficha técnica ha sido creada con tu DNI ${cleanDni} y has recibido 20 puntos de bienvenida.`,
+    client: newClient,
+    appointments: [],
+    technicalRecords: []
+  });
+});
+
+// Búsqueda directa por DNI
+app.get('/api/clients/by-dni/:dni', (req, res) => {
+  const cleanDni = req.params.dni.trim().toUpperCase().replace(/[\s-]/g, '');
+  const client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  if (!client) {
+    return res.status(404).json({ exists: false, error: 'Clienta no encontrada con este DNI.' });
+  }
+
+  const appointments = db.appointments.filter(a => a.clientId === client.id || a.clientDni === cleanDni);
+  const technicalRecords = db.technicalRecords.filter(r => r.clientId === client.id);
+
+  res.json({
+    exists: true,
+    client,
+    appointments,
+    technicalRecords
+  });
 });
 
 app.get('/api/clients/:id', (req, res) => {
@@ -851,9 +976,20 @@ app.post('/api/products/reserve', (req, res) => {
 
 // 11. AGENTE IA DE CITAS (CON SIMULADOR Y RESOLUCIÓN INTELIGENTE DE TOOLS)
 app.post('/api/ai/chat', (req, res) => {
-  const { message, clientId = 'cli-1' } = req.body;
+  const { message, clientId, clientDni } = req.body;
   const text = (message || '').toLowerCase();
-  const client = db.clients.find(c => c.id === clientId) || db.clients[0];
+
+  let client = null;
+  if (clientDni) {
+    const cleanDni = clientDni.trim().toUpperCase().replace(/[\s-]/g, '');
+    client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  }
+  if (!client && clientId) {
+    client = db.clients.find(c => c.id === clientId);
+  }
+  if (!client) {
+    client = db.clients[0];
+  }
 
   let toolCalled = null;
   let reply = '';
@@ -873,13 +1009,14 @@ app.post('/api/ai/chat', (req, res) => {
       `• **17:30** — Disponible ✅\n` +
       `• **18:30** — Disponible ✅\n` +
       `*(A las 10:00 y a las 16:00 tiene citas reservadas).* \n\n` +
-      `¿Te reservo a las 17:30?`;
+      `¿Te reservo a las 17:30 para ${client.name} (DNI: ${client.dni || 'Registrado'})?`;
   } else if (text.includes('17:30') || text.includes('si') || text.includes('sí') || text.includes('reserva') || text.includes('confirma') || text.includes('perfecto')) {
-    toolCalled = 'book_appointment(client_id="cli-1", staff_id="stf-1", start_time="2026-10-23T17:30:00Z")';
+    toolCalled = `book_appointment(client_id="${client.id}", dni="${client.dni || ''}", staff_id="stf-1", start_time="2026-10-23T17:30:00Z")`;
     
     const newApt = {
       id: 'apt-' + Date.now(),
       clientId: client.id,
+      clientDni: client.dni || '',
       clientName: client.name,
       staffId: 'stf-1',
       staffName: 'Elena Gómez',
@@ -888,19 +1025,20 @@ app.post('/api/ai/chat', (req, res) => {
       startTime: '2026-10-23T17:30:00.000Z',
       endTime: '2026-10-23T19:00:00.000Z',
       status: 'confirmed',
-      clientComments: 'Reservada automáticamente por el Asistente IA de Citas.',
+      clientComments: 'Reservada automáticamente por el Asistente IA de Citas con DNI ' + (client.dni || 'verificado') + '.',
       reminderSent24h: false,
       reminderSent2h: false,
       createdAt: new Date().toISOString()
     };
     db.appointments.push(newApt);
 
-    reply = `🎉 **¡Cita confirmada con éxito!**\n\n` +
+    reply = `🎉 **¡Cita confirmada con éxito, ${client.name}!**\n\n` +
       `📅 **Fecha**: Viernes, 23 de Octubre de 2026\n` +
       `⏰ **Hora**: 17:30 a 19:00\n` +
       `💇‍♀️ **Estilista**: Elena Gómez\n` +
+      `🆔 **DNI Asociado**: ${client.dni || 'Sin DNI'}\n` +
       `✨ **Servicios**: Corte y Estilismo + Coloración Completa\n\n` +
-      `Hemos programado tus recordatorios por WhatsApp para 24h y 2h antes de la cita. ¡Te esperamos en el salón!`;
+      `Hemos programado tus recordatorios por WhatsApp para 24h y 2h antes de la cita. ¡Queda vinculada directamente a tu expediente técnico de clienta!`;
   } else {
     reply = `¡Hola, ${client.name}! Soy tu asistente personal de citas de Peluquería Losan. Puedes pedirme ver los servicios, consultar huecos libres con Elena, Raquel o Carmen, o decirme qué necesitas y te buscaré la mejor opción. ¿En qué te ayudo hoy?`;
   }
