@@ -71,6 +71,9 @@ CREATE TABLE IF NOT EXISTS salon_settings (
     address TEXT DEFAULT 'Calle Velázquez 42, 28001 Madrid',
     schedule_text TEXT DEFAULT 'Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00',
     default_vat_rate NUMERIC(5,2) DEFAULT 21.00,
+    loyalty_stamps_required INT DEFAULT 8,
+    loyalty_stamp_reward TEXT DEFAULT 'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
+    salon_qr_secret VARCHAR(100) DEFAULT 'LOSAN-STAMP-QR-2026',
     currency VARCHAR(10) DEFAULT 'EUR',
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -101,6 +104,8 @@ CREATE TABLE IF NOT EXISTS clients (
     hair_type VARCHAR(100) DEFAULT 'Normal',
     general_notes TEXT,
     loyalty_points INT DEFAULT 0,
+    loyalty_stamps INT DEFAULT 0,
+    completed_cards_count INT DEFAULT 0,
     google_review_verified BOOLEAN DEFAULT FALSE,
     qr_code_hash VARCHAR(64) UNIQUE,
     marketing_consent BOOLEAN DEFAULT FALSE,
@@ -279,6 +284,20 @@ CREATE TABLE IF NOT EXISTS service_packages (
     price_paid NUMERIC(10, 2) NOT NULL,
     expires_at TIMESTAMPTZ,
     is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2.15 Historial de Sellados de Fidelización (Sellado con QR del Salón / TPV)
+CREATE TABLE IF NOT EXISTS stamp_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    stamp_number INT NOT NULL,
+    total_stamps_target INT NOT NULL DEFAULT 8,
+    stamped_at TIMESTAMPTZ DEFAULT NOW(),
+    method VARCHAR(50) NOT NULL DEFAULT 'QR_SALON_SCAN', -- 'QR_SALON_SCAN' o 'TPV_MANUAL_STAMP'
+    staff_id UUID REFERENCES staff(id) ON DELETE SET NULL,
+    staff_name VARCHAR(100) DEFAULT 'Equipo Losan',
+    reward_unlocked TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -562,6 +581,13 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loyalty_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gift_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stamp_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Clients read own stamp history" ON stamp_history FOR SELECT USING (
+    client_id IN (SELECT id FROM clients WHERE dni = current_setting('request.jwt.claim.dni', true)) OR
+    auth.role() = 'service_role' OR auth.role() = 'anon'
+);
+CREATE POLICY "Admin full access stamp history" ON stamp_history FOR ALL USING (true);
 
 -- 5.1 Políticas Públicas / Acceso Anónimo (Portal Clientas - Solo Lectura General)
 CREATE POLICY "Public read salon settings" ON salon_settings FOR SELECT USING (true);
@@ -698,7 +724,14 @@ VALUES (
     'card'
 ) ON CONFLICT (series, invoice_number) DO NOTHING;
 
--- 6.10 Tarjetas Regalo y Bonos
+-- 6.10 Historial Semilla de Sellados
+INSERT INTO stamp_history (client_id, stamp_number, total_stamps_target, stamped_at, method, staff_name, reward_unlocked) VALUES
+('c0000000-0000-0000-0000-000000000001', 1, 8, '2026-09-15 11:00:00+00', 'QR_SALON_SCAN', 'Elena Gómez', null),
+('c0000000-0000-0000-0000-000000000001', 2, 8, '2026-09-28 16:30:00+00', 'QR_SALON_SCAN', 'Elena Gómez', null),
+('c0000000-0000-0000-0000-000000000001', 3, 8, '2026-10-12 10:15:00+00', 'TPV_MANUAL_STAMP', 'Raquel Santos', null)
+ON CONFLICT DO NOTHING;
+
+-- 6.11 Tarjetas Regalo y Bonos
 INSERT INTO gift_cards (code, purchased_by_client_id, recipient_name, initial_balance, current_balance, expires_at)
 VALUES (
     'REGALO-LOSAN-50',

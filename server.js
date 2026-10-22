@@ -126,6 +126,9 @@ const db = {
       allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)',
       generalNotes: 'Prefiere tonos cobrizos sutiles. Suele pedir café con leche sin azúcar.',
       loyaltyPoints: 120,
+      stampsCount: 3,
+      completedCardsCount: 0,
+      activeRewards: [],
       googleReviewVerified: false,
       qrCodeHash: 'QR-12345678Z-77492-HASH',
       marketingConsent: true,
@@ -139,6 +142,9 @@ const db = {
       allergies: 'Sin alergias conocidas. Cabello muy fino.',
       generalNotes: 'Cabello muy fino, corte en capas para aportar volumen. Cuero cabelludo normal.',
       loyaltyPoints: 50,
+      stampsCount: 1,
+      completedCardsCount: 0,
+      activeRewards: [],
       googleReviewVerified: false,
       qrCodeHash: 'QR-87654321X-88319-HASH',
       marketingConsent: true,
@@ -463,6 +469,50 @@ const db = {
   invoices: [],
   appointmentAuditLogs: [],
   loyaltyTransactions: [],
+  loyaltyConfig: {
+    totalStamps: 8,
+    rewardDescription: 'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
+    salonQrSecret: 'LOSAN-STAMP-QR-2026',
+    updatedAt: new Date().toISOString()
+  },
+  stampHistory: [
+    {
+      id: 'stamp-101',
+      clientId: 'cli-1',
+      clientDni: '12345678Z',
+      clientName: 'Laura Martínez',
+      stampNumber: 1,
+      totalStampsTarget: 8,
+      timestamp: '2026-09-15T11:00:00.000Z',
+      method: 'QR_SALON_SCAN',
+      staffName: 'Elena Gómez',
+      rewardUnlocked: null
+    },
+    {
+      id: 'stamp-102',
+      clientId: 'cli-1',
+      clientDni: '12345678Z',
+      clientName: 'Laura Martínez',
+      stampNumber: 2,
+      totalStampsTarget: 8,
+      timestamp: '2026-09-28T16:30:00.000Z',
+      method: 'QR_SALON_SCAN',
+      staffName: 'Elena Gómez',
+      rewardUnlocked: null
+    },
+    {
+      id: 'stamp-103',
+      clientId: 'cli-1',
+      clientDni: '12345678Z',
+      clientName: 'Laura Martínez',
+      stampNumber: 3,
+      totalStampsTarget: 8,
+      timestamp: '2026-10-12T10:15:00.000Z',
+      method: 'TPV_MANUAL_STAMP',
+      staffName: 'Raquel Santos',
+      rewardUnlocked: null
+    }
+  ],
 
   // --------------------------------------------------------------------------
   // BONOS DE SESIONES Y PACKS DE SERVICIOS
@@ -1403,6 +1453,190 @@ app.post('/api/technical-records', (req, res) => {
 });
 
 // 8. FIDELIZACIÓN: VALIDAR RESEÑA GOOGLE BUSINESS
+
+// ============================================================================
+// 8B. TARJETA DE FIDELIZACIÓN POR SELLOS & SELLADO CON QR EN SALÓN
+// ============================================================================
+
+// Obtener configuración de sellos y QR oficial del salón
+app.get('/api/loyalty/config', (req, res) => {
+  res.json(db.loyaltyConfig);
+});
+
+// Actualizar configuración de sellos desde administración
+app.put('/api/loyalty/config', (req, res) => {
+  const { totalStamps, rewardDescription, salonQrSecret } = req.body;
+  
+  if (totalStamps && (!Number.isInteger(Number(totalStamps)) || Number(totalStamps) < 2)) {
+    return res.status(400).json({ error: 'El número total de sellos debe ser un entero mayor o igual a 2.' });
+  }
+
+  if (totalStamps) db.loyaltyConfig.totalStamps = parseInt(totalStamps, 10);
+  if (rewardDescription && rewardDescription.trim()) db.loyaltyConfig.rewardDescription = rewardDescription.trim();
+  if (salonQrSecret && salonQrSecret.trim()) db.loyaltyConfig.salonQrSecret = salonQrSecret.trim();
+  db.loyaltyConfig.updatedAt = new Date().toISOString();
+
+  res.json({
+    success: true,
+    message: 'Configuración de la tarjeta de fidelización actualizada correctamente.',
+    config: db.loyaltyConfig
+  });
+});
+
+// Obtener estado de la tarjeta de sellos e histórico de una clienta
+app.get('/api/loyalty/card/:idOrDni', (req, res) => {
+  const param = req.params.idOrDni.trim().toUpperCase();
+  const client = db.clients.find(c => 
+    c.id === req.params.idOrDni || 
+    (c.dni && c.dni.toUpperCase() === param)
+  );
+
+  if (!client) {
+    return res.status(404).json({ error: 'Clienta no encontrada.' });
+  }
+
+  const clientHistory = db.stampHistory.filter(s => 
+    s.clientId === client.id || 
+    (s.clientDni && s.clientDni.toUpperCase() === client.dni.toUpperCase())
+  );
+
+  res.json({
+    client: {
+      id: client.id,
+      name: client.name,
+      dni: client.dni,
+      stampsCount: client.stampsCount || 0,
+      completedCardsCount: client.completedCardsCount || 0,
+      activeRewards: client.activeRewards || [],
+      loyaltyPoints: client.loyaltyPoints || 0
+    },
+    config: db.loyaltyConfig,
+    history: clientHistory
+  });
+});
+
+// Sellar tarjeta de fidelización mediante escaneo de QR en salón o TPV
+app.post('/api/loyalty/stamp', (req, res) => {
+  const { clientId, clientDni, qrSecret, method = 'QR_SALON_SCAN', staffId, staffName } = req.body;
+
+  let client = null;
+  if (clientId) client = db.clients.find(c => c.id === clientId);
+  if (!client && clientDni) {
+    const cleanDni = clientDni.trim().toUpperCase();
+    client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  }
+
+  if (!client) {
+    return res.status(404).json({ error: 'Clienta no encontrada para sellar tarjeta.' });
+  }
+
+  // Si el método es escaneo de QR en salón, validar el token secreto del QR
+  if (method === 'QR_SALON_SCAN') {
+    const inputSecret = (qrSecret || '').trim();
+    const validSecret = db.loyaltyConfig.salonQrSecret;
+    // Aceptar coincidencia exacta o formato QR salón
+    if (inputSecret && inputSecret !== validSecret && !inputSecret.includes(validSecret)) {
+      return res.status(400).json({ error: 'Código QR no reconocido. Debes escanear el QR oficial ubicado en el mostrador del salón.' });
+    }
+  }
+
+  const currentStamps = client.stampsCount || 0;
+  const targetStamps = db.loyaltyConfig.totalStamps || 8;
+  const newStamps = currentStamps + 1;
+
+  let cardCompleted = false;
+  let rewardUnlocked = null;
+
+  if (newStamps >= targetStamps) {
+    // Tarjeta completada con éxito
+    cardCompleted = true;
+    rewardUnlocked = db.loyaltyConfig.rewardDescription;
+    client.stampsCount = 0; // Se reinicia para la siguiente ronda de sellos
+    client.completedCardsCount = (client.completedCardsCount || 0) + 1;
+    client.activeRewards = client.activeRewards || [];
+    client.activeRewards.push({
+      id: 'rew-' + Date.now(),
+      reward: rewardUnlocked,
+      unlockedAt: new Date().toISOString(),
+      redeemed: false
+    });
+  } else {
+    client.stampsCount = newStamps;
+  }
+
+  // Registrar en el histórico de sellados
+  const stampEntry = {
+    id: 'stamp-' + Date.now(),
+    clientId: client.id,
+    clientDni: client.dni,
+    clientName: client.name,
+    stampNumber: cardCompleted ? targetStamps : newStamps,
+    totalStampsTarget: targetStamps,
+    timestamp: new Date().toISOString(),
+    method: method,
+    staffName: staffName || 'Equipo Losan',
+    rewardUnlocked: cardCompleted ? rewardUnlocked : null
+  };
+
+  db.stampHistory.unshift(stampEntry);
+
+  res.json({
+    success: true,
+    message: cardCompleted 
+      ? `🎉 ¡ENHORABUENA! Has completado tu tarjeta de ${targetStamps} sellos. Has ganado: ${rewardUnlocked}.`
+      : `✨ ¡Visita sellada con éxito! Llevas ${client.stampsCount} de ${targetStamps} sellos.`,
+    stampsCount: client.stampsCount,
+    totalStamps: targetStamps,
+    completedCardsCount: client.completedCardsCount || 0,
+    cardCompleted,
+    rewardUnlocked,
+    activeRewards: client.activeRewards || [],
+    entry: stampEntry
+  });
+});
+
+// Obtener histórico global de sellados (para panel de administración)
+app.get('/api/loyalty/history', (req, res) => {
+  const { clientId, dni } = req.query;
+  let list = db.stampHistory;
+
+  if (clientId) {
+    list = list.filter(s => s.clientId === clientId);
+  } else if (dni) {
+    const cleanDni = dni.trim().toUpperCase();
+    list = list.filter(s => s.clientDni && s.clientDni.toUpperCase() === cleanDni);
+  }
+
+  res.json({
+    total: list.length,
+    config: db.loyaltyConfig,
+    history: list
+  });
+});
+
+// Canjear una recompensa ganada
+app.post('/api/loyalty/redeem', (req, res) => {
+  const { clientId, rewardId } = req.body;
+  const client = db.clients.find(c => c.id === clientId);
+  if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
+
+  const rew = (client.activeRewards || []).find(r => r.id === rewardId);
+  if (!rew) return res.status(404).json({ error: 'Recompensa no encontrada.' });
+
+  if (rew.redeemed) {
+    return res.status(400).json({ error: 'Esta recompensa ya fue canjeada previamente.' });
+  }
+
+  rew.redeemed = true;
+  rew.redeemedAt = new Date().toISOString();
+
+  res.json({
+    success: true,
+    message: `Recompensa "${rew.reward}" canjeada con éxito en el salón.`,
+    activeRewards: client.activeRewards
+  });
+});
+
 app.post('/api/loyalty/google-review', (req, res) => {
   const { clientId } = req.body;
   const client = db.clients.find(c => c.id === clientId);
