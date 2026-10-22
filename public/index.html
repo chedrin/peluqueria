@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peluquería & Estilismo Losan — Sistema Integral</title>
+  <title>Peluquería & Estilismo Losan — Gestión Integral</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -11,55 +11,87 @@
   <!-- QRious QR Code Generator CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FBFBFA;
+      color: #1C1917;
+    }
+    
+    .font-serif-luxury {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    
+    .font-mono-code { 
+      font-family: 'JetBrains Mono', monospace; 
+    }
+    
     .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #F5F5F4; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
+
+    /* Efectos de relieve suave */
+    .luxury-card {
+      background: #FFFFFF;
+      border: 1px solid #E7E5E4;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    }
+    
+    .luxury-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased selection:bg-rose-100 selection:text-rose-900">
 
   <!-- ========================================================================= -->
-  <!-- BARRA SUPERIOR DE CONTROL RBAC (SELECTOR DE PORTALES) -->
+  <!-- BARRA SUPERIOR DE CONTROL RBAC (SELECTOR DE PORTALES - ESTILO CLARO) -->
   <!-- ========================================================================= -->
-  <header class="bg-slate-950/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+  <header class="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50 px-4 py-3 shadow-xs">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      
+      <!-- Marca & Estado Fiscal -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 via-rose-500 to-amber-400 flex items-center justify-center shadow-lg shadow-rose-500/20">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-rose-400 to-amber-300 flex items-center justify-center shadow-md shadow-rose-200">
           <i data-lucide="scissors" class="w-5 h-5 text-white"></i>
         </div>
         <div>
-          <h1 class="text-base font-bold text-white tracking-wide flex items-center gap-2">
-            Peluquería Losan
-            <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-              Veri*Factu AEAT Activo
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-stone-900 tracking-tight font-serif-luxury text-lg">
+              Peluquería Losan
+            </h1>
+            <span class="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full shadow-2xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Veri*Factu AEAT
             </span>
-          </h1>
-          <p class="text-xs text-slate-400">Sistema Integral RBAC & Motor Fiscal Español (Ley 11/2021)</p>
+          </div>
+          <p class="text-xs text-stone-500">Gestión Integral RBAC & Sistema Fiscal Ley 11/2021</p>
         </div>
       </div>
 
-      <!-- Selector de Rol / Portal -->
-      <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 shadow-inner">
-        <button id="btn-portal-client" onclick="switchPortal('client')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-rose-600 text-white shadow">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+      <!-- Selector de Rol / Portal (Pills Modernos en Contraste) -->
+      <div class="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 shadow-inner">
+        <button id="btn-portal-client" onclick="switchPortal('client')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-stone-900 shadow-sm border border-stone-200/60">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-500"></i>
           <span>1. Portal Clientas</span>
         </button>
-        <button id="btn-portal-staff" onclick="switchPortal('staff')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <button id="btn-portal-staff" onclick="switchPortal('staff')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-purple-500"></i>
           <span>2. Trabajadoras</span>
         </button>
-        <button id="btn-portal-admin" onclick="switchPortal('admin')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
-          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+        <button id="btn-portal-admin" onclick="switchPortal('admin')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all">
+          <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-500"></i>
           <span>3. Administración / TPV</span>
         </button>
       </div>
+
     </div>
   </header>
 
   <!-- CONTENEDOR PRINCIPAL -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8">
 
     <!-- ======================================================================= -->
     <!-- PORTAL 1: PORTAL CLIENTAS (PWA / MOBILE FIRST) -->
@@ -67,105 +99,111 @@
     <div id="portal-client" class="space-y-6">
       
       <!-- Sub-navegación Portal Clientas -->
-      <div class="flex border-b border-slate-800 overflow-x-auto scrollbar-thin gap-2 pb-2">
-        <button onclick="switchClientTab('ai-chat')" id="tab-c-ai-chat" class="client-tab active flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          <i data-lucide="bot" class="w-4 h-4"></i> Agente IA de Citas
+      <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
+        <button onclick="switchClientTab('ai-chat')" id="tab-c-ai-chat" class="client-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+          <i data-lucide="bot" class="w-4 h-4 text-rose-500"></i> Agente IA de Citas
         </button>
-        <button onclick="switchClientTab('calendar')" id="tab-c-calendar" class="client-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="calendar" class="w-4 h-4"></i> Calendario & Huecos Libres
+        <button onclick="switchClientTab('calendar')" id="tab-c-calendar" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="calendar" class="w-4 h-4 text-stone-500"></i> Calendario & Huecos Libres
         </button>
-        <button onclick="switchClientTab('loyalty')" id="tab-c-loyalty" class="client-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="qr-code" class="w-4 h-4"></i> Fidelización QR & Reseñas Google
+        <button onclick="switchClientTab('loyalty')" id="tab-c-loyalty" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="qr-code" class="w-4 h-4 text-stone-500"></i> Fidelización QR & Reseñas Google
         </button>
-        <button onclick="switchClientTab('showcase')" id="tab-c-showcase" class="client-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Tienda Escaparate
+        <button onclick="switchClientTab('showcase')" id="tab-c-showcase" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-stone-500"></i> Tienda Escaparate
         </button>
-        <button onclick="switchClientTab('my-appointments')" id="tab-c-my-appointments" class="client-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="clock" class="w-4 h-4"></i> Mis Citas & WhatsApp
+        <button onclick="switchClientTab('my-appointments')" id="tab-c-my-appointments" class="client-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="clock" class="w-4 h-4 text-stone-500"></i> Mis Citas & WhatsApp
         </button>
       </div>
 
       <!-- VISTA 1A: CHAT AGENTE IA -->
       <div id="cview-ai-chat" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col h-[580px] shadow-2xl overflow-hidden">
-          <div class="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+        <div class="lg:col-span-2 luxury-card rounded-2xl flex flex-col h-[600px] overflow-hidden">
+          
+          <!-- Encabezado del Chat -->
+          <div class="p-4 border-b border-stone-200 bg-stone-50/70 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-sm">
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-white">Asistente Virtual de Citas</h3>
-                <span class="text-xs text-emerald-400 flex items-center gap-1">
+                <h3 class="text-sm font-bold text-stone-900">Asistente Virtual de Citas</h3>
+                <span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Conectado con Gemini 2.5 Flash & Function Calling
+                  Gemini 2.5 Flash con Function Calling en directo
                 </span>
               </div>
             </div>
-            <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">Clienta: Laura Martínez</span>
+            <span class="text-xs bg-stone-100 text-stone-600 px-3 py-1 rounded-full border border-stone-200 font-medium">
+              Clienta: Laura Martínez
+            </span>
           </div>
 
           <!-- Mensajes del Chat -->
-          <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin bg-slate-950/60">
+          <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 scrollbar-thin bg-stone-50/40">
             <!-- Mensaje Inicial -->
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center flex-shrink-0 text-xs">IA</div>
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-3.5 max-w-[85%] text-sm text-slate-200">
+              <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                IA
+              </div>
+              <div class="bg-white border border-stone-200 rounded-2xl rounded-tl-xs p-4 max-w-[85%] text-sm text-stone-800 shadow-xs leading-relaxed">
                 ¡Hola Laura! Soy tu asistente de Peluquería Losan. Consulta disponibilidad en tiempo real, reserva servicios como corte, mechas balayage o tinte, o dime qué día te gustaría venir. ¿En qué te ayudo hoy?
               </div>
             </div>
           </div>
 
           <!-- Tool Call Banner Indicador -->
-          <div id="tool-call-banner" class="hidden px-4 py-2 bg-indigo-950/40 border-t border-indigo-900/40 text-xs text-indigo-300 font-mono-code flex items-center gap-2">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-400 animate-spin"></i>
+          <div id="tool-call-banner" class="hidden px-4 py-2 bg-indigo-50 border-t border-indigo-100 text-xs text-indigo-700 font-mono-code flex items-center gap-2">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-500 animate-spin"></i>
             <span id="tool-call-name">Ejecutando tool calling...</span>
           </div>
 
-          <!-- Input Chat -->
-          <form id="chat-form" onsubmit="sendChatMessage(event)" class="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
-            <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes por la tarde con Elena..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
-            <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition">
+          <!-- Formulario de Entrada del Chat -->
+          <form id="chat-form" onsubmit="sendChatMessage(event)" class="p-3 bg-white border-t border-stone-200 flex gap-2">
+            <input type="text" id="chat-input" placeholder="Ej: Quiero teñirme y cortar el viernes por la tarde con Elena..." class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
+            <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition shadow-sm shadow-rose-200">
               <span>Enviar</span>
               <i data-lucide="send" class="w-4 h-4"></i>
             </button>
           </form>
         </div>
 
-        <!-- Panel de Sugerencias Rápidas y Catálogo -->
+        <!-- Panel Lateral: Atajos & Ficha Personal -->
         <div class="space-y-4">
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i> Atajos de prueba para el Agente
+          <div class="luxury-card rounded-2xl p-5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Sugerencias Rápidas para el Chat
             </h4>
             <div class="space-y-2">
-              <button onclick="presetChat('Quiero ver los precios y servicios disponibles')" class="w-full text-left text-xs bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-slate-300 transition">
+              <button onclick="presetChat('Quiero ver los precios y servicios disponibles')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
                 📋 "Quiero ver los precios y servicios disponibles"
               </button>
-              <button onclick="presetChat('¿Qué huecos libres tiene Elena para tinte y corte este viernes?')" class="w-full text-left text-xs bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-slate-300 transition">
+              <button onclick="presetChat('¿Qué huecos libres tiene Elena para tinte y corte este viernes?')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
                 🕒 "¿Qué huecos tiene Elena el viernes para tinte y corte?"
               </button>
-              <button onclick="presetChat('Confírmame la cita con Elena a las 17:30')" class="w-full text-left text-xs bg-slate-900 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-xl text-slate-300 transition">
+              <button onclick="presetChat('Confírmame la cita con Elena a las 17:30')" class="w-full text-left text-xs bg-stone-50 hover:bg-stone-100 border border-stone-200 p-3 rounded-xl text-stone-700 font-medium transition hover:border-stone-300">
                 ✅ "Confírmame la cita con Elena a las 17:30"
               </button>
             </div>
           </div>
 
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i> Tu Perfil en Salón (Ficha 360°)
+          <div class="luxury-card rounded-2xl p-5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i> Tu Ficha Personal en Salón
             </h4>
-            <div class="text-xs space-y-2 text-slate-300">
-              <div class="flex justify-between border-b border-slate-800 pb-1.5">
-                <span class="text-slate-500">Puntos de fidelización:</span>
-                <span class="font-bold text-amber-400" id="client-points-badge">120 pts (6,00 € dto.)</span>
+            <div class="text-xs space-y-2.5 text-stone-700">
+              <div class="flex justify-between border-b border-stone-100 pb-2">
+                <span class="text-stone-500">Puntos de fidelización:</span>
+                <span class="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200" id="client-points-badge">120 pts (6,00 € dto.)</span>
               </div>
-              <div class="flex justify-between border-b border-slate-800 pb-1.5">
-                <span class="text-slate-500">Alergias registradas:</span>
-                <span class="text-rose-400 font-medium text-right">Sensibilidad al amoniaco</span>
+              <div class="flex justify-between border-b border-stone-100 pb-2">
+                <span class="text-stone-500">Alergias registradas:</span>
+                <span class="text-rose-600 font-semibold text-right">Sensibilidad al amoniaco</span>
               </div>
-              <div class="flex justify-between pb-1.5">
-                <span class="text-slate-500">Última fórmula técnica:</span>
-                <span class="text-slate-300 font-mono-code text-right">6.1 (30g) + 7.0 (15g)</span>
+              <div class="flex justify-between pb-1">
+                <span class="text-stone-500">Última fórmula técnica:</span>
+                <span class="text-stone-800 font-mono-code text-right font-medium">6.1 (30g) + 7.0 (15g)</span>
               </div>
             </div>
           </div>
@@ -174,15 +212,22 @@
 
       <!-- VISTA 1B: CALENDARIO INTERACTIVO & RESERVA DIRECTA -->
       <div id="cview-calendar" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-6">
-          <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
-            <span>Disponibilidad en Tiempo Real</span>
-            <span class="text-xs text-slate-400 font-normal">Viernes, 23 de Octubre de 2026</span>
-          </h3>
+        <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-5 border-b border-stone-100 pb-3">
+            <div>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Disponibilidad en Tiempo Real</h3>
+              <p class="text-xs text-stone-500">Selecciona franja y servicios para consultar el cuadrante exacto</p>
+            </div>
+            <span class="text-xs bg-stone-100 text-stone-700 font-semibold px-3 py-1 rounded-full border border-stone-200">
+              Viernes, 23 de Octubre de 2026
+            </span>
+          </div>
 
           <!-- Grid de Huecos Horarios -->
           <div class="mb-6">
-            <label class="block text-xs font-medium text-slate-400 mb-2">Selecciona Franja Horaria (Huecos con Elena Gómez):</label>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5">
+              Franja Horaria Disponible (Huecos con Elena Gómez):
+            </label>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5" id="slots-grid">
               <!-- Renderizado dinámico -->
             </div>
@@ -190,31 +235,31 @@
 
           <!-- Selección de Servicios -->
           <div class="space-y-3">
-            <label class="block text-xs font-medium text-slate-400">Servicios Deseados:</label>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500">Servicios a Realizar:</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="services-checklist">
               <!-- Renderizado dinámico -->
             </div>
           </div>
 
-          <!-- Botón de Confirmación -->
-          <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+          <!-- Resumen y Confirmación -->
+          <div class="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between">
             <div>
-              <span class="text-xs text-slate-400 block">Total Estimado con IVA (21%):</span>
-              <span class="text-lg font-bold text-white" id="booking-total-price">0,00 €</span>
+              <span class="text-xs text-stone-500 block">Total Estimado con IVA (21%):</span>
+              <span class="text-xl font-bold text-stone-900" id="booking-total-price">0,00 €</span>
             </div>
-            <button onclick="submitManualBooking()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2">
+            <button onclick="submitManualBooking()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-sm shadow-rose-200">
               <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Cita
             </button>
           </div>
         </div>
 
-        <!-- Resumen de Cita -->
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h4 class="text-sm font-bold text-white">Parámetros de Reserva</h4>
-          <div class="space-y-3 text-xs text-slate-300">
+        <!-- Parámetros de Reserva -->
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Parámetros de Reserva</h4>
+          <div class="space-y-3.5 text-xs text-stone-700">
             <div>
-              <span class="text-slate-500 block">Estilista Asignada:</span>
-              <select id="select-booking-staff" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-white">
+              <span class="text-stone-500 font-medium block">Estilista Preferente:</span>
+              <select id="select-booking-staff" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-medium focus:outline-none focus:border-rose-500">
                 <option value="stf-1">Elena Gómez (Color & Balayage)</option>
                 <option value="stf-2">Raquel Santos (Corte & Peinado)</option>
                 <option value="stf-3">Carmen Vidal (Tratamientos)</option>
@@ -222,81 +267,86 @@
               </select>
             </div>
             <div>
-              <span class="text-slate-500 block">Observaciones / Comentarios:</span>
-              <textarea id="booking-comments" rows="3" placeholder="Ej: Tengo el pelo muy largo, me gustaría que repasáramos las puntas..." class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-white placeholder-slate-600"></textarea>
+              <span class="text-stone-500 font-medium block">Observaciones / Peticiones:</span>
+              <textarea id="booking-comments" rows="3" placeholder="Ej: Me gustaría mantener el largo y repasar el tono cobrizo..." class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-500"></textarea>
             </div>
           </div>
-          <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-[11px] text-slate-400 leading-relaxed">
-            🔔 <strong>Avisos automáticos:</strong> Recibirás recordatorio por WhatsApp 24h y 2h antes según configuración oficial del salón.
+          <div class="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-800 leading-relaxed flex items-start gap-2">
+            <i data-lucide="bell-ring" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <strong>Avisos automatizados:</strong> Se enviará recordatorio oficial por WhatsApp 24h y 2h antes de tu cita según la configuración del salón.
+            </div>
           </div>
         </div>
       </div>
 
       <!-- VISTA 1C: FIDELIZACIÓN QR & RESEÑAS GOOGLE -->
       <div id="cview-loyalty" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col items-center text-center">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mb-4">
-            <i data-lucide="award" class="w-4 h-4"></i> Programa Club Belleza Losan
+        <div class="luxury-card rounded-2xl p-6 flex flex-col items-center text-center">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold mb-4">
+            <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Club de Fidelización Losan
           </div>
           
-          <!-- Canvas QR Code -->
-          <div class="p-4 bg-white rounded-2xl shadow-xl shadow-rose-500/5 mb-4">
+          <!-- Canvas QR Code con marco fino -->
+          <div class="p-4 bg-white border border-stone-200 rounded-2xl shadow-sm mb-4">
             <canvas id="client-qr-canvas" width="180" height="180"></canvas>
           </div>
           
-          <h3 class="text-lg font-bold text-white mb-1" id="qr-client-name">Laura Martínez</h3>
-          <p class="text-xs font-mono-code text-slate-400 mb-4" id="qr-hash-display">QR-LAURA-77492-HASH</p>
+          <h3 class="text-lg font-bold text-stone-900 mb-0.5" id="qr-client-name">Laura Martínez</h3>
+          <p class="text-xs font-mono-code text-stone-400 mb-4" id="qr-hash-display">QR-LAURA-77492-HASH</p>
 
-          <div class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+          <div class="w-full bg-stone-50 border border-stone-200 rounded-xl p-4 flex items-center justify-between">
             <div class="text-left">
-              <span class="text-xs text-slate-500 block">Saldo Actual de Puntos:</span>
-              <span class="text-2xl font-black text-amber-400" id="loyalty-balance-display">120 pts</span>
+              <span class="text-xs text-stone-500 block">Saldo Actual de Puntos:</span>
+              <span class="text-2xl font-black text-amber-600 font-mono-code" id="loyalty-balance-display">120 pts</span>
             </div>
             <div class="text-right">
-              <span class="text-xs text-slate-500 block">Equivalencia TPV:</span>
-              <span class="text-sm font-bold text-emerald-400" id="loyalty-euro-value">6,00 € dto.</span>
+              <span class="text-xs text-stone-500 block">Equivalencia TPV:</span>
+              <span class="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200" id="loyalty-euro-value">6,00 € dto.</span>
             </div>
           </div>
         </div>
 
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-5">
+        <div class="luxury-card rounded-2xl p-6 space-y-5">
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
               <i data-lucide="star" class="w-5 h-5 text-amber-400 fill-amber-400"></i>
               Reseña Verificada en Google Business
             </h3>
-            <p class="text-xs text-slate-400 mt-1">
-              Ayúdanos con tu opinión en Google Maps y obtén <strong class="text-amber-400">+50 puntos directos</strong> (2,50 € de descuento en tu próximo servicio).
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Comparte tu experiencia en Google Maps y recibe <strong class="text-amber-700 font-bold">+50 puntos directos</strong> (2,50 € de descuento directo aplicable en cualquier servicio o producto de muestra).
             </p>
           </div>
 
-          <div class="p-4 bg-slate-900/70 border border-slate-800 rounded-xl space-y-3">
-            <div class="flex items-center gap-2 text-xs text-slate-300">
-              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-              <span>Validación automática anti-fraude vinculada a tu cuenta</span>
+          <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
+            <div class="flex items-center gap-2 text-xs text-stone-700">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+              <span>Validación automática anti-fraude vinculada a tu perfil</span>
             </div>
-            <div id="google-review-status-box" class="text-xs text-slate-400">
-              Estado: <span id="review-status-badge" class="font-semibold text-slate-300">Pendiente de publicar</span>
+            <div id="google-review-status-box" class="text-xs text-stone-500">
+              Estado: <span id="review-status-badge" class="font-semibold text-stone-800">Pendiente de publicar</span>
             </div>
-            <button id="btn-submit-google-review" onclick="simulateGoogleReviewVerification()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-500/20">
+            <button id="btn-submit-google-review" onclick="simulateGoogleReviewVerification()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-blue-200">
               <i data-lucide="external-link" class="w-4 h-4"></i> Publicar Reseña y Reclamar +50 Puntos
             </button>
           </div>
 
-          <div class="text-[11px] text-slate-500 leading-relaxed">
-            * Los puntos se canjean directamente en caja al pagar cualquier servicio o producto de muestra. Sin fecha de caducidad.
+          <div class="text-[11px] text-stone-400 leading-relaxed border-t border-stone-100 pt-3">
+            * Los puntos se canjean directamente en caja al abonar cualquier servicio de peluquería o cosmético. No tienen fecha de caducidad.
           </div>
         </div>
       </div>
 
       <!-- VISTA 1D: TIENDA ESCAPARATE -->
       <div id="cview-showcase" class="hidden space-y-4">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <h3 class="text-base font-bold text-white">Catálogo de Productos Cosméticos de Muestra</h3>
-            <p class="text-xs text-slate-400">Productos profesionales recomendados por nuestras estilistas para mantener tu color y tratamiento en casa.</p>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Catálogo de Productos Cosméticos de Muestra</h3>
+            <p class="text-xs text-stone-500">Productos profesionales recomendados por nuestras estilistas para el cuidado de tu cabello en casa.</p>
           </div>
-          <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Modo: Reserva y recogida en salón</span>
+          <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">
+            Modo: Reserva para recogida en salón
+          </span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="showcase-grid">
@@ -306,7 +356,7 @@
 
       <!-- VISTA 1E: MIS CITAS & WHATSAPP -->
       <div id="cview-my-appointments" class="hidden space-y-4">
-        <h3 class="text-base font-bold text-white">Tus Próximas Citas y Automatizaciones</h3>
+        <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Tus Próximas Citas y Automatizaciones</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="client-appointments-list">
           <!-- Renderizado dinámico -->
         </div>
@@ -321,14 +371,14 @@
     <div id="portal-staff" class="hidden space-y-6">
       
       <!-- Selector de Trabajadora Conectada -->
-      <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-base" id="staff-avatar">
+      <div class="luxury-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center font-bold text-base shadow-xs" id="staff-avatar">
             EG
           </div>
           <div>
-            <span class="text-xs text-slate-400 block">Estilista Activa Conectada:</span>
-            <select id="select-active-worker" onchange="changeActiveWorker()" class="bg-slate-900 border border-slate-800 text-white font-bold text-sm rounded-lg px-3 py-1.5 mt-0.5 focus:outline-none">
+            <span class="text-xs text-stone-500 block">Estilista Activa Conectada:</span>
+            <select id="select-active-worker" onchange="changeActiveWorker()" class="bg-stone-50 border border-stone-300 text-stone-900 font-bold text-sm rounded-lg px-3 py-1.5 mt-0.5 focus:outline-none focus:border-purple-500">
               <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
               <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
               <option value="stf-3">Carmen Vidal (Tratamientos & Salud Capilar)</option>
@@ -337,8 +387,8 @@
         </div>
 
         <div class="flex items-center gap-3 text-xs">
-          <span class="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Turno Activo: 09:30 - 19:30
+          <span class="px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Turno Activo: 09:30 - 19:30
           </span>
         </div>
       </div>
@@ -347,10 +397,10 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Columna 1 & 2: Agenda Diaria Individual -->
-        <div class="lg:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-6">
-          <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
+        <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
+          <h3 class="text-base font-bold text-stone-900 mb-4 flex items-center justify-between font-serif-luxury text-lg">
             <span>Tu Agenda para Hoy (Viernes 23 Oct)</span>
-            <span class="text-xs text-slate-400 font-normal" id="worker-appointment-count">2 citas programadas</span>
+            <span class="text-xs text-stone-500 font-sans font-normal" id="worker-appointment-count">2 citas programadas</span>
           </h3>
           <div class="space-y-3" id="worker-agenda-list">
             <!-- Citas asignadas a la trabajadora -->
@@ -358,49 +408,49 @@
         </div>
 
         <!-- Columna 3: Ficha Previa de la Clienta Seleccionada -->
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="clipboard-list" class="w-4 h-4 text-purple-400"></i> Ficha Técnica Previa
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <div class="border-b border-stone-100 pb-3 flex justify-between items-center">
+            <h4 class="text-sm font-bold text-stone-900 flex items-center gap-2 font-serif-luxury">
+              <i data-lucide="clipboard-list" class="w-4 h-4 text-purple-600"></i> Ficha Técnica Previa
             </h4>
-            <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">Histórico</span>
+            <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">Histórico</span>
           </div>
 
           <div id="client-history-preview" class="space-y-3 text-xs">
             <!-- Detalles cargados dinámicamente -->
-            <div class="p-3 bg-red-950/30 border border-red-900/50 rounded-xl text-red-300">
-              <strong class="block font-bold">⚠️ Alerta de Alergia:</strong>
+            <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900">
+              <strong class="block font-bold text-rose-700">⚠️ Alerta de Alergia:</strong>
               Sensibilidad al amoniaco concentrado. Utilizar oxidante 20vol sin PPD.
             </div>
-            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
-              <span class="text-slate-500 block">Fórmula de colorimetría anterior (15 Sep):</span>
-              <p class="font-mono-code text-white font-medium">6.1 (30g) + 7.0 (15g) con oxidante 20vol (45g)</p>
-              <p class="text-slate-400 mt-1">Técnica: Balayage suave con matiz perlado en bacha (12 min).</p>
+            <div class="p-3.5 bg-stone-50 border border-stone-200 rounded-xl space-y-1 text-stone-700">
+              <span class="text-stone-500 block">Fórmula de colorimetría anterior (15 Sep):</span>
+              <p class="font-mono-code text-stone-900 font-bold">6.1 (30g) + 7.0 (15g) con oxidante 20vol (45g)</p>
+              <p class="text-stone-500 mt-1">Técnica: Balayage suave con matiz perlado en bacha (12 min).</p>
             </div>
           </div>
 
           <!-- Formulario Rápido Post-Servicio -->
-          <div class="border-t border-slate-800 pt-4 space-y-3">
-            <h5 class="text-xs font-bold text-white uppercase tracking-wider">Actualizar Expediente Post-Servicio</h5>
+          <div class="border-t border-stone-200 pt-4 space-y-3">
+            <h5 class="text-xs font-bold text-stone-900 uppercase tracking-wider">Actualizar Expediente Post-Servicio</h5>
             <div>
-              <label class="block text-[11px] text-slate-400">Nueva Fórmula Aplicada (Tinte / Gramaje):</label>
-              <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con 20vol" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white">
+              <label class="block text-[11px] font-semibold text-stone-600">Nueva Fórmula Aplicada (Tinte / Gramaje):</label>
+              <input type="text" id="post-dye-formula" placeholder="Ej: 6.1 (35g) + 8.1 (10g) con 20vol" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] text-slate-400">Técnica Usada:</label>
-                <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white">
+                <label class="block text-[11px] font-semibold text-stone-600">Técnica Usada:</label>
+                <input type="text" id="post-technique" placeholder="Ej: Mechas Babylight" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
               </div>
               <div>
-                <label class="block text-[11px] text-slate-400">Exposición (min):</label>
-                <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white">
+                <label class="block text-[11px] font-semibold text-stone-600">Exposición (min):</label>
+                <input type="number" id="post-exposure" value="35" class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] text-slate-400">Notas / Resultado:</label>
-              <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, clienta muy contenta..." class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white"></textarea>
+              <label class="block text-[11px] font-semibold text-stone-600">Notas / Resultado:</label>
+              <textarea id="post-notes" rows="2" placeholder="Tono frío perfecto, clienta muy contenta..." class="w-full mt-1 bg-stone-50 border border-stone-300 rounded-lg p-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500"></textarea>
             </div>
-            <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+            <button onclick="saveTechnicalRecord()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200">
               <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar en Expediente
             </button>
           </div>
@@ -417,18 +467,18 @@
     <div id="portal-admin" class="hidden space-y-6">
 
       <!-- Sub-navegación Administración -->
-      <div class="flex border-b border-slate-800 overflow-x-auto scrollbar-thin gap-2 pb-2">
-        <button onclick="switchAdminTab('agenda-master')" id="tab-a-agenda" class="admin-tab active flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-          <i data-lucide="calendar-range" class="w-4 h-4"></i> Agenda Maestra Multicanal
+      <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
+        <button onclick="switchAdminTab('agenda-master')" id="tab-a-agenda" class="admin-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
+          <i data-lucide="calendar-range" class="w-4 h-4 text-indigo-600"></i> Agenda Maestra Multicanal
         </button>
-        <button onclick="switchAdminTab('pos-tpv')" id="tab-a-tpv" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="credit-card" class="w-4 h-4"></i> TPV & Cobros en Caja
+        <button onclick="switchAdminTab('pos-tpv')" id="tab-a-tpv" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="credit-card" class="w-4 h-4 text-stone-500"></i> TPV & Cobros en Caja
         </button>
-        <button onclick="switchAdminTab('fiscal-verifactu')" id="tab-a-fiscal" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="file-check-2" class="w-4 h-4"></i> Facturación Fiscal Veri*Factu (Ley 11/2021)
+        <button onclick="switchAdminTab('fiscal-verifactu')" id="tab-a-fiscal" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="file-check-2" class="w-4 h-4 text-stone-500"></i> Facturación Fiscal Veri*Factu (Ley 11/2021)
         </button>
-        <button onclick="switchAdminTab('stock')" id="tab-a-stock" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white">
-          <i data-lucide="boxes" class="w-4 h-4"></i> Control de Stock
+        <button onclick="switchAdminTab('stock')" id="tab-a-stock" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
+          <i data-lucide="boxes" class="w-4 h-4 text-stone-500"></i> Control de Stock
         </button>
       </div>
 
@@ -436,40 +486,40 @@
       <div id="aview-agenda" class="space-y-6">
         
         <!-- Barra de Emergencia: Protocolo de Baja Médica Repentina -->
-        <div class="bg-gradient-to-r from-red-950/60 via-slate-900 to-slate-900 border border-red-900/50 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+        <div class="bg-rose-50/70 border border-rose-200 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-400 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
             </div>
             <div>
-              <h4 class="text-sm font-bold text-white">Protocolo de Contingencia: Baja Médica Repentina</h4>
-              <p class="text-xs text-slate-400">Ejecuta el algoritmo en cascada para reasignar citas a compañeras libres o derivar con máxima prioridad al Agente IA.</p>
+              <h4 class="text-sm font-bold text-stone-900">Protocolo de Contingencia: Baja Médica Repentina</h4>
+              <p class="text-xs text-stone-500">Algoritmo en cascada que reubica citas con estilistas libres o deriva con prioridad VIP al Agente IA.</p>
             </div>
           </div>
           <div class="flex items-center gap-2 w-full md:w-auto">
-            <select id="leave-staff-select" class="bg-slate-950 border border-slate-800 text-xs text-white rounded-xl px-3 py-2">
+            <select id="leave-staff-select" class="bg-white border border-stone-300 text-xs font-medium text-stone-800 rounded-xl px-3 py-2 shadow-2xs">
               <option value="stf-2">Raquel Santos (Cortes)</option>
               <option value="stf-1">Elena Gómez (Color)</option>
               <option value="stf-3">Carmen Vidal (Tratamientos)</option>
             </select>
-            <button onclick="executeMedicalLeaveProtocol()" class="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition flex-shrink-0 shadow-lg shadow-red-500/20">
+            <button onclick="executeMedicalLeaveProtocol()" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition flex-shrink-0 shadow-sm shadow-rose-200">
               <i data-lucide="zap" class="w-3.5 h-3.5"></i> Activar Baja
             </button>
           </div>
         </div>
 
         <!-- Resumen de Reasignación si se ejecutó -->
-        <div id="leave-summary-card" class="hidden bg-slate-950 border border-emerald-500/30 rounded-2xl p-4 space-y-3">
+        <div id="leave-summary-card" class="hidden bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <h5 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="check-circle" class="w-4 h-4"></i> Resultado del Algoritmo en Cascada
+            <h5 class="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> Resultado de la Reasignación en Cascada
             </h5>
-            <span class="text-xs text-slate-400" id="leave-timestamp"></span>
+            <span class="text-xs text-stone-500 font-mono-code" id="leave-timestamp"></span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs" id="leave-metrics-grid">
             <!-- Métricas -->
           </div>
-          <div class="text-xs text-slate-300" id="leave-details-list">
+          <div class="text-xs text-stone-700 space-y-1" id="leave-details-list">
             <!-- Detalles de citas reubicadas -->
           </div>
         </div>
@@ -477,13 +527,13 @@
         <!-- Columnas de Agenda Multicanal por Profesional -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Columna Elena -->
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+          <div class="luxury-card rounded-2xl p-4">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-purple-500"></span>
-                <span class="font-bold text-sm text-white">Elena Gómez</span>
+                <span class="font-bold text-sm text-stone-900">Elena Gómez</span>
               </div>
-              <span class="text-[11px] text-purple-400 font-medium">Sillón 1 (Color)</span>
+              <span class="text-[11px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full font-medium">Sillón 1 (Color)</span>
             </div>
             <div class="space-y-2.5" id="agenda-col-elena">
               <!-- Citas Elena -->
@@ -491,13 +541,13 @@
           </div>
 
           <!-- Columna Raquel -->
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+          <div class="luxury-card rounded-2xl p-4">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-pink-500"></span>
-                <span class="font-bold text-sm text-white" id="staff-name-raquel">Raquel Santos</span>
+                <span class="font-bold text-sm text-stone-900" id="staff-name-raquel">Raquel Santos</span>
               </div>
-              <span class="text-[11px] text-pink-400 font-medium" id="staff-status-raquel">Sillón 2 (Cortes)</span>
+              <span class="text-[11px] text-pink-700 bg-pink-50 px-2 py-0.5 rounded-full font-medium" id="staff-status-raquel">Sillón 2 (Cortes)</span>
             </div>
             <div class="space-y-2.5" id="agenda-col-raquel">
               <!-- Citas Raquel -->
@@ -505,13 +555,13 @@
           </div>
 
           <!-- Columna Carmen -->
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+          <div class="luxury-card rounded-2xl p-4">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                <span class="font-bold text-sm text-white">Carmen Vidal</span>
+                <span class="font-bold text-sm text-stone-900">Carmen Vidal</span>
               </div>
-              <span class="text-[11px] text-emerald-400 font-medium">Sillón 3 (Tratamientos)</span>
+              <span class="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Sillón 3 (Tratamientos)</span>
             </div>
             <div class="space-y-2.5" id="agenda-col-carmen">
               <!-- Citas Carmen -->
@@ -522,24 +572,27 @@
 
       <!-- VISTA 3B: TPV & COBROS EN CAJA -->
       <div id="aview-tpv" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h3 class="text-base font-bold text-white flex items-center justify-between">
-            <span>Terminal Punto de Venta (TPV)</span>
-            <span class="text-xs text-slate-400">Emisión Fiscal Inmediata Veri*Factu</span>
-          </h3>
+        <div class="lg:col-span-2 luxury-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Terminal Punto de Venta (TPV)</h3>
+              <p class="text-xs text-stone-500">Emisión Fiscal Inmediata y Veri*Factu</p>
+            </div>
+            <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">Caja Principal 01</span>
+          </div>
 
-          <!-- Selección de Cita a Cobrar o Servicio Manual -->
+          <!-- Selección de Cita a Cobrar -->
           <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Cargar desde Cita Pendiente de Cobro:</label>
-            <select id="tpv-appointment-select" onchange="loadAppointmentIntoTpv()" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-white">
-              <option value="">-- Cobro manual de servicios/productos --</option>
+            <label class="block text-xs font-semibold text-stone-600 mb-1">Cargar Cita Pendiente de Cobro:</label>
+            <select id="tpv-appointment-select" onchange="loadAppointmentIntoTpv()" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+              <option value="">-- Cobro manual de servicios o cosméticos --</option>
             </select>
           </div>
 
           <!-- Tabla de Conceptos de Venta -->
-          <div class="border border-slate-800 rounded-xl overflow-hidden">
+          <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
             <table class="w-full text-xs text-left">
-              <thead class="bg-slate-900 text-slate-400 uppercase font-semibold">
+              <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
                 <tr>
                   <th class="p-3">Concepto</th>
                   <th class="p-3 w-16 text-center">Cant.</th>
@@ -549,7 +602,7 @@
                   <th class="p-3 w-12 text-center"></th>
                 </tr>
               </thead>
-              <tbody id="tpv-items-tbody" class="divide-y divide-slate-800 text-slate-300">
+              <tbody id="tpv-items-tbody" class="divide-y divide-stone-100 text-stone-800 bg-white">
                 <!-- Líneas dinámicas -->
               </tbody>
             </table>
@@ -557,50 +610,50 @@
 
           <!-- Añadir Productos o Servicios Extra -->
           <div class="flex gap-2">
-            <select id="tpv-quick-service" class="bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white flex-1">
+            <select id="tpv-quick-service" class="bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium flex-1">
               <option value="">+ Añadir Servicio al Ticket...</option>
             </select>
-            <select id="tpv-quick-product" class="bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white flex-1">
+            <select id="tpv-quick-product" class="bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium flex-1">
               <option value="">+ Añadir Producto de Muestra...</option>
             </select>
-            <button onclick="addTpvQuickItem()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">
+            <button onclick="addTpvQuickItem()" class="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs">
               Añadir
             </button>
           </div>
         </div>
 
         <!-- Panel de Liquidación y Pago -->
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-5 flex flex-col justify-between">
+        <div class="luxury-card rounded-2xl p-6 space-y-5 flex flex-col justify-between">
           <div class="space-y-4">
-            <h4 class="text-sm font-bold text-white">Desglose Fiscal (Ley Antifraude)</h4>
+            <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Desglose Fiscal (Ley Antifraude)</h4>
             
             <div class="space-y-2 text-xs">
-              <div class="flex justify-between text-slate-400">
+              <div class="flex justify-between text-stone-500">
                 <span>Base Imponible:</span>
-                <span id="tpv-tax-base" class="text-white font-mono-code font-bold">0,00 €</span>
+                <span id="tpv-tax-base" class="text-stone-900 font-mono-code font-bold">0,00 €</span>
               </div>
-              <div class="flex justify-between text-slate-400">
+              <div class="flex justify-between text-stone-500">
                 <span>Cuota IVA (21,00%):</span>
-                <span id="tpv-vat-amount" class="text-white font-mono-code font-bold">0,00 €</span>
+                <span id="tpv-vat-amount" class="text-stone-900 font-mono-code font-bold">0,00 €</span>
               </div>
-              <div class="flex justify-between text-slate-400" id="tpv-loyalty-discount-row">
+              <div class="flex justify-between text-stone-500" id="tpv-loyalty-discount-row">
                 <span>Descuento Puntos Fidelización:</span>
-                <span id="tpv-loyalty-discount" class="text-emerald-400 font-mono-code font-bold">-0,00 €</span>
+                <span id="tpv-loyalty-discount" class="text-emerald-600 font-mono-code font-bold">-0,00 €</span>
               </div>
-              <div class="border-t border-slate-800 pt-2 flex justify-between text-base font-black">
-                <span class="text-white">Total a Cobrar:</span>
-                <span id="tpv-total-amount" class="text-rose-400 font-mono-code">0,00 €</span>
+              <div class="border-t border-stone-200 pt-2 flex justify-between text-base font-black">
+                <span class="text-stone-900">Total a Cobrar:</span>
+                <span id="tpv-total-amount" class="text-rose-600 font-mono-code text-xl">0,00 €</span>
               </div>
             </div>
 
             <!-- Canje de Puntos de Fidelización -->
-            <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-xs">
               <div class="flex justify-between items-center">
-                <span class="text-slate-400">Canjear Puntos de la Clienta:</span>
-                <span class="font-bold text-amber-400" id="tpv-client-points-badge">120 pts disp.</span>
+                <span class="text-stone-600 font-medium">Canjear Puntos de la Clienta:</span>
+                <span class="font-bold text-amber-800 font-mono-code" id="tpv-client-points-badge">120 pts disp.</span>
               </div>
               <div class="flex gap-2">
-                <button onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg py-1.5 font-semibold text-[11px] transition">
+                <button onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-1.5 font-semibold text-[11px] transition">
                   Canjear 100 pts (-5,00 €)
                 </button>
               </div>
@@ -608,22 +661,22 @@
 
             <!-- Método de Pago -->
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">Método de Pago:</label>
+              <label class="block text-xs font-semibold text-stone-600 mb-1.5">Método de Pago:</label>
               <div class="grid grid-cols-3 gap-2 text-xs">
-                <button onclick="setTpvPaymentMethod('card')" id="pay-card" class="tpv-pay-btn active bg-rose-600 text-white font-semibold py-2 rounded-xl flex items-center justify-center gap-1">
+                <button onclick="setTpvPaymentMethod('card')" id="pay-card" class="tpv-pay-btn active bg-rose-600 text-white font-semibold py-2 rounded-xl flex items-center justify-center gap-1 shadow-sm shadow-rose-200">
                   <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Tarjeta
                 </button>
-                <button onclick="setTpvPaymentMethod('cash')" id="pay-cash" class="tpv-pay-btn bg-slate-900 text-slate-400 font-semibold py-2 rounded-xl border border-slate-800 flex items-center justify-center gap-1">
+                <button onclick="setTpvPaymentMethod('cash')" id="pay-cash" class="tpv-pay-btn bg-stone-50 text-stone-600 font-semibold py-2 rounded-xl border border-stone-200 flex items-center justify-center gap-1 hover:bg-stone-100">
                   <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Efectivo
                 </button>
-                <button onclick="setTpvPaymentMethod('bizum')" id="pay-bizum" class="tpv-pay-btn bg-slate-900 text-slate-400 font-semibold py-2 rounded-xl border border-slate-800 flex items-center justify-center gap-1">
+                <button onclick="setTpvPaymentMethod('bizum')" id="pay-bizum" class="tpv-pay-btn bg-stone-50 text-stone-600 font-semibold py-2 rounded-xl border border-stone-200 flex items-center justify-center gap-1 hover:bg-stone-100">
                   <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Bizum
                 </button>
               </div>
             </div>
           </div>
 
-          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-200">
             <i data-lucide="printer" class="w-4 h-4"></i> Cobrar y Emitir Factura Veri*Factu
           </button>
         </div>
@@ -631,24 +684,24 @@
 
       <!-- VISTA 3C: FACTURACIÓN FISCAL VERI*FACTU & LIBRO REGISTRO -->
       <div id="aview-fiscal" class="hidden space-y-6">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-100 pb-4">
             <div>
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i data-lucide="link" class="w-5 h-5 text-emerald-400"></i>
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg flex items-center gap-2">
+                <i data-lucide="link" class="w-5 h-5 text-emerald-600"></i>
                 Libro Registro de Facturas Emitidas (Cadena Criptográfica Inalterable)
               </h3>
-              <p class="text-xs text-slate-400">Encadenamiento con algoritmo SHA-256 según RD 1007/2023. Cada registro vincula la huella de la factura anterior.</p>
+              <p class="text-xs text-stone-500 mt-0.5">Encadenamiento con algoritmo SHA-256 según RD 1007/2023. Cada registro vincula la huella de la factura anterior.</p>
             </div>
-            <button onclick="exportFiscalBook()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition">
+            <button onclick="exportFiscalBook()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition shadow-sm shadow-indigo-200">
               <i data-lucide="download" class="w-4 h-4"></i> Exportar para Asesoría (Mod. 303)
             </button>
           </div>
 
           <!-- Tabla de Facturas Encadenadas -->
-          <div class="border border-slate-800 rounded-xl overflow-x-auto scrollbar-thin">
+          <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin">
             <table class="w-full text-xs text-left">
-              <thead class="bg-slate-900 text-slate-400 uppercase font-semibold">
+              <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
                 <tr>
                   <th class="p-3">Nº Serie/Factura</th>
                   <th class="p-3">Fecha Expedición</th>
@@ -659,7 +712,7 @@
                   <th class="p-3 text-center">Huella SHA-256 & QR</th>
                 </tr>
               </thead>
-              <tbody id="invoices-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono-code">
+              <tbody id="invoices-tbody" class="divide-y divide-stone-100 text-stone-800 font-mono-code bg-white">
                 <!-- Filas dinámicas -->
               </tbody>
             </table>
@@ -667,64 +720,68 @@
         </div>
 
         <!-- Visor de Factura / Ticket Fiscal Veri*Factu -->
-        <div id="ticket-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div class="bg-white text-slate-900 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative font-mono-code text-xs">
-            <button onclick="closeTicketModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800">
+        <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div class="bg-white text-stone-900 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative font-mono-code text-xs border border-stone-200">
+            <button onclick="closeTicketModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700">
               <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
-            <div class="text-center border-b border-dashed border-slate-300 pb-3">
-              <h4 class="font-bold text-sm uppercase">Peluquería Losan S.L.</h4>
-              <p class="text-[11px] text-slate-500">NIF: B-87654321</p>
-              <p class="text-[11px] text-slate-500">Calle Gran Vía 42, 28013 Madrid</p>
-              <p class="text-[10px] text-emerald-600 font-bold mt-1">FACTURA SIMPLIFICADA (VERI*FACTU)</p>
+            <div class="text-center border-b border-dashed border-stone-300 pb-3">
+              <h4 class="font-bold text-sm uppercase font-serif-luxury tracking-wide">Peluquería Losan S.L.</h4>
+              <p class="text-[11px] text-stone-500">NIF: B-87654321</p>
+              <p class="text-[11px] text-stone-500">Calle Gran Vía 42, 28013 Madrid</p>
+              <p class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
+                FACTURA SIMPLIFICADA (VERI*FACTU)
+              </p>
             </div>
 
             <div class="space-y-1 text-[11px]">
               <div class="flex justify-between">
-                <span>Número:</span>
-                <span class="font-bold" id="ticket-num">FS2026-0002</span>
+                <span class="text-stone-500">Número:</span>
+                <span class="font-bold text-stone-900" id="ticket-num">FS2026-0002</span>
               </div>
               <div class="flex justify-between">
-                <span>Fecha:</span>
+                <span class="text-stone-500">Fecha:</span>
                 <span id="ticket-date">23/10/2026 18:00</span>
               </div>
               <div class="flex justify-between">
-                <span>Cliente:</span>
+                <span class="text-stone-500">Cliente:</span>
                 <span id="ticket-client">Laura Martínez</span>
               </div>
             </div>
 
-            <div class="border-t border-b border-dashed border-slate-300 py-2 space-y-1" id="ticket-items">
+            <div class="border-t border-b border-dashed border-stone-300 py-2 space-y-1" id="ticket-items">
               <!-- Items -->
             </div>
 
             <div class="space-y-1 text-right text-[11px]">
               <div class="flex justify-between">
-                <span>Base Imponible:</span>
+                <span class="text-stone-500">Base Imponible:</span>
                 <span id="ticket-base">49.59 €</span>
               </div>
               <div class="flex justify-between">
-                <span>IVA (21%):</span>
+                <span class="text-stone-500">IVA (21%):</span>
                 <span id="ticket-vat">10.41 €</span>
               </div>
-              <div class="flex justify-between font-bold text-sm border-t border-slate-200 pt-1">
+              <div class="flex justify-between font-bold text-sm border-t border-stone-200 pt-1 text-stone-900">
                 <span>TOTAL:</span>
                 <span id="ticket-total">60.00 €</span>
               </div>
             </div>
 
             <div class="text-center pt-2 flex flex-col items-center">
-              <canvas id="ticket-qr-canvas" width="130" height="130"></canvas>
-              <p class="text-[9px] text-slate-500 mt-2 break-all font-mono-code" id="ticket-hash-snippet">
+              <div class="p-2 bg-stone-50 border border-stone-200 rounded-xl mb-2">
+                <canvas id="ticket-qr-canvas" width="130" height="130"></canvas>
+              </div>
+              <p class="text-[9px] text-stone-400 break-all font-mono-code" id="ticket-hash-snippet">
                 SHA: a591a6d40b490f...
               </p>
-              <span class="text-[9px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1">
+              <span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1 border border-emerald-200">
                 Cotejo en Sede Electrónica AEAT
               </span>
             </div>
 
-            <button onclick="window.print()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-sans font-semibold py-2 rounded-xl text-xs">
+            <button onclick="window.print()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-sans font-semibold py-2.5 rounded-xl text-xs transition">
               Imprimir Ticket Térmico
             </button>
           </div>
@@ -732,11 +789,17 @@
       </div>
 
       <!-- VISTA 3D: CONTROL DE STOCK -->
-      <div id="aview-stock" class="hidden bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h3 class="text-base font-bold text-white">Inventario de Productos (Uso Interno & Tienda Escaparate)</h3>
-        <div class="border border-slate-800 rounded-xl overflow-hidden">
+      <div id="aview-stock" class="hidden luxury-card rounded-2xl p-6 space-y-4">
+        <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg">Inventario de Productos</h3>
+            <p class="text-xs text-stone-500">Control de stock de uso interno y escaparate de venta</p>
+          </div>
+        </div>
+
+        <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
           <table class="w-full text-xs text-left">
-            <thead class="bg-slate-900 text-slate-400 uppercase font-semibold">
+            <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
               <tr>
                 <th class="p-3">SKU</th>
                 <th class="p-3">Producto & Marca</th>
@@ -747,7 +810,7 @@
                 <th class="p-3 text-center">Acción</th>
               </tr>
             </thead>
-            <tbody id="stock-tbody" class="divide-y divide-slate-800 text-slate-300">
+            <tbody id="stock-tbody" class="divide-y divide-stone-100 text-stone-800 bg-white">
               <!-- Filas de stock -->
             </tbody>
           </table>
@@ -761,24 +824,24 @@
   <!-- ========================================================================= -->
   <!-- MODAL DE NOTIFICACIONES WHATSAPP (SIMULADOR INTERACTIVO 24H / 2H) -->
   <!-- ========================================================================= -->
-  <div id="whatsapp-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl relative">
-      <button onclick="closeWhatsAppModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+  <div id="whatsapp-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-xl relative">
+      <button onclick="closeWhatsAppModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white">
+        <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-sm shadow-emerald-200">
           <i data-lucide="message-circle" class="w-5 h-5"></i>
         </div>
         <div>
-          <h4 class="text-sm font-bold text-white">WhatsApp Business API</h4>
-          <span class="text-[11px] text-emerald-400">Notificación Oficial Certificada</span>
+          <h4 class="text-sm font-bold text-stone-900">WhatsApp Business API</h4>
+          <span class="text-[11px] text-emerald-600 font-semibold">Notificación Oficial Certificada</span>
         </div>
       </div>
-      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-200 leading-relaxed font-sans" id="whatsapp-body">
+      <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed font-sans" id="whatsapp-body">
         <!-- Contenido dinámico del mensaje -->
       </div>
-      <button onclick="closeWhatsAppModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 rounded-xl text-xs transition">
+      <button onclick="closeWhatsAppModal()" class="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold py-2 rounded-xl text-xs transition border border-stone-200">
         Cerrar Vista Previa
       </button>
     </div>
@@ -916,10 +979,10 @@
     function switchPortal(portal) {
       state.activePortal = portal;
       
-      // Botones del header
+      // Botones del header en tema claro
       document.querySelectorAll('#btn-portal-client, #btn-portal-staff, #btn-portal-admin').forEach(btn => {
-        btn.classList.remove('bg-rose-600', 'bg-purple-600', 'bg-indigo-600', 'text-white', 'shadow');
-        btn.classList.add('text-slate-400');
+        btn.classList.remove('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
+        btn.classList.add('text-stone-600');
       });
 
       // Ocultar vistas
@@ -929,14 +992,14 @@
 
       if (portal === 'client') {
         document.getElementById('portal-client').classList.remove('hidden');
-        document.getElementById('btn-portal-client').classList.add('bg-rose-600', 'text-white', 'shadow');
+        document.getElementById('btn-portal-client').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
       } else if (portal === 'staff') {
         document.getElementById('portal-staff').classList.remove('hidden');
-        document.getElementById('btn-portal-staff').classList.add('bg-purple-600', 'text-white', 'shadow');
+        document.getElementById('btn-portal-staff').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
         renderWorkerAgenda();
       } else if (portal === 'admin') {
         document.getElementById('portal-admin').classList.remove('hidden');
-        document.getElementById('btn-portal-admin').classList.add('bg-indigo-600', 'text-white', 'shadow');
+        document.getElementById('btn-portal-admin').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
         renderMasterAgenda();
       }
       lucide.createIcons();
@@ -945,10 +1008,10 @@
     function switchClientTab(tab) {
       state.activeClientTab = tab;
       document.querySelectorAll('.client-tab').forEach(b => {
-        b.classList.remove('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20', 'active');
-        b.classList.add('text-slate-400');
+        b.classList.remove('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
+        b.classList.add('text-stone-600');
       });
-      document.getElementById('tab-c-' + tab).classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20', 'active');
+      document.getElementById('tab-c-' + tab).classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200', 'shadow-2xs', 'active');
 
       document.querySelectorAll('#cview-ai-chat, #cview-calendar, #cview-loyalty, #cview-showcase, #cview-my-appointments').forEach(el => el.classList.add('hidden'));
       document.getElementById('cview-' + tab).classList.remove('hidden');
@@ -958,10 +1021,10 @@
     function switchAdminTab(tab) {
       state.activeAdminTab = tab;
       document.querySelectorAll('.admin-tab').forEach(b => {
-        b.classList.remove('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20', 'active');
-        b.classList.add('text-slate-400');
+        b.classList.remove('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
+        b.classList.add('text-stone-600');
       });
-      document.getElementById('tab-a-' + (tab.split('-')[0])).classList.add('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20', 'active');
+      document.getElementById('tab-a-' + (tab.split('-')[0])).classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
 
       document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock').forEach(el => el.classList.add('hidden'));
       document.getElementById('aview-' + (tab.split('-')[0])).classList.remove('hidden');
@@ -983,7 +1046,7 @@
       const banner = document.getElementById('tool-call-banner');
       const bannerText = document.getElementById('tool-call-name');
       banner.classList.remove('hidden');
-      bannerText.innerText = 'Analizando intención y disponibilidad de agenda...';
+      bannerText.innerText = 'Consultando disponibilidad en agenda oficial...';
 
       try {
         const res = await fetch('/api/ai/chat', {
@@ -1024,14 +1087,16 @@
 
       if (sender === 'client') {
         div.innerHTML = `
-          <div class="bg-rose-600 text-white rounded-2xl rounded-tr-sm p-3.5 max-w-[85%] text-sm shadow">
+          <div class="bg-rose-600 text-white rounded-2xl rounded-tr-xs p-3.5 max-w-[85%] text-sm shadow-sm">
             ${escapeHtml(text)}
           </div>
         `;
       } else {
         div.innerHTML = `
-          <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center flex-shrink-0 text-xs">IA</div>
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-3.5 max-w-[85%] text-sm text-slate-200 leading-relaxed space-y-1">
+          <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+            IA
+          </div>
+          <div class="bg-white border border-stone-200 rounded-2xl rounded-tl-xs p-4 max-w-[85%] text-sm text-stone-800 shadow-xs leading-relaxed space-y-1">
             ${formatMarkdown(text)}
           </div>
         `;
@@ -1042,7 +1107,7 @@
 
     function formatMarkdown(text) {
       return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-stone-900">$1</strong>')
         .replace(/\n/g, '<br/>');
     }
 
@@ -1068,10 +1133,10 @@
       container.innerHTML = slots.map(s => `
         <button type="button" onclick="selectSlot('${s.time}', ${s.busy})" class="p-2.5 rounded-xl text-xs font-semibold border transition text-center ${
           s.busy 
-            ? 'bg-slate-900/50 border-slate-800/80 text-slate-600 cursor-not-allowed line-through' 
+            ? 'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed line-through' 
             : state.selectedSlots === s.time 
-              ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-600/20' 
-              : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+              ? 'bg-rose-600 border-rose-600 text-white shadow-sm shadow-rose-200' 
+              : 'bg-white border-stone-200 text-stone-700 hover:border-rose-400 hover:bg-rose-50/50'
         }">
           ${s.time} ${s.busy ? '(Ocupado)' : '✅ Libre'}
         </button>
@@ -1089,12 +1154,12 @@
       container.innerHTML = state.services.map(s => {
         const checked = state.selectedServicesForBooking.includes(s.id);
         return `
-          <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${checked ? 'bg-rose-950/20 border-rose-500/40' : 'bg-slate-900 border-slate-800'}">
+          <label class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition ${checked ? 'bg-rose-50/70 border-rose-300 shadow-2xs' : 'bg-white border-stone-200 hover:border-stone-300'}">
             <div class="flex items-center gap-2.5">
-              <input type="checkbox" onchange="toggleServiceSelection('${s.id}')" ${checked ? 'checked' : ''} class="rounded border-slate-700 text-rose-600 focus:ring-0">
-              <span class="text-xs font-medium text-slate-200">${s.name} (${s.durationMinutes}m)</span>
+              <input type="checkbox" onchange="toggleServiceSelection('${s.id}')" ${checked ? 'checked' : ''} class="rounded border-stone-300 text-rose-600 focus:ring-0">
+              <span class="text-xs font-semibold text-stone-800">${s.name} (${s.durationMinutes}m)</span>
             </div>
-            <span class="text-xs font-bold text-white">${s.price.toFixed(2)} €</span>
+            <span class="text-xs font-bold text-stone-900">${s.price.toFixed(2)} €</span>
           </label>
         `;
       }).join('');
@@ -1162,7 +1227,7 @@
         value: 'https://tu-peluqueria.com/fidelizacion/' + state.clients[0].qrHash,
         size: 180,
         background: '#ffffff',
-        foreground: '#0f172a'
+        foreground: '#1c1917'
       });
     }
 
@@ -1185,9 +1250,9 @@
           document.getElementById('loyalty-balance-display').innerText = `${data.newBalance} pts`;
           document.getElementById('client-points-badge').innerText = `${data.newBalance} pts (${(data.newBalance/100*5).toFixed(2)} € dto.)`;
           document.getElementById('tpv-client-points-badge').innerText = `${data.newBalance} pts disp.`;
-          document.getElementById('review-status-badge').className = 'font-bold text-emerald-400';
+          document.getElementById('review-status-badge').className = 'font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200';
           document.getElementById('review-status-badge').innerText = '✅ Reseña verificada (+50 pts aplicados)';
-          btn.className = 'w-full bg-emerald-600/30 text-emerald-300 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed';
+          btn.className = 'w-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed';
           btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Bonificación Cobrada`;
           alert('¡Enhorabuena! Google Business Profile ha confirmado tu reseña de 5 estrellas. Se han añadido +50 puntos a tu cuenta.');
         } else {
@@ -1208,17 +1273,17 @@
       const showcase = state.products.filter(p => p.isShowcase);
       const container = document.getElementById('showcase-grid');
       container.innerHTML = showcase.map(p => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg">
+        <div class="luxury-card rounded-2xl overflow-hidden flex flex-col justify-between">
           <img src="${p.img || 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80'}" alt="${p.name}" class="h-44 w-full object-cover">
           <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
             <div>
-              <span class="text-[10px] font-bold tracking-wider uppercase text-rose-400">${p.brand}</span>
-              <h4 class="text-xs font-bold text-white">${p.name}</h4>
-              <p class="text-[11px] text-slate-400 mt-1">Stock visible: <strong class="text-white">${p.stock} unidades</strong></p>
+              <span class="text-[10px] font-bold tracking-wider uppercase text-rose-600">${p.brand}</span>
+              <h4 class="text-xs font-bold text-stone-900">${p.name}</h4>
+              <p class="text-[11px] text-stone-500 mt-1">Stock disponible: <strong class="text-stone-800">${p.stock} unidades</strong></p>
             </div>
-            <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
-              <span class="text-sm font-black text-white">${p.price.toFixed(2)} € <span class="text-[10px] font-normal text-slate-500">IVA incl.</span></span>
-              <button onclick="reserveProduct('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''} class="bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 disabled:text-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+            <div class="pt-3 border-t border-stone-100 flex items-center justify-between">
+              <span class="text-sm font-black text-stone-900 font-mono-code">${p.price.toFixed(2)} € <span class="text-[10px] font-normal text-stone-500">IVA incl.</span></span>
+              <button onclick="reserveProduct('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''} class="bg-rose-600 hover:bg-rose-500 disabled:bg-stone-200 disabled:text-stone-400 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-2xs">
                 <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Reservar
               </button>
             </div>
@@ -1257,31 +1322,31 @@
       const clientApts = state.appointments.filter(a => a.clientId === 'cli-1' || a.clientName.includes('Laura'));
 
       if (!clientApts.length) {
-        container.innerHTML = '<p class="text-xs text-slate-500">No tienes citas activas programadas.</p>';
+        container.innerHTML = '<p class="text-xs text-stone-400 p-2">No tienes citas activas programadas.</p>';
         return;
       }
 
       container.innerHTML = clientApts.map(a => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="luxury-card rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-white">${a.serviceNames || 'Servicio de Peluquería'}</span>
+            <span class="text-xs font-bold text-stone-900">${a.serviceNames || 'Servicio de Peluquería'}</span>
             <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-              a.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+              a.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
             }">
               ${a.status === 'confirmed' ? 'Confirmada' : a.status}
             </span>
           </div>
-          <div class="text-xs text-slate-400 space-y-1">
-            <p>📅 <strong>Horario:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} (${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})})</p>
+          <div class="text-xs text-stone-600 space-y-1">
+            <p>📅 <strong>Fecha:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</p>
             <p>💇‍♀️ <strong>Estilista:</strong> ${a.staffName}</p>
-            ${a.clientComments ? `<p class="italic text-slate-500">"${a.clientComments}"</p>` : ''}
+            ${a.clientComments ? `<p class="italic text-stone-500">"${a.clientComments}"</p>` : ''}
           </div>
-          <div class="border-t border-slate-800 pt-2 flex gap-2">
-            <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-emerald-400 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Ver WhatsApp 24h
+          <div class="border-t border-stone-100 pt-2 flex gap-2">
+            <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 24h
             </button>
-            <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-emerald-400 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Ver WhatsApp 2h
+            <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 2h
             </button>
           </div>
         </div>
@@ -1296,16 +1361,16 @@
       
       if (type === '24h') {
         body.innerHTML = `
-          <p class="font-bold text-white mb-1">¡Hola Laura! 👋</p>
+          <p class="font-bold text-stone-900 mb-1">¡Hola Laura! 👋</p>
           <p>Te recordamos tu cita de mañana a las <strong>${timeStr}</strong> en Peluquería Losan con <strong>${apt ? apt.staffName : 'Elena Gómez'}</strong>.</p>
-          <p class="mt-2 text-slate-400">Servicios: ${apt ? apt.serviceNames : 'Tinte + Corte'}.</p>
-          <div class="mt-3 p-2 bg-slate-900 rounded-lg border border-slate-800 text-[11px] text-emerald-400">
-            ✅ Pulsa para confirmar asistencia o avisar de cualquier modificación.
+          <p class="mt-2 text-stone-500">Servicios: ${apt ? apt.serviceNames : 'Tinte + Corte'}.</p>
+          <div class="mt-3 p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-[11px] text-emerald-800">
+            ✅ Pulsa para confirmar asistencia o avisar con antelación de cualquier cambio.
           </div>
         `;
       } else {
         body.innerHTML = `
-          <p class="font-bold text-white mb-1">¡Nos vemos en 2 horas! ⏰</p>
+          <p class="font-bold text-stone-900 mb-1">¡Nos vemos en 2 horas! ⏰</p>
           <p>Tu estilista te estará esperando en el salón a las <strong>${timeStr}</strong>. ¡Ya tenemos listo tu expediente de colorimetría!</p>
         `;
       }
@@ -1332,24 +1397,24 @@
       document.getElementById('worker-appointment-count').innerText = `${myApts.length} cita(s) programada(s)`;
 
       if (!myApts.length) {
-        container.innerHTML = '<p class="text-xs text-slate-500 p-4">No tienes citas asignadas para esta jornada.</p>';
+        container.innerHTML = '<p class="text-xs text-stone-400 p-4 bg-stone-50 rounded-xl text-center">No tienes citas asignadas para esta jornada.</p>';
         return;
       }
 
       container.innerHTML = myApts.map(a => `
-        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <div class="text-center font-mono-code bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
-              <span class="text-xs font-bold text-purple-400 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-              <span class="text-[10px] text-slate-500">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+        <div class="p-4 bg-white border border-stone-200 rounded-xl flex items-center justify-between gap-4 shadow-2xs hover:border-stone-300 transition">
+          <div class="flex items-center gap-3.5">
+            <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200">
+              <span class="text-xs font-bold text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+              <span class="text-[10px] text-stone-400">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
             </div>
             <div>
-              <h5 class="text-sm font-bold text-white">${a.clientName}</h5>
-              <p class="text-xs text-slate-400">${a.serviceNames}</p>
-              ${a.clientComments ? `<p class="text-[11px] text-slate-500 italic mt-0.5">"${a.clientComments}"</p>` : ''}
+              <h5 class="text-sm font-bold text-stone-900">${a.clientName}</h5>
+              <p class="text-xs text-stone-500">${a.serviceNames}</p>
+              ${a.clientComments ? `<p class="text-[11px] text-stone-400 italic mt-0.5">"${a.clientComments}"</p>` : ''}
             </div>
           </div>
-          <button onclick="selectClientForTechnicalRecord('${a.clientId}')" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+          <button onclick="selectClientForTechnicalRecord('${a.clientId}')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
             <i data-lucide="eye" class="w-3.5 h-3.5"></i> Ficha Técnica
           </button>
         </div>
@@ -1410,16 +1475,16 @@
 
     function renderColumnApts(staffId) {
       const list = state.appointments.filter(a => a.staffId === staffId && a.status !== 'cancelled');
-      if (!list.length) return '<p class="text-xs text-slate-600 p-2 text-center">Sin citas asignadas</p>';
+      if (!list.length) return '<p class="text-xs text-stone-400 p-3 text-center bg-stone-50 rounded-xl">Sin citas asignadas</p>';
 
       return list.map(a => `
-        <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1.5 shadow">
+        <div class="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-1.5 shadow-2xs hover:border-stone-300 transition">
           <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-white">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">${a.status}</span>
+            <span class="font-bold text-stone-900">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+            <span class="text-[10px] bg-white text-stone-600 px-2 py-0.5 rounded border border-stone-200 font-semibold">${a.status}</span>
           </div>
-          <p class="text-xs font-semibold text-slate-200">${a.clientName}</p>
-          <p class="text-[11px] text-slate-400 truncate">${a.serviceNames}</p>
+          <p class="text-xs font-semibold text-stone-800">${a.clientName}</p>
+          <p class="text-[11px] text-stone-500 truncate">${a.serviceNames}</p>
         </div>
       `).join('');
     }
@@ -1446,24 +1511,24 @@
         document.getElementById('leave-timestamp').innerText = new Date().toLocaleTimeString('es-ES');
         
         document.getElementById('leave-metrics-grid').innerHTML = `
-          <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
-            <span class="text-slate-500 block">Total Afectadas:</span>
-            <span class="text-lg font-black text-white">${data.summary.totalAffected}</span>
+          <div class="p-3 bg-white rounded-xl border border-stone-200 text-center shadow-2xs">
+            <span class="text-stone-500 block">Total Afectadas:</span>
+            <span class="text-lg font-black text-stone-900">${data.summary.totalAffected}</span>
           </div>
-          <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
-            <span class="text-slate-500 block">Nivel 1 (Reasignadas directas):</span>
-            <span class="text-lg font-black text-emerald-400">${data.summary.automaticallyReassigned}</span>
+          <div class="p-3 bg-white rounded-xl border border-stone-200 text-center shadow-2xs">
+            <span class="text-stone-500 block">Nivel 1 (Reasignadas directas):</span>
+            <span class="text-lg font-black text-emerald-700">${data.summary.automaticallyReassigned}</span>
           </div>
-          <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
-            <span class="text-slate-500 block">Nivel 3 (Cola IA Preferente):</span>
-            <span class="text-lg font-black text-amber-400">${data.summary.sentToAiQueue}</span>
+          <div class="p-3 bg-white rounded-xl border border-stone-200 text-center shadow-2xs">
+            <span class="text-stone-500 block">Nivel 3 (Cola IA Preferente):</span>
+            <span class="text-lg font-black text-amber-700">${data.summary.sentToAiQueue}</span>
           </div>
         `;
 
         document.getElementById('leave-details-list').innerHTML = data.details.map(d => `
-          <div class="p-2 bg-slate-900/60 rounded-lg border border-slate-800/80 flex justify-between items-center mt-1">
+          <div class="p-2.5 bg-white rounded-lg border border-stone-200 flex justify-between items-center text-xs">
             <span>Clienta: <strong>${d.clientName}</strong></span>
-            <span class="text-emerald-400 font-semibold">${d.action} → ${d.newStaff}</span>
+            <span class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">${d.action} → ${d.newStaff}</span>
           </div>
         `).join('');
 
@@ -1483,14 +1548,14 @@
     function renderTpvTable() {
       const tbody = document.getElementById('tpv-items-tbody');
       tbody.innerHTML = state.tpvItems.map((item, idx) => `
-        <tr>
-          <td class="p-3 font-medium text-white">${item.concept}</td>
-          <td class="p-3 text-center">${item.quantity}</td>
-          <td class="p-3 text-right font-mono-code">${item.unitPrice.toFixed(2)} €</td>
-          <td class="p-3 text-center text-slate-400">${item.vatRate}%</td>
-          <td class="p-3 text-right font-mono-code font-bold text-white">${(item.quantity * item.unitPrice).toFixed(2)} €</td>
+        <tr class="hover:bg-stone-50 transition">
+          <td class="p-3 font-semibold text-stone-900">${item.concept}</td>
+          <td class="p-3 text-center text-stone-700">${item.quantity}</td>
+          <td class="p-3 text-right font-mono-code text-stone-700">${item.unitPrice.toFixed(2)} €</td>
+          <td class="p-3 text-center text-stone-500">${item.vatRate}%</td>
+          <td class="p-3 text-right font-mono-code font-bold text-stone-900">${(item.quantity * item.unitPrice).toFixed(2)} €</td>
           <td class="p-3 text-center">
-            <button onclick="removeTpvItem(${idx})" class="text-slate-500 hover:text-rose-400">
+            <button onclick="removeTpvItem(${idx})" class="text-stone-400 hover:text-rose-600 transition">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </td>
@@ -1561,10 +1626,10 @@
     function setTpvPaymentMethod(method) {
       state.tpvPaymentMethod = method;
       document.querySelectorAll('.tpv-pay-btn').forEach(b => {
-        b.classList.remove('bg-rose-600', 'text-white', 'active');
-        b.classList.add('bg-slate-900', 'text-slate-400');
+        b.classList.remove('bg-rose-600', 'text-white', 'shadow-sm', 'shadow-rose-200', 'active');
+        b.classList.add('bg-stone-50', 'text-stone-600');
       });
-      document.getElementById('pay-' + method).classList.add('bg-rose-600', 'text-white', 'active');
+      document.getElementById('pay-' + method).classList.add('bg-rose-600', 'text-white', 'shadow-sm', 'shadow-rose-200', 'active');
     }
 
     async function executeFiscalInvoicing() {
@@ -1638,15 +1703,15 @@
     function renderInvoicesTable() {
       const tbody = document.getElementById('invoices-tbody');
       tbody.innerHTML = state.invoices.map((inv, idx) => `
-        <tr class="hover:bg-slate-900/60 transition">
-          <td class="p-3 font-bold text-white">${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}</td>
-          <td class="p-3 text-slate-400">${new Date(inv.issueDate).toLocaleString('es-ES')}</td>
-          <td class="p-3 text-slate-300 font-sans">${inv.clientName}</td>
-          <td class="p-3 text-right">${inv.taxBase.toFixed(2)} €</td>
-          <td class="p-3 text-right text-slate-400">${inv.vatAmount.toFixed(2)} €</td>
-          <td class="p-3 text-right font-bold text-emerald-400">${inv.totalAmount.toFixed(2)} €</td>
+        <tr class="hover:bg-stone-50 transition">
+          <td class="p-3 font-bold text-stone-900">${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}</td>
+          <td class="p-3 text-stone-500">${new Date(inv.issueDate).toLocaleString('es-ES')}</td>
+          <td class="p-3 text-stone-700 font-sans font-medium">${inv.clientName}</td>
+          <td class="p-3 text-right text-stone-700">${inv.taxBase.toFixed(2)} €</td>
+          <td class="p-3 text-right text-stone-500">${inv.vatAmount.toFixed(2)} €</td>
+          <td class="p-3 text-right font-bold text-emerald-700">${inv.totalAmount.toFixed(2)} €</td>
           <td class="p-3 text-center">
-            <span class="inline-block bg-slate-900 text-slate-400 px-2 py-0.5 rounded text-[10px] border border-slate-800" title="Hash: ${inv.recordHash}">
+            <span class="inline-block bg-stone-100 text-stone-600 px-2 py-0.5 rounded text-[10px] border border-stone-200 font-mono-code" title="Hash: ${inv.recordHash}">
               🔗 ${inv.recordHash.slice(0, 10)}...
             </span>
           </td>
@@ -1676,23 +1741,23 @@
     function renderStockTable() {
       const tbody = document.getElementById('stock-tbody');
       tbody.innerHTML = state.products.map(p => `
-        <tr class="hover:bg-slate-900/60 transition">
-          <td class="p-3 font-mono-code text-slate-400">${p.sku}</td>
-          <td class="p-3 font-semibold text-white">${p.name} <span class="text-slate-500 font-normal">(${p.brand})</span></td>
+        <tr class="hover:bg-stone-50 transition">
+          <td class="p-3 font-mono-code text-stone-500">${p.sku}</td>
+          <td class="p-3 font-semibold text-stone-900">${p.name} <span class="text-stone-400 font-normal">(${p.brand})</span></td>
           <td class="p-3 text-center">
-            <span class="text-[10px] px-2 py-0.5 rounded-full ${p.isShowcase ? 'bg-purple-500/20 text-purple-300' : 'bg-slate-800 text-slate-400'}">
+            <span class="text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${p.isShowcase ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-stone-100 text-stone-600 border border-stone-200'}">
               ${p.isShowcase ? 'Tienda Escaparate' : 'Uso Interno'}
             </span>
           </td>
-          <td class="p-3 text-right font-mono-code">${p.price.toFixed(2)} €</td>
-          <td class="p-3 text-center font-bold ${p.stock <= 4 ? 'text-amber-400' : 'text-slate-200'}">${p.stock} uds</td>
+          <td class="p-3 text-right font-mono-code text-stone-800">${p.price.toFixed(2)} €</td>
+          <td class="p-3 text-center font-bold ${p.stock <= 4 ? 'text-amber-600' : 'text-stone-800'}">${p.stock} uds</td>
           <td class="p-3 text-center">
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.stock <= 4 ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.stock <= 4 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
               ${p.stock <= 4 ? 'Reponer' : 'Óptimo'}
             </span>
           </td>
           <td class="p-3 text-center">
-            <button onclick="restockProduct('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-lg text-[11px] transition">
+            <button onclick="restockProduct('${p.id}')" class="bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-800 px-2.5 py-1 rounded-lg text-[11px] font-medium transition shadow-2xs">
               + Reponer 5
             </button>
           </td>
