@@ -192,7 +192,8 @@ const db = {
       phone: '34655555555',
       allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)',
       generalNotes: 'Prefiere tonos cobrizos sutiles. Suele pedir café con leche sin azúcar.',
-      loyaltyPoints: 120,
+      loyaltyPoints: 150,
+      points: 150,
       stampsCount: 3,
       completedCardsCount: 0,
       activeRewards: [],
@@ -1903,6 +1904,11 @@ app.post('/api/staff/leave', (req, res) => {
 
 // 7. CLIENTES Y EXPEDIENTES TÉCNICOS (DNI COMO IDENTIFICADOR FUNDAMENTAL)
 app.get('/api/clients', (req, res) => {
+  db.clients.forEach(c => {
+    const pts = c.loyaltyPoints !== undefined ? c.loyaltyPoints : (c.points || 0);
+    c.loyaltyPoints = pts;
+    c.points = pts;
+  });
   res.json(db.clients);
 });
 
@@ -1991,6 +1997,10 @@ app.get('/api/clients/by-dni/:dni', (req, res) => {
     return res.status(404).json({ exists: false, error: 'Clienta no encontrada con este DNI.' });
   }
 
+  const pts = client.loyaltyPoints !== undefined ? client.loyaltyPoints : (client.points || 0);
+  client.loyaltyPoints = pts;
+  client.points = pts;
+
   const appointments = db.appointments.filter(a => a.clientId === client.id || a.clientDni === cleanDni);
   const technicalRecords = db.technicalRecords.filter(r => r.clientId === client.id);
 
@@ -2005,6 +2015,10 @@ app.get('/api/clients/by-dni/:dni', (req, res) => {
 app.get('/api/clients/:id', (req, res) => {
   const client = db.clients.find(c => c.id === req.params.id);
   if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
+
+  const pts = client.loyaltyPoints !== undefined ? client.loyaltyPoints : (client.points || 0);
+  client.loyaltyPoints = pts;
+  client.points = pts;
 
   const records = db.technicalRecords.filter(r => r.clientId === client.id);
   res.json({ ...client, technicalRecords: records });
@@ -4771,6 +4785,7 @@ app.post('/api/clients/:id/adjust-loyalty', (req, res) => {
 
   if (effectiveDeltaPoints) {
     client.loyaltyPoints = Math.max(0, (client.loyaltyPoints || 0) + effectiveDeltaPoints);
+    client.points = client.loyaltyPoints;
   }
 
   // Registrar en stampHistory para histórico oficial y Excel

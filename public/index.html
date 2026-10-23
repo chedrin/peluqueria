@@ -1641,11 +1641,19 @@
             <span class="text-xs bg-stone-100 text-stone-700 font-medium px-3 py-1 rounded-full border border-stone-200">Caja Principal 01</span>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-stone-600 mb-1">Cargar Cita Pendiente de Cobro:</label>
-            <select id="tpv-appointment-select" onchange="loadAppointmentIntoTpv()" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
-              <option value="">-- Cobro manual de servicios o cosméticos --</option>
-            </select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-stone-600 mb-1">Clienta / Titular en Caja:</label>
+              <select id="tpv-client-select" onchange="onTpvClientChange(this.value)" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                <option value="">-- Seleccionar clienta registrada --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-stone-600 mb-1">Cargar Cita Pendiente de Cobro:</label>
+              <select id="tpv-appointment-select" onchange="loadAppointmentIntoTpv()" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+                <option value="">-- Cobro manual de servicios o cosméticos --</option>
+              </select>
+            </div>
           </div>
 
           <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
@@ -1708,14 +1716,21 @@
 
             <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-xs">
               <div class="flex justify-between items-center">
-                <span class="text-stone-600 font-medium">Canjear Puntos de la Clienta:</span>
-                <span class="font-bold text-amber-800 font-mono-code" id="tpv-client-points-badge">120 pts disp.</span>
+                <span class="text-stone-700 font-medium flex items-center gap-1.5">
+                  <i data-lucide="award" class="w-3.5 h-3.5 text-amber-600"></i> Puntos de Fidelización:
+                </span>
+                <span class="font-bold text-amber-800 font-mono-code bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200" id="tpv-client-points-badge">0 pts disp.</span>
               </div>
-              <div class="flex gap-2">
-                <button onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-1.5 font-semibold text-[11px] transition">
-                  Canjear 100 pts (-5,00 €)
+              <div class="flex items-center gap-2" id="tpv-points-buttons">
+                <button type="button" id="btn-tpv-redeem-100" onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-1.5 font-semibold text-[11px] transition flex items-center justify-center gap-1">
+                  <i data-lucide="tag" class="w-3 h-3 text-amber-700"></i>
+                  <span>Canjear 100 pts (-5,00 €)</span>
+                </button>
+                <button type="button" id="btn-tpv-remove-discount" onclick="removeLoyaltyPointsDiscount()" class="hidden bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 rounded-lg px-2.5 py-1.5 font-semibold text-[11px] transition">
+                  ✕ Quitar
                 </button>
               </div>
+              <div id="tpv-points-status-msg" class="text-[11px] text-amber-800 font-medium hidden"></div>
             </div>
 
             <!-- Canjear Tarjeta Regalo o Bono Prepago en TPV -->
@@ -6002,6 +6017,8 @@
       ],
       tpvPaymentMethod: 'card',
       tpvDiscountPoints: 0,
+      tpvRedeemedPoints: 0,
+      tpvRedeemedClientId: null,
       
       tpvVoucherDiscount: 0,
       tpvVoucherCode: '',
@@ -6146,7 +6163,7 @@
           { id: 'stf-3', name: 'Carmen Vidal', isAvailable: true, specialty: 'Tratamientos & Keratina' },
         ];
         state.clients = [
-          { id: 'cli-1', dni: '12345678Z', name: 'Laura Martínez', phone: '34655555555', allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)', points: 120, loyaltyPoints: 120, qrCodeHash: 'QR-12345678Z-HASH' },
+          { id: 'cli-1', dni: '12345678Z', name: 'Laura Martínez', phone: '34655555555', allergies: 'Sensibilidad al amoniaco concentrado (usar oxidante 20vol sin PPD)', points: 150, loyaltyPoints: 150, qrCodeHash: 'QR-12345678Z-HASH' },
           { id: 'cli-2', dni: '87654321X', name: 'Sofía Morales', phone: '34666666666', allergies: 'Sin alergias conocidas. Cabello muy fino.', points: 50, loyaltyPoints: 50, qrCodeHash: 'QR-87654321X-HASH' },
           { id: 'cli-3', dni: '45678912C', name: 'Carmen Sánchez', phone: '34677777777', allergies: 'Alergia al níquel.', points: 75, loyaltyPoints: 75, qrCodeHash: 'QR-45678912C-HASH' },
           { id: 'cli-4', dni: '78912345M', name: 'Marta Domínguez', phone: '34688888888', allergies: 'Cuero cabelludo reactivo.', points: 90, loyaltyPoints: 90, qrHash: 'QR-78912345M-HASH' },
@@ -8233,6 +8250,94 @@
     // ========================================================================
     // TPV Y COBROS EN CAJA
     // ========================================================================
+    function getActiveTpvClient() {
+      const cliSel = document.getElementById('tpv-client-select');
+      if (cliSel && cliSel.value) {
+        const c = (state.clients || []).find(cl => cl.id === cliSel.value);
+        if (c) return c;
+      }
+
+      const aptSel = document.getElementById('tpv-appointment-select');
+      if (aptSel && aptSel.value) {
+        const apt = (state.appointments || []).find(a => a.id === aptSel.value);
+        if (apt) {
+          const c = (state.clients || []).find(cl => 
+            cl.id === apt.clientId || 
+            (apt.clientDni && cl.dni && cl.dni.toUpperCase() === apt.clientDni.toUpperCase()) || 
+            (apt.clientName && cl.name && cl.name.trim().toLowerCase() === apt.clientName.trim().toLowerCase())
+          );
+          if (c) return c;
+        }
+      }
+
+      if (state.selectedClientId) {
+        const c = (state.clients || []).find(cl => cl.id === state.selectedClientId);
+        if (c) return c;
+      }
+
+      if (state.loggedInClient) {
+        return state.loggedInClient;
+      }
+
+      return (state.clients && state.clients.length > 0) ? state.clients[0] : null;
+    }
+
+    function getClientLoyaltyPoints(client) {
+      if (!client) return 0;
+      if (client.loyaltyPoints !== undefined && client.loyaltyPoints !== null) {
+        return Number(client.loyaltyPoints) || 0;
+      }
+      if (client.points !== undefined && client.points !== null) {
+        return Number(client.points) || 0;
+      }
+      return 0;
+    }
+
+    function onTpvClientChange(clientId) {
+      state.selectedClientId = clientId;
+      if (state.tpvDiscountPoints > 0) {
+        removeLoyaltyPointsDiscount(true);
+      }
+      updateTpvPointsBadge();
+    }
+
+    function updateTpvPointsBadge() {
+      const badge = document.getElementById('tpv-client-points-badge');
+      const removeBtn = document.getElementById('btn-tpv-remove-discount');
+      const statusMsg = document.getElementById('tpv-points-status-msg');
+      const redeemBtn = document.getElementById('btn-tpv-redeem-100');
+      if (!badge) return;
+
+      const client = getActiveTpvClient();
+      if (!client) {
+        badge.innerText = '0 pts disp.';
+        if (removeBtn) removeBtn.classList.add('hidden');
+        if (statusMsg) statusMsg.classList.add('hidden');
+        return;
+      }
+
+      const currentPts = getClientLoyaltyPoints(client);
+      const clientFirstName = (client.name || 'Clienta').split(' ')[0];
+      badge.innerText = `${currentPts} pts disp. (${clientFirstName})`;
+
+      if (state.tpvDiscountPoints > 0) {
+        if (removeBtn) removeBtn.classList.remove('hidden');
+        if (statusMsg) {
+          statusMsg.classList.remove('hidden');
+          statusMsg.innerText = `✓ Descuento de ${state.tpvDiscountPoints.toFixed(2)} € aplicado (${state.tpvRedeemedPoints || 100} pts canjeados).`;
+        }
+        if (redeemBtn) {
+          redeemBtn.classList.add('opacity-50');
+        }
+      } else {
+        if (removeBtn) removeBtn.classList.add('hidden');
+        if (statusMsg) statusMsg.classList.add('hidden');
+        if (redeemBtn) {
+          redeemBtn.classList.remove('opacity-50');
+        }
+      }
+    }
+
     function renderTpvTable() {
       const tbody = document.getElementById('tpv-items-tbody');
       tbody.innerHTML = state.tpvItems.map((item, idx) => `
@@ -8276,6 +8381,7 @@
       document.getElementById('tpv-total-amount').innerText = finalGross.toFixed(2) + ' €';
 
       populateQuickSelects();
+      updateTpvPointsBadge();
       lucide.createIcons();
     }
 
@@ -8285,32 +8391,67 @@
     }
 
     function populateQuickSelects() {
+      const cliSelect = document.getElementById('tpv-client-select');
+      if (cliSelect) {
+        const activeClient = getActiveTpvClient();
+        const currentId = activeClient ? activeClient.id : (cliSelect.value || state.selectedClientId || '');
+        cliSelect.innerHTML = '<option value="">-- Seleccionar clienta registrada --</option>' + 
+          (state.clients || []).map(c => {
+            const pts = getClientLoyaltyPoints(c);
+            const sel = c.id === currentId ? 'selected' : '';
+            return `<option value="${c.id}" ${sel}>${c.name} (${c.dni || 'Sin DNI'}) - ${pts} pts</option>`;
+          }).join('');
+        if (activeClient && !state.selectedClientId) {
+          state.selectedClientId = activeClient.id;
+        }
+      }
+
       const srvSelect = document.getElementById('tpv-quick-service');
-      srvSelect.innerHTML = '<option value="">+ Añadir Servicio al Ticket...</option>' + 
-        state.services.map(s => `<option value="srv:${s.id}">${s.name} (${s.price.toFixed(2)} €)</option>`).join('');
+      if (srvSelect) {
+        srvSelect.innerHTML = '<option value="">+ Añadir Servicio al Ticket...</option>' + 
+          state.services.map(s => `<option value="srv:${s.id}">${s.name} (${s.price.toFixed(2)} €)</option>`).join('');
+      }
 
       const prdSelect = document.getElementById('tpv-quick-product');
-      prdSelect.innerHTML = '<option value="">+ Añadir Producto de Muestra...</option>' + 
-        state.products.map(p => `<option value="prd:${p.id}">${p.name} (${p.price.toFixed(2)} €)</option>`).join('');
+      if (prdSelect) {
+        prdSelect.innerHTML = '<option value="">+ Añadir Producto de Muestra...</option>' + 
+          state.products.map(p => `<option value="prd:${p.id}">${p.name} (${p.price.toFixed(2)} €)</option>`).join('');
+      }
       
       const aptSelect = document.getElementById('tpv-appointment-select');
       if (aptSelect) {
+        const currentAptVal = aptSelect.value || '';
         aptSelect.innerHTML = '<option value="">-- Cobro manual de servicios o cosméticos --</option>' + 
           state.appointments.filter(a => a.status === 'confirmed').map(a => 
-            `<option value="${a.id}">Cita: ${a.clientName} (${a.serviceNames}) - ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</option>`
+            `<option value="${a.id}" ${a.id === currentAptVal ? 'selected' : ''}>Cita: ${a.clientName} (${a.serviceNames}) - ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</option>`
           ).join('');
       }
     }
 
     function loadAppointmentIntoTpv() {
-      const aptId = document.getElementById('tpv-appointment-select').value;
-      if (!aptId) return;
+      const aptId = document.getElementById('tpv-appointment-select')?.value;
+      if (!aptId) {
+        updateTpvPointsBadge();
+        return;
+      }
 
-      const apt = state.appointments.find(a => a.id === aptId);
+      const apt = (state.appointments || []).find(a => a.id === aptId);
       if (!apt) return;
 
+      // Sincronizar clienta en selector de TPV
+      const matchedClient = (state.clients || []).find(cl => 
+        cl.id === apt.clientId || 
+        (apt.clientDni && cl.dni && cl.dni.toUpperCase() === apt.clientDni.toUpperCase()) || 
+        (apt.clientName && cl.name && cl.name.trim().toLowerCase() === apt.clientName.trim().toLowerCase())
+      );
+      if (matchedClient) {
+        state.selectedClientId = matchedClient.id;
+        const cliSel = document.getElementById('tpv-client-select');
+        if (cliSel) cliSel.value = matchedClient.id;
+      }
+
       state.tpvItems = [];
-      const services = state.services.filter(s => (apt.serviceIds || []).includes(s.id));
+      const services = (state.services || []).filter(s => (apt.serviceIds || []).includes(s.id));
       if (services.length > 0) {
         services.forEach(s => {
           state.tpvItems.push({ concept: s.name, quantity: 1, unitPrice: s.price, vatRate: 21.0 });
@@ -8318,6 +8459,8 @@
       } else {
         state.tpvItems.push({ concept: apt.serviceNames || 'Servicio de Peluquería', quantity: 1, unitPrice: 35.00, vatRate: 21.0 });
       }
+
+      updateTpvPointsBadge();
       renderTpvTable();
     }
 
@@ -8339,15 +8482,109 @@
       renderTpvTable();
     }
 
-    function applyLoyaltyPointsDiscount(points) {
-      if ((state.clients[0]?.points || 0) < points) {
-        alert('Saldo de puntos insuficiente.');
+    async function applyLoyaltyPointsDiscount(points = 100) {
+      const client = getActiveTpvClient();
+      if (!client) {
+        alert('Por favor, selecciona una clienta en caja para canjear sus puntos.');
         return;
       }
-      state.tpvDiscountPoints = (points / 100) * 5.0;
-      state.clients[0].points -= points;
+
+      if (state.tpvDiscountPoints > 0) {
+        alert(`Ya se ha aplicado un descuento de ${state.tpvDiscountPoints.toFixed(2)} € por canje de puntos a este ticket.`);
+        return;
+      }
+
+      const currentPts = getClientLoyaltyPoints(client);
+      if (currentPts < points) {
+        alert(`Saldo de puntos insuficiente.\n\nClienta: ${client.name}\nPuntos disponibles: ${currentPts} pts\nPuntos requeridos: ${points} pts`);
+        return;
+      }
+
+      const discountAmount = (points / 100) * 5.0;
+      state.tpvDiscountPoints = discountAmount;
+      state.tpvRedeemedPoints = points;
+      state.tpvRedeemedClientId = client.id;
+
+      const newBalance = Math.max(0, currentPts - points);
+      client.loyaltyPoints = newBalance;
+      client.points = newBalance;
+
+      if (state.loggedInClient && (state.loggedInClient.id === client.id || state.loggedInClient.dni === client.dni)) {
+        state.loggedInClient.loyaltyPoints = newBalance;
+        state.loggedInClient.points = newBalance;
+      }
+
+      try {
+        await fetch(`/api/clients/${client.id}/adjust-loyalty`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'redeem_points',
+            deltaPoints: -points,
+            note: `Canje TPV de ${points} pts por descuento de ${discountAmount.toFixed(2)} €`
+          })
+        });
+      } catch (err) {
+        console.warn('Sincronización de puntos en backend:', err);
+      }
+
+      updateTpvPointsBadge();
+      populateQuickSelects();
       renderTpvTable();
-      alert(`¡Aplicado descuento de 5,00 € por canje de ${points} puntos!`);
+      alert(`¡Aplicado descuento de ${discountAmount.toFixed(2)} € por canje de ${points} puntos a ${client.name}!\n\nSaldo anterior: ${currentPts} pts\nPuntos canjeados: ${points} pts\nSaldo restante: ${newBalance} pts`);
+    }
+
+    async function removeLoyaltyPointsDiscount(silent = false) {
+      if (!state.tpvDiscountPoints || !state.tpvRedeemedPoints) {
+        state.tpvDiscountPoints = 0;
+        state.tpvRedeemedPoints = 0;
+        state.tpvRedeemedClientId = null;
+        renderTpvTable();
+        updateTpvPointsBadge();
+        return;
+      }
+
+      const redeemedPts = state.tpvRedeemedPoints;
+      const clientId = state.tpvRedeemedClientId;
+      const client = (state.clients || []).find(c => c.id === clientId) || getActiveTpvClient();
+
+      if (client) {
+        const currentPts = getClientLoyaltyPoints(client);
+        const restoredBalance = currentPts + redeemedPts;
+        client.loyaltyPoints = restoredBalance;
+        client.points = restoredBalance;
+
+        if (state.loggedInClient && (state.loggedInClient.id === client.id || state.loggedInClient.dni === client.dni)) {
+          state.loggedInClient.loyaltyPoints = restoredBalance;
+          state.loggedInClient.points = restoredBalance;
+        }
+
+        try {
+          await fetch(`/api/clients/${client.id}/adjust-loyalty`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'restore_points',
+              deltaPoints: redeemedPts,
+              note: `Devolución de ${redeemedPts} pts por anulación de descuento en TPV`
+            })
+          });
+        } catch (err) {
+          console.warn('Devolución de puntos local:', err);
+        }
+      }
+
+      state.tpvDiscountPoints = 0;
+      state.tpvRedeemedPoints = 0;
+      state.tpvRedeemedClientId = null;
+
+      updateTpvPointsBadge();
+      populateQuickSelects();
+      renderTpvTable();
+
+      if (!silent) {
+        alert(`Se ha cancelado el canje de puntos. Se han reintegrado los ${redeemedPts} puntos a la clienta.`);
+      }
     }
 
     function setTpvPaymentMethod(method) {
@@ -8365,22 +8602,49 @@
         return;
       }
 
+      const client = getActiveTpvClient();
+      const grossTotal = state.tpvItems.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
+      const total = Math.max(0, grossTotal - (state.tpvDiscountPoints || 0) - (state.tpvVoucherDiscount || 0));
+
       // Si el método seleccionado en TPV es tarjeta, abrir datáfono virtual
       if (state.tpvPaymentMethod === 'card') {
-        const total = state.tpvItems.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
-        const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
+        let concept = state.tpvItems.map(i => i.concept).join(' + ');
+        if (state.tpvDiscountPoints > 0) concept += ` (Dto. Puntos: -${state.tpvDiscountPoints.toFixed(2)} €)`;
+        if (state.tpvVoucherDiscount > 0) concept += ` (Bono: -${state.tpvVoucherDiscount.toFixed(2)} €)`;
+
         openCardTerminalModal({
-          concept: state.tpvItems.map(i => i.concept).join(' + '),
+          concept,
           amount: total,
           clientId: client ? client.id : 'cli-1',
-          clientName: client ? client.name : 'Cliente en TPV',
+          clientName: client ? client.name : 'Clienta en TPV',
           staffId: state.activeStaffId || 'stf-1',
           notes: 'Cobro TPV con Datáfono'
         });
         return;
       }
 
-      const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
+      // Preparar líneas de factura con descuentos aplicados
+      const invoiceItems = [...state.tpvItems];
+      if (state.tpvDiscountPoints > 0) {
+        invoiceItems.push({
+          concept: `Descuento Canje Puntos Fidelización (-${state.tpvDiscountPoints.toFixed(2)} €)`,
+          quantity: 1,
+          unitPrice: -state.tpvDiscountPoints,
+          vatRate: 21.0
+        });
+      }
+      if (state.tpvVoucherDiscount > 0) {
+        invoiceItems.push({
+          concept: `Descuento Tarjeta Regalo / Bono (-${state.tpvVoucherDiscount.toFixed(2)} €)`,
+          quantity: 1,
+          unitPrice: -state.tpvVoucherDiscount,
+          vatRate: 21.0
+        });
+      }
+
+      // Resolver cita vinculada si hay alguna seleccionada
+      const aptSelect = document.getElementById('tpv-appointment-select');
+      const appointmentId = aptSelect ? aptSelect.value : null;
 
       try {
         const res = await fetch('/api/invoices', {
@@ -8389,8 +8653,9 @@
           body: JSON.stringify({
             series: 'FS2026',
             type: 'simplified',
+            appointmentId: appointmentId || undefined,
             clientId: client ? client.id : 'cli-1',
-            items: state.tpvItems,
+            items: invoiceItems,
             paymentMethod: state.tpvPaymentMethod
           })
         });
@@ -8402,7 +8667,10 @@
         showTicketModal(invoice);
         state.tpvItems = [];
         state.tpvDiscountPoints = 0;
+        state.tpvRedeemedPoints = 0;
+        state.tpvRedeemedClientId = null;
         renderTpvTable();
+        updateTpvPointsBadge();
 
       } catch (e) {
         alert('Factura emitida localmente.');
@@ -8834,10 +9102,12 @@
       state.selectedClientId = clientId;
       switchPortal('admin');
       switchAdminTab('pos-tpv');
-      const client = state.clients.find(c => c.id === clientId);
+      const cliSel = document.getElementById('tpv-client-select');
+      if (cliSel) cliSel.value = clientId;
+      updateTpvPointsBadge();
+      renderTpvTable();
+      const client = (state.clients || []).find(c => c.id === clientId);
       if (client) {
-        const pts = client.loyaltyPoints !== undefined ? client.loyaltyPoints : (client.points || 0);
-        document.getElementById('tpv-client-points-badge').innerText = `${pts} pts disp.`;
         alert(`Clienta ${client.name} (DNI: ${client.dni}) seleccionada en el TPV.`);
       }
     }
@@ -14294,10 +14564,16 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         if (res.ok) {
           if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
           closeCardTerminalModal();
+          state.tpvItems = [];
+          state.tpvDiscountPoints = 0;
+          state.tpvRedeemedPoints = 0;
+          state.tpvRedeemedClientId = null;
           await fetchInitialData();
           renderWorkerAgenda();
           renderMasterAgenda();
           pollAdminNotifications();
+          renderTpvTable();
+          updateTpvPointsBadge();
           showTicketModal(data.invoice, data.transaction);
         } else {
           alert('Error en pasarela bancaria: ' + data.error);
