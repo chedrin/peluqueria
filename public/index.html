@@ -1418,48 +1418,181 @@
       <!-- Banner de Avisos en Tiempo Real (Estilistas -> Caja / Cobros) -->
         <div id="admin-notifications-banner-area" class="space-y-2 mb-4"></div>
 
-      <!-- Sub-navegación Administración -->
-      <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
-        <button onclick="switchAdminTab('agenda-master')" id="tab-a-agenda" class="admin-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
-          <i data-lucide="calendar-range" class="w-4 h-4 text-indigo-600"></i> Agenda Maestra Multicanal
-        </button>
-        <button onclick="switchAdminTab('pos-tpv')" id="tab-a-tpv" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="credit-card" class="w-4 h-4 text-stone-500"></i> TPV & Cobros en Caja
-        </button>
-        <button onclick="switchAdminTab('fiscal-verifactu')" id="tab-a-fiscal" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="file-check-2" class="w-4 h-4 text-stone-500"></i> Facturación Fiscal Veri*Factu (Ley 11/2021)
-        </button>
-        <button onclick="switchAdminTab('stock')" id="tab-a-stock" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="boxes" class="w-4 h-4 text-stone-500"></i> Control de Stock
-        </button>
-        <button onclick="switchAdminTab('crm')" id="tab-a-crm" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="users" class="w-4 h-4 text-stone-500"></i> CRM / Clientas & DNI
-        </button>
-        <button onclick="switchAdminTab('kpis')" id="tab-a-kpis" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition">
-          <i data-lucide="bar-chart-3" class="w-4 h-4 text-stone-500"></i> KPIs & Negocio
-        </button>
-        <button onclick="switchAdminTab('staff')" id="tab-a-staff" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="scissors" class="w-4 h-4 text-stone-500"></i> Estilistas (Altas & Bajas)
-        </button>
-        <button onclick="switchAdminTab('loyalty')" id="tab-a-loyalty" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="award" class="w-4 h-4 text-stone-500"></i> Tarjeta de Sellos & QR
-        </button>
-        <button onclick="switchAdminTab('salon')" id="tab-a-salon" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="store" class="w-4 h-4 text-stone-500"></i> Datos de la Peluquería
-        </button>
-        <button onclick="switchAdminTab('time-tracking')" id="tab-a-timetracking" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="clock" class="w-4 h-4 text-stone-500"></i> Control Horario & Fichajes
-        </button>
-        <button onclick="switchAdminTab('services')" id="tab-a-services" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="sparkles" class="w-4 h-4 text-stone-500"></i> Servicios & Tiempos
-        </button>
-        <button onclick="switchAdminTab('packages')" id="tab-a-packages" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="gift" class="w-4 h-4 text-stone-500"></i> Bonos, Regalos & Lookbook
-        </button>
-        <button onclick="switchAdminTab('users')" id="tab-a-users" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
-          <i data-lucide="key" class="w-4 h-4 text-stone-500"></i> Claves & Usuarios
-        </button>
-      </div>
+      <!-- ===================================================================== -->
+      <!-- LAYOUT PRINCIPAL DE ADMINISTRACIÓN: SIDEBAR VERTICAL + VISTAS         -->
+      <!-- ===================================================================== -->
+      <div class="flex flex-col lg:flex-row items-start gap-6 relative">
+
+        <!-- MENÚ VERTICAL A LA IZQUIERDA CON DESPLEGABLES SUAVES (SIDEBAR) -->
+        <aside id="admin-vertical-sidebar" class="w-full lg:w-72 flex-shrink-0 bg-white border border-stone-200/90 rounded-3xl p-4 shadow-sm lg:sticky lg:top-24 space-y-3.5 z-20 transition-all duration-300">
+          
+          <!-- Cabecera del Menú Vertical -->
+          <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-purple-600 text-white flex items-center justify-center font-bold shadow-xs">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-stone-900 font-serif-luxury uppercase tracking-wider">Menú de Gestión</h4>
+                <span class="text-[10px] text-stone-400 block font-medium">13 Módulos del Salón</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="toggleAllAdminNavGroups(true)" title="Desplegar todos los menús" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer text-[10px]">
+                <i data-lucide="chevrons-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="toggleAllAdminNavGroups(false)" title="Colapsar todos los menús" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition cursor-pointer text-[10px]">
+                <i data-lucide="chevrons-up" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Selector Rápido Móvil (visible en pantallas pequeñas) -->
+          <div class="lg:hidden pb-1">
+            <button type="button" onclick="toggleMobileAdminSidebar()" class="w-full flex items-center justify-between p-2.5 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-xl text-xs font-bold text-stone-800 transition cursor-pointer">
+              <span class="flex items-center gap-2">
+                <i data-lucide="menu" class="w-4 h-4 text-indigo-600"></i>
+                <span>Navegación Móvil</span>
+              </span>
+              <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800" id="mobile-active-tab-label">Agenda Maestra</span>
+            </button>
+          </div>
+
+          <!-- CONTENEDOR DESPLEGABLE DE SECCIONES (ACORDEÓN CON TRANSICIONES SUAVES) -->
+          <div id="admin-sidebar-nav-sections" class="space-y-2">
+
+            <!-- GRUPO 1: OPERACIONES & MOSTRADOR -->
+            <div class="space-y-1">
+              <button type="button" onclick="toggleAdminNavGroup('nav-group-ops')" class="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-stone-800 hover:bg-stone-100/80 transition cursor-pointer group">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="group-hover:text-indigo-600 transition text-[11px] uppercase tracking-wide">Agenda & Mostrador</span>
+                </div>
+                <i data-lucide="chevron-down" id="arrow-nav-group-ops" class="w-3.5 h-3.5 text-stone-400 transition-transform duration-300 transform"></i>
+              </button>
+              <div id="nav-group-ops" data-collapsed="false" class="admin-nav-dropdown space-y-1 pl-2 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 400px; opacity: 1;">
+                <button onclick="switchAdminTab('agenda-master')" id="tab-a-agenda" class="admin-tab active w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs text-left transition cursor-pointer">
+                  <i data-lucide="calendar-range" class="w-3.5 h-3.5 flex-shrink-0 text-indigo-600"></i>
+                  <span class="truncate">Agenda Maestra Multicanal</span>
+                </button>
+                <button onclick="switchAdminTab('pos-tpv')" id="tab-a-tpv" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="credit-card" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">TPV & Cobros en Caja</span>
+                </button>
+                <button onclick="switchAdminTab('time-tracking')" id="tab-a-timetracking" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Control Horario & Fichajes</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GRUPO 2: FISCALIDAD & FINANZAS -->
+            <div class="space-y-1">
+              <button type="button" onclick="toggleAdminNavGroup('nav-group-finance')" class="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-stone-800 hover:bg-stone-100/80 transition cursor-pointer group">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="group-hover:text-emerald-600 transition text-[11px] uppercase tracking-wide">Fiscalidad & Finanzas</span>
+                </div>
+                <i data-lucide="chevron-down" id="arrow-nav-group-finance" class="w-3.5 h-3.5 text-stone-400 transition-transform duration-300 transform"></i>
+              </button>
+              <div id="nav-group-finance" data-collapsed="false" class="admin-nav-dropdown space-y-1 pl-2 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 400px; opacity: 1;">
+                <button onclick="switchAdminTab('fiscal-verifactu')" id="tab-a-fiscal" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="file-check-2" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Facturación Veri*Factu</span>
+                </button>
+                <button onclick="switchAdminTab('kpis')" id="tab-a-kpis" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">KPIs & Rendimiento</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GRUPO 3: CLIENTAS & FIDELIZACIÓN -->
+            <div class="space-y-1">
+              <button type="button" onclick="toggleAdminNavGroup('nav-group-clients')" class="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-stone-800 hover:bg-stone-100/80 transition cursor-pointer group">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="group-hover:text-rose-600 transition text-[11px] uppercase tracking-wide">Clientas & Fidelización</span>
+                </div>
+                <i data-lucide="chevron-down" id="arrow-nav-group-clients" class="w-3.5 h-3.5 text-stone-400 transition-transform duration-300 transform"></i>
+              </button>
+              <div id="nav-group-clients" data-collapsed="false" class="admin-nav-dropdown space-y-1 pl-2 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 400px; opacity: 1;">
+                <button onclick="switchAdminTab('crm')" id="tab-a-crm" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="users" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">CRM / Fichas & DNI</span>
+                </button>
+                <button onclick="switchAdminTab('loyalty')" id="tab-a-loyalty" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="award" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Tarjeta de Sellos & QR</span>
+                </button>
+                <button onclick="switchAdminTab('packages')" id="tab-a-packages" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="gift" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Bonos, Regalos & Lookbook</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GRUPO 4: ALMACÉN & CATÁLOGO -->
+            <div class="space-y-1">
+              <button type="button" onclick="toggleAdminNavGroup('nav-group-catalog')" class="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-stone-800 hover:bg-stone-100/80 transition cursor-pointer group">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="boxes" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="group-hover:text-amber-600 transition text-[11px] uppercase tracking-wide">Almacén & Catálogo</span>
+                </div>
+                <i data-lucide="chevron-down" id="arrow-nav-group-catalog" class="w-3.5 h-3.5 text-stone-400 transition-transform duration-300 transform"></i>
+              </button>
+              <div id="nav-group-catalog" data-collapsed="false" class="admin-nav-dropdown space-y-1 pl-2 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 400px; opacity: 1;">
+                <button onclick="switchAdminTab('stock')" id="tab-a-stock" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="boxes" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Control de Stock & Proveedores</span>
+                </button>
+                <button onclick="switchAdminTab('services')" id="tab-a-services" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Servicios, Precios & Tiempos</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GRUPO 5: EQUIPO & CONFIGURACIÓN -->
+            <div class="space-y-1">
+              <button type="button" onclick="toggleAdminNavGroup('nav-group-config')" class="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold text-stone-800 hover:bg-stone-100/80 transition cursor-pointer group">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="group-hover:text-purple-600 transition text-[11px] uppercase tracking-wide">Equipo & Configuración</span>
+                </div>
+                <i data-lucide="chevron-down" id="arrow-nav-group-config" class="w-3.5 h-3.5 text-stone-400 transition-transform duration-300 transform"></i>
+              </button>
+              <div id="nav-group-config" data-collapsed="false" class="admin-nav-dropdown space-y-1 pl-2 transition-all duration-300 ease-in-out overflow-hidden" style="max-height: 400px; opacity: 1;">
+                <button onclick="switchAdminTab('staff')" id="tab-a-staff" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="scissors" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Estilistas (Altas & Bajas)</span>
+                </button>
+                <button onclick="switchAdminTab('salon')" id="tab-a-salon" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="store" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Datos de la Peluquería</span>
+                </button>
+                <button onclick="switchAdminTab('users')" id="tab-a-users" class="admin-tab w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 text-left transition cursor-pointer">
+                  <i data-lucide="key" class="w-3.5 h-3.5 flex-shrink-0 text-stone-500"></i>
+                  <span class="truncate">Claves & Usuarios de Acceso</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+        <!-- CONTENEDOR PRINCIPAL DE VISTAS DE ADMINISTRACIÓN (DERECHA) -->
+        <div class="flex-1 min-w-0 w-full space-y-6">
 
       <!-- VISTA 3A: AGENDA MAESTRA & PROTOCOLO DE BAJA MÉDICA -->
       <div id="aview-agenda" class="space-y-6">
@@ -2765,6 +2898,9 @@
           </div>
         </div>
       </div>
+
+        </div> <!-- Fin Contenedor Principal de Vistas de Administración -->
+      </div> <!-- Fin Layout 2-Columnas Administración -->
 
       </div> <!-- Fin #admin-dashboard-view -->
     </div>
@@ -6400,6 +6536,78 @@
       updateHeaderSessionBadge();
       lucide.createIcons();
     }
+    // ========================================================================
+    // CONTROL DEL MENÚ VERTICAL LATERAL CON DESPLEGABLES SUAVES
+    // ========================================================================
+    function toggleAdminNavGroup(groupId) {
+      const el = document.getElementById(groupId);
+      const arrow = document.getElementById('arrow-' + groupId);
+      if (!el) return;
+      const isCollapsed = el.dataset.collapsed === 'true';
+      if (isCollapsed) {
+        el.style.maxHeight = (el.scrollHeight + 40) + 'px';
+        el.style.opacity = '1';
+        el.style.marginTop = '4px';
+        el.style.marginBottom = '4px';
+        el.dataset.collapsed = 'false';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      } else {
+        el.style.maxHeight = '0px';
+        el.style.opacity = '0';
+        el.style.marginTop = '0px';
+        el.style.marginBottom = '0px';
+        el.dataset.collapsed = 'true';
+        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    function toggleAllAdminNavGroups(openAll) {
+      const groups = document.querySelectorAll('.admin-nav-dropdown');
+      groups.forEach(g => {
+        const arrow = document.getElementById('arrow-' + g.id);
+        if (openAll) {
+          g.style.maxHeight = (g.scrollHeight + 40) + 'px';
+          g.style.opacity = '1';
+          g.style.marginTop = '4px';
+          g.style.marginBottom = '4px';
+          g.dataset.collapsed = 'false';
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        } else {
+          g.style.maxHeight = '0px';
+          g.style.opacity = '0';
+          g.style.marginTop = '0px';
+          g.style.marginBottom = '0px';
+          g.dataset.collapsed = 'true';
+          if (arrow) arrow.style.transform = 'rotate(-90deg)';
+        }
+      });
+    }
+
+    function ensureAdminNavGroupOpenForTab(btnId) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const group = btn.closest('.admin-nav-dropdown');
+      if (group && group.id) {
+        const arrow = document.getElementById('arrow-' + group.id);
+        group.style.maxHeight = (group.scrollHeight + 40) + 'px';
+        group.style.opacity = '1';
+        group.style.marginTop = '4px';
+        group.style.marginBottom = '4px';
+        group.dataset.collapsed = 'false';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function toggleMobileAdminSidebar() {
+      const sections = document.getElementById('admin-sidebar-nav-sections');
+      if (!sections) return;
+      if (sections.classList.contains('hidden')) {
+        sections.classList.remove('hidden');
+      } else {
+        sections.classList.add('hidden');
+      }
+    }
+
 
     function handleHashRouting() {
       const hash = window.location.hash.toLowerCase();
@@ -6555,12 +6763,23 @@
       const info = tabMap[tab] || { view: 'aview-' + tab, btn: 'tab-a-' + tab, key: tab };
       
       document.querySelectorAll('.admin-tab').forEach(b => {
-        b.classList.remove('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
-        b.classList.add('text-stone-600');
+        b.classList.remove('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active', 'font-semibold');
+        b.classList.add('text-stone-600', 'font-medium');
       });
       const activeBtn = document.getElementById(info.btn);
       if (activeBtn) {
-        activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
+        activeBtn.classList.remove('text-stone-600', 'font-medium');
+        activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active', 'font-semibold');
+        
+        // Actualizar etiqueta activa móvil
+        const mobileLabel = document.getElementById('mobile-active-tab-label');
+        if (mobileLabel) {
+          const span = activeBtn.querySelector('span');
+          if (span) mobileLabel.innerText = span.innerText.trim();
+        }
+
+        // Asegurar que su desplegable vertical esté suavemente abierto
+        ensureAdminNavGroupOpenForTab(info.btn);
       }
 
       document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis, #aview-staff, #aview-salon, #aview-loyalty, #aview-timetracking, #aview-users, #aview-services, #aview-packages').forEach(el => el.classList.add('hidden'));
