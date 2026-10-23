@@ -79,20 +79,23 @@
         </div>
       </div>
 
-      <!-- Selector de Rol / Portal (Pills Modernos en Contraste) -->
-      <div class="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 shadow-inner">
-        <button id="btn-portal-client" onclick="switchPortal('client')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-stone-900 shadow-sm border border-stone-200/60">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-500"></i>
-          <span>1. Portal Clientas</span>
-        </button>
-        <button id="btn-portal-staff" onclick="switchPortal('staff')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all">
-          <i data-lucide="user-check" class="w-3.5 h-3.5 text-purple-500"></i>
-          <span>2. Trabajadoras</span>
-        </button>
-        <button id="btn-portal-admin" onclick="switchPortal('admin')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all">
-          <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-500"></i>
-          <span>3. Administración / TPV</span>
-        </button>
+      <!-- Selector de Acceso Segregado: Clientas vs Administración -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 shadow-inner">
+          <a href="#clientes" id="btn-nav-clientes" onclick="switchPortal('client'); return false;" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-stone-900 shadow-sm border border-stone-200/80 cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i>
+            <span>Acceso Clientas</span>
+          </a>
+          <a href="#admin" id="btn-nav-admin" onclick="switchPortal('admin'); return false;" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all cursor-pointer">
+            <i data-lucide="shield" class="w-4 h-4 text-indigo-600"></i>
+            <span>Acceso Administración</span>
+          </a>
+        </div>
+
+        <!-- Indicador de Sesión de Usuario -->
+        <div id="header-user-badge" class="hidden items-center gap-2 pl-2">
+          <!-- Render dinámico según usuario logueado -->
+        </div>
       </div>
 
     </div>
@@ -105,6 +108,31 @@
     <!-- PORTAL 1: PORTAL CLIENTAS (PWA / MOBILE FIRST) -->
     <!-- ======================================================================= -->
     <div id="portal-client" class="space-y-6">
+
+      <!-- BANNER PWA CLIENTAS: INSTALABLE EN EL MÓVIL (ACCESO #CLIENTES) -->
+      <div id="client-pwa-install-banner" class="bg-gradient-to-r from-stone-900 via-rose-950 to-stone-950 text-white p-4 sm:p-5 rounded-2xl shadow-md border border-rose-800/40 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-300 text-2xl flex-shrink-0 shadow-inner">
+            📱
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-bold text-rose-300">App Oficial Clientas (PWA #clientes)</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Instalable
+              </span>
+            </div>
+            <h4 class="text-sm sm:text-base font-bold text-white font-serif-luxury mt-0.5">Instala la App de Peluquería Losan en tu Móvil</h4>
+            <p class="text-xs text-stone-300 max-w-xl">Accede con 1 clic desde tu pantalla de inicio a tus citas programadas, bonos y sella tu tarjeta de fidelización con el código QR del mostrador.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button onclick="installClientPWA()" id="btn-install-client-pwa" class="w-full md:w-auto bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-rose-900/50 cursor-pointer whitespace-nowrap">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>📲 Instalar App en el Móvil</span>
+          </button>
+        </div>
+      </div>
 
       <!-- ===================================================================== -->
       <!-- PANTALLA DE ACCESO / ONBOARDING CON DNI (ID FUNDAMENTAL)              -->
@@ -1216,6 +1244,109 @@
     <!-- ======================================================================= -->
     <div id="portal-admin" class="hidden space-y-6">
 
+      <!-- ===================================================================== -->
+      <!-- PANTALLA DE ACCESO / LOGIN DE ADMINISTRACIÓN (VALIDADO EN BD)         -->
+      <!-- Se muestra cuando el usuario NO está autenticado como administrador   -->
+      <!-- ===================================================================== -->
+      <div id="admin-login-view" class="luxury-card rounded-3xl p-6 sm:p-10 max-w-xl mx-auto shadow-lg border border-stone-200 transition-all">
+        <div class="text-center max-w-md mx-auto mb-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-700 via-purple-600 to-stone-900 flex items-center justify-center text-white mx-auto mb-4 shadow-md shadow-indigo-300">
+            <i data-lucide="shield-lock" class="w-8 h-8 text-indigo-100"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-stone-900 font-serif-luxury tracking-tight">Acceso a Administración & Salón</h2>
+          <p class="text-xs text-stone-500 mt-2">Introduce tus credenciales de gerencia o estilista registradas en la base de datos para acceder al TPV, agenda y control de jornada.</p>
+        </div>
+
+        <form onsubmit="handleAdminLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Usuario o Correo Electrónico *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+                <i data-lucide="user" class="w-4 h-4"></i>
+              </span>
+              <input type="text" id="admin-login-user" required placeholder="admin o admin@peluquerialosan.es" class="w-full bg-stone-50 border border-stone-300 rounded-xl pl-9 pr-3 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition shadow-2xs font-semibold">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Contraseña de Acceso *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+                <i data-lucide="key" class="w-4 h-4"></i>
+              </span>
+              <input type="password" id="admin-login-pass" required placeholder="••••••••" class="w-full bg-stone-50 border border-stone-300 rounded-xl pl-9 pr-3 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition shadow-2xs font-semibold">
+            </div>
+          </div>
+
+          <div id="admin-login-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 text-rose-600"></i>
+            <span id="admin-login-error-msg">Error de credenciales</span>
+          </div>
+
+          <button type="submit" id="btn-submit-admin-login" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-sm shadow-indigo-300 cursor-pointer">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Iniciar Sesión en Administración</span>
+          </button>
+        </form>
+
+        <!-- Botones de Demostración Rápida con Datos de la BD -->
+        <div class="mt-6 pt-5 border-t border-stone-200 space-y-2">
+          <span class="text-[11px] font-bold text-stone-400 uppercase tracking-wider block text-center">Acceso Rápido con Cuentas de la BD:</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button type="button" onclick="quickFillAdmin('admin', 'admin1234')" class="p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100/70 text-indigo-900 font-semibold text-left transition flex items-center gap-2 cursor-pointer">
+              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">MG</span>
+              <div>
+                <strong class="block text-[11px]">Marisa (Gerente)</strong>
+                <span class="text-[10px] text-stone-500">admin / admin1234</span>
+              </div>
+            </button>
+            <button type="button" onclick="quickFillAdmin('elena', 'elena1234')" class="p-2.5 rounded-xl border border-purple-200 bg-purple-50/70 hover:bg-purple-100/70 text-purple-900 font-semibold text-left transition flex items-center gap-2 cursor-pointer">
+              <span class="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px] font-bold">EG</span>
+              <div>
+                <strong class="block text-[11px]">Elena (Estilista)</strong>
+                <span class="text-[10px] text-stone-500">elena / elena1234</span>
+              </div>
+            </button>
+          </div>
+          <div class="text-center pt-2">
+            <a href="#clientes" onclick="switchPortal('client'); return false;" class="text-xs text-stone-500 hover:text-stone-800 underline font-medium">
+              ← Volver al portal de clientas (#clientes)
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PANEL DE GESTIÓN ADMINISTRATIVA (VISIBLE TRAS INICIAR SESIÓN)          -->
+      <!-- ===================================================================== -->
+      <div id="admin-dashboard-view" class="hidden space-y-6">
+
+        <!-- Barra Superior de Administrador Conectado -->
+        <div class="luxury-card p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-l-4 border-l-indigo-600">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center font-bold text-sm shadow-xs" id="admin-user-avatar">
+              MG
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-stone-500">Sesión Administrativa:</span>
+                <span id="admin-user-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Gerente</span>
+              </div>
+              <h4 id="admin-user-display-name" class="text-sm font-bold text-stone-900 font-serif-luxury">Marisa Garrido (Gerente)</h4>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button onclick="switchPortal('staff')" class="bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="scissors" class="w-3.5 h-3.5 text-purple-600"></i>
+              <span>Ver Portal Trabajadoras</span>
+            </button>
+            <button onclick="adminLogout()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition border border-stone-300 cursor-pointer">
+              <i data-lucide="log-out" class="w-3.5 h-3.5 text-stone-500"></i>
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+
       <!-- Sub-navegación Administración -->
       <div class="flex border-b border-stone-200 overflow-x-auto scrollbar-thin gap-1 pb-2">
         <button onclick="switchAdminTab('agenda-master')" id="tab-a-agenda" class="admin-tab active flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
@@ -2191,6 +2322,7 @@
         </div>
 
       </div>
+      </div> <!-- Fin #admin-dashboard-view -->
     </div>
 
   </main>
@@ -2298,6 +2430,7 @@
       selectedSlots: '17:30',
       selectedServicesForBooking: ['srv-1', 'srv-2'],
       loggedInClient: null, // Clienta autenticada mediante DNI (ID fundamental)
+      loggedInAdmin: null,  // Administrador o estilista autenticado en BD
       tpvItems: [
         { concept: 'Corte y Estilismo', quantity: 1, unitPrice: 22.00, vatRate: 21.0 },
         { concept: 'Coloración Completa (Tinte)', quantity: 1, unitPrice: 38.00, vatRate: 21.0 }
@@ -2348,6 +2481,20 @@
           state.loggedInClient = found;
         }
       }
+
+      // Recuperar sesión persistente de administración si existe en localStorage
+      const savedAdmin = localStorage.getItem('peluqueria_admin_user');
+      if (savedAdmin) {
+        try {
+          state.loggedInAdmin = JSON.parse(savedAdmin);
+        } catch (e) {
+          localStorage.removeItem('peluqueria_admin_user');
+        }
+      }
+
+      // Manejar enrutamiento por Hash (#clientes, #admin, #estilistas)
+      handleHashRouting();
+      window.addEventListener('hashchange', handleHashRouting);
 
       renderClientSession();
       renderBookingStylistSelectors();
@@ -2585,30 +2732,127 @@
     // ========================================================================
     function switchPortal(portal) {
       state.activePortal = portal;
-      
-      document.querySelectorAll('#btn-portal-client, #btn-portal-staff, #btn-portal-admin').forEach(btn => {
-        btn.classList.remove('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
-        btn.classList.add('text-stone-600');
-      });
 
+      // Actualizar botones de navegación principal
+      const navBtnClient = document.getElementById('btn-nav-clientes');
+      const navBtnAdmin = document.getElementById('btn-nav-admin');
+
+      if (navBtnClient && navBtnAdmin) {
+        if (portal === 'client') {
+          navBtnClient.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-stone-900 shadow-sm border border-stone-200/80 cursor-pointer';
+          navBtnAdmin.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all cursor-pointer';
+        } else {
+          navBtnClient.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition-all cursor-pointer';
+          navBtnAdmin.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-stone-900 shadow-sm border border-stone-200/80 cursor-pointer';
+        }
+      }
+
+      // Ocultar todos los portales
       document.getElementById('portal-client').classList.add('hidden');
       document.getElementById('portal-staff').classList.add('hidden');
       document.getElementById('portal-admin').classList.add('hidden');
 
       if (portal === 'client') {
         document.getElementById('portal-client').classList.remove('hidden');
-        document.getElementById('btn-portal-client').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
+        if (window.location.hash !== '#clientes' && window.location.hash !== '') {
+          history.replaceState(null, '', '#clientes');
+        }
+        renderClientSession();
       } else if (portal === 'staff') {
         document.getElementById('portal-staff').classList.remove('hidden');
-        document.getElementById('btn-portal-staff').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
+        if (window.location.hash !== '#estilistas') {
+          history.replaceState(null, '', '#estilistas');
+        }
         renderWorkerAgenda();
         loadStaffTimeTrackingStatus();
       } else if (portal === 'admin') {
         document.getElementById('portal-admin').classList.remove('hidden');
-        document.getElementById('btn-portal-admin').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
-        renderMasterAgenda();
+        if (window.location.hash !== '#admin' && window.location.hash !== '#administracion') {
+          history.replaceState(null, '', '#admin');
+        }
+        renderAdminAuthState();
       }
+
+      updateHeaderSessionBadge();
       lucide.createIcons();
+    }
+
+    function handleHashRouting() {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#admin' || hash === '#administracion' || hash === '#gerencia') {
+        switchPortal('admin');
+      } else if (hash === '#estilistas' || hash === '#staff' || hash === '#trabajadoras' || hash === '#fichajes') {
+        switchPortal('staff');
+      } else {
+        // Por defecto: Acceso a Clientes (#clientes)
+        switchPortal('client');
+      }
+    }
+
+    function renderAdminAuthState() {
+      const loginView = document.getElementById('admin-login-view');
+      const dashboardView = document.getElementById('admin-dashboard-view');
+
+      if (!loginView || !dashboardView) return;
+
+      if (state.loggedInAdmin) {
+        loginView.classList.add('hidden');
+        dashboardView.classList.remove('hidden');
+
+        // Actualizar datos del usuario conectado
+        const nameEl = document.getElementById('admin-user-display-name');
+        const roleEl = document.getElementById('admin-user-role-badge');
+        const avatarEl = document.getElementById('admin-user-avatar');
+
+        if (nameEl) nameEl.innerText = state.loggedInAdmin.displayName || state.loggedInAdmin.username;
+        if (roleEl) {
+          roleEl.innerText = state.loggedInAdmin.role === 'admin' ? 'Gerente General' : 'Estilista / Personal';
+          roleEl.className = state.loggedInAdmin.role === 'admin' 
+            ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200'
+            : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200';
+        }
+        if (avatarEl) {
+          const initials = (state.loggedInAdmin.displayName || state.loggedInAdmin.username).split(' ').map(n=>n[0]).join('').slice(0, 2).toUpperCase();
+          avatarEl.innerText = initials;
+        }
+
+        renderMasterAgenda();
+      } else {
+        loginView.classList.remove('hidden');
+        dashboardView.classList.add('hidden');
+      }
+    }
+
+    function updateHeaderSessionBadge() {
+      const badge = document.getElementById('header-user-badge');
+      if (!badge) return;
+
+      if (state.activePortal === 'admin' && state.loggedInAdmin) {
+        badge.className = 'flex items-center gap-2 pl-2 border-l border-stone-200';
+        badge.innerHTML = `
+          <span class="text-xs font-semibold text-stone-700 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            ${state.loggedInAdmin.displayName || state.loggedInAdmin.username}
+          </span>
+          <button onclick="adminLogout()" title="Cerrar Sesión" class="text-stone-400 hover:text-stone-700 p-1 rounded-md text-xs">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+      } else if (state.activePortal === 'client' && state.loggedInClient) {
+        badge.className = 'flex items-center gap-2 pl-2 border-l border-stone-200';
+        badge.innerHTML = `
+          <span class="text-xs font-semibold text-rose-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            ${state.loggedInClient.name} (DNI: ${state.loggedInClient.dni})
+          </span>
+          <button onclick="clientLogout()" title="Cerrar Sesión" class="text-stone-400 hover:text-stone-700 p-1 rounded-md text-xs">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+      } else {
+        badge.className = 'hidden';
+        badge.innerHTML = '';
+      }
     }
 
     function switchClientTab(tab) {
@@ -6351,6 +6595,113 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         alert('Error de conexión al guardar fichaje manual');
       }
     }
+
+    // ========================================================================
+    // 22. AUTENTICACIÓN SEGURA DE ADMINISTRACIÓN Y CLIENTES (EN BASE DE DATOS)
+    // ========================================================================
+    async function handleAdminLoginSubmit(event) {
+      event.preventDefault();
+      const user = document.getElementById('admin-login-user').value.trim();
+      const pass = document.getElementById('admin-login-pass').value.trim();
+      const errorBox = document.getElementById('admin-login-error');
+      const errorMsg = document.getElementById('admin-login-error-msg');
+      const submitBtn = document.getElementById('btn-submit-admin-login');
+
+      if (!user || !pass) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="animate-spin inline-block mr-2">⏳</span> Verificando en Base de Datos...';
+      if (errorBox) errorBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/auth/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usernameOrEmail: user, password: pass })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (errorBox && errorMsg) {
+            errorMsg.innerText = data.error || 'Credenciales inválidas';
+            errorBox.classList.remove('hidden');
+          }
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4"></i> Iniciar Sesión en Administración';
+          lucide.createIcons();
+          return;
+        }
+
+        // Login correcto: guardar sesión en estado y localStorage
+        state.loggedInAdmin = data.user;
+        localStorage.setItem('peluqueria_admin_user', JSON.stringify(data.user));
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> ¡Acceso Concedido!';
+
+        // Si es estilista, seleccionar su perfil automáticamente
+        if (data.user.staffId) {
+          state.activeStaffId = data.user.staffId;
+          const selectWorker = document.getElementById('select-active-worker');
+          if (selectWorker) selectWorker.value = data.user.staffId;
+        }
+
+        renderAdminAuthState();
+        updateHeaderSessionBadge();
+        lucide.createIcons();
+      } catch (err) {
+        if (errorBox && errorMsg) {
+          errorMsg.innerText = 'Error de conexión con el servidor.';
+          errorBox.classList.remove('hidden');
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4"></i> Iniciar Sesión en Administración';
+      }
+    }
+
+    function quickFillAdmin(username, password) {
+      const userInput = document.getElementById('admin-login-user');
+      const passInput = document.getElementById('admin-login-pass');
+      if (userInput && passInput) {
+        userInput.value = username;
+        passInput.value = password;
+        const fakeEvent = { preventDefault: () => {} };
+        handleAdminLoginSubmit(fakeEvent);
+      }
+    }
+
+    function adminLogout() {
+      if (confirm('¿Cerrar sesión de administración?')) {
+        state.loggedInAdmin = null;
+        localStorage.removeItem('peluqueria_admin_user');
+        renderAdminAuthState();
+        updateHeaderSessionBadge();
+        lucide.createIcons();
+      }
+    }
+
+    function clientLogout() {
+      if (confirm('¿Cerrar sesión de clienta? Tendrás que introducir tu DNI para volver a identificarte.')) {
+        state.loggedInClient = null;
+        localStorage.removeItem('peluqueria_client_dni');
+        renderClientSession();
+        updateHeaderSessionBadge();
+        lucide.createIcons();
+      }
+    }
+
+    function installClientPWA() {
+      if (state.deferredPwaPrompt) {
+        state.deferredPwaPrompt.prompt();
+        state.deferredPwaPrompt.userChoice.then((choiceResult) => {
+          console.log('[PWA Clientas] Elección del usuario:', choiceResult.outcome);
+          state.deferredPwaPrompt = null;
+        });
+      } else {
+        alert('📲 Para instalar la App de Peluquería Losan (Clientas) en tu móvil:\n\n• Android / Chrome: Pulsa los 3 puntos (⋮) arriba a la derecha y selecciona "Instalar aplicación" o "Añadir a pantalla de inicio".\n• iPhone / Safari: Pulsa el botón "Compartir" (cuadrado con flecha hacia arriba) y selecciona "Añadir a pantalla de inicio".\n\n¡Tendrás acceso inmediato a tus citas y sellos en #clientes!');
+      }
+    }
+
   </script>
 
   <!-- ========================================================================= -->

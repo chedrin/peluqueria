@@ -1,12 +1,12 @@
 {
-  "name": "Peluquería Losan — Portal Estilistas & Fichajes",
-  "short_name": "Estilistas Losan",
-  "description": "App para estilistas de Peluquería Losan: agenda diaria de citas, expedientes técnicos, fórmulas de color y registro horario de jornada laboral (fichajes).",
-  "start_url": "/?portal=staff",
+  "name": "Peluquería Losan — App Oficial (Citas, Fidelización & Gestión)",
+  "short_name": "Peluquería Losan",
+  "description": "App oficial de Peluquería & Estilismo Losan. Reserva citas online con asesoría IA, acumula sellos en tu tarjeta digital, y acceso a administración y control horario.",
+  "start_url": "/#clientes",
   "scope": "/",
   "display": "standalone",
   "background_color": "#1c1917",
-  "theme_color": "#7c3aed",
+  "theme_color": "#e11d48",
   "orientation": "portrait-primary",
   "lang": "es-ES",
   "icons": [
@@ -29,17 +29,27 @@
       "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity", "lifestyle"],
+  "categories": ["lifestyle", "business", "beauty"],
   "shortcuts": [
     {
-      "name": "Mi Agenda de Citas",
-      "url": "/?portal=staff",
-      "description": "Ver citas programadas para hoy"
+      "name": "Acceso Clientas (Citas & Sellos)",
+      "url": "/#clientes",
+      "description": "Pedir cita y ver tarjeta de fidelización"
     },
     {
-      "name": "Fichar Entrada / Salida",
-      "url": "/?portal=staff#fichajes",
-      "description": "Control de horario laboral"
+      "name": "Mi Tarjeta de Fidelización",
+      "url": "/#clientes?tab=loyalty",
+      "description": "Ver tarjeta de fidelización y escanear QR"
+    },
+    {
+      "name": "Acceso Administración & TPV",
+      "url": "/#admin",
+      "description": "Panel de gerencia, facturación Veri*Factu y control horario"
+    },
+    {
+      "name": "Portal Estilistas & Fichajes",
+      "url": "/#estilistas",
+      "description": "Agenda de citas y registro de jornada"
     }
   ]
 }

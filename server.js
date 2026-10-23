@@ -32,12 +32,75 @@ const db = {
     currency: 'EUR'
   },
   users: [
-    { id: 'usr-admin-1', phone: '34611111111', role: 'admin', firstName: 'Marisa', lastName: 'Garrido (Gerente)', isActive: true },
-    { id: 'usr-staff-1', phone: '34622222222', role: 'staff', firstName: 'Elena', lastName: 'Gómez', isActive: true },
-    { id: 'usr-staff-2', phone: '34633333333', role: 'staff', firstName: 'Raquel', lastName: 'Santos', isActive: true },
-    { id: 'usr-staff-3', phone: '34644444444', role: 'staff', firstName: 'Carmen', lastName: 'Vidal', isActive: true },
-    { id: 'usr-client-1', phone: '34655555555', role: 'client', firstName: 'Laura', lastName: 'Martínez', isActive: true },
-    { id: 'usr-client-2', phone: '34666666666', role: 'client', firstName: 'Sofía', lastName: 'Morales', isActive: true },
+    {
+      id: 'usr-admin-1',
+      username: 'admin',
+      email: 'admin@peluquerialosan.es',
+      password: 'admin1234',
+      role: 'admin',
+      firstName: 'Marisa',
+      lastName: 'Garrido',
+      displayName: 'Marisa Garrido (Gerente)',
+      phone: '34611111111',
+      isActive: true
+    },
+    {
+      id: 'usr-staff-1',
+      username: 'elena',
+      email: 'elena@peluquerialosan.es',
+      password: 'elena1234',
+      role: 'staff',
+      staffId: 'stf-1',
+      firstName: 'Elena',
+      lastName: 'Gómez',
+      displayName: 'Elena Gómez (Colorimetría)',
+      phone: '34622222222',
+      isActive: true
+    },
+    {
+      id: 'usr-staff-2',
+      username: 'raquel',
+      email: 'raquel@peluquerialosan.es',
+      password: 'raquel1234',
+      role: 'staff',
+      staffId: 'stf-2',
+      firstName: 'Raquel',
+      lastName: 'Santos',
+      displayName: 'Raquel Santos (Cortes & Estilismo)',
+      phone: '34633333333',
+      isActive: true
+    },
+    {
+      id: 'usr-staff-3',
+      username: 'carmen',
+      email: 'carmen@peluquerialosan.es',
+      password: 'carmen1234',
+      role: 'staff',
+      staffId: 'stf-3',
+      firstName: 'Carmen',
+      lastName: 'Vidal',
+      displayName: 'Carmen Vidal (Tratamientos)',
+      phone: '34644444444',
+      isActive: true
+    },
+    {
+      id: 'usr-client-1',
+      dni: '12345678Z',
+      phone: '34655555555',
+      role: 'client',
+      firstName: 'Laura',
+      lastName: 'Martínez',
+      isActive: true
+    },
+    {
+      id: 'usr-client-2',
+      dni: '87654321X',
+      phone: '34666666666',
+      role: 'client',
+      firstName: 'Sofía',
+      lastName: 'Morales',
+      isActive: true
+    }
   ],
   staff: [
     {
@@ -2974,6 +3037,94 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_Losan_${month}.xlsx"`);
   res.send(excelBuffer);
+});
+
+
+// ============================================================================
+// 19. AUTENTICACIÓN Y SEGURIDAD RBAC (ADMINISTRACIÓN Y CLIENTES EN BD)
+// ============================================================================
+
+// Login de Administración / Salón (Valida contra db.users en Base de Datos)
+app.post('/api/auth/admin/login', (req, res) => {
+  const { usernameOrEmail, password } = req.body;
+  if (!usernameOrEmail || !password) {
+    return res.status(400).json({ error: 'Por favor, introduce tu usuario/email y contraseña.' });
+  }
+
+  const query = usernameOrEmail.trim().toLowerCase();
+  const user = db.users.find(u => 
+    (u.username && u.username.toLowerCase() === query) ||
+    (u.email && u.email.toLowerCase() === query) ||
+    (u.phone && u.phone === query)
+  );
+
+  if (!user || user.password !== password) {
+    return res.status(401).json({ error: 'Credenciales inválidas. Verifica tu usuario/email y contraseña.' });
+  }
+
+  if (user.isActive === false) {
+    return res.status(403).json({ error: 'Este usuario se encuentra inactivo. Contacta con gerencia.' });
+  }
+
+  // Generar token de sesión
+  const token = 'adm-tok-' + Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      displayName: user.displayName || `${user.firstName} ${user.lastName}`,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      staffId: user.staffId || null
+    }
+  });
+});
+
+// Verificación de sesión de administración
+app.get('/api/auth/admin/verify', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return res.json({ valid: true, message: 'Sesión activa' });
+  }
+  res.json({ valid: false });
+});
+
+// Listado de usuarios administrativos en base de datos
+app.get('/api/auth/users', (req, res) => {
+  const safeUsers = db.users.map(u => ({
+    id: u.id,
+    username: u.username || '',
+    email: u.email || '',
+    role: u.role,
+    displayName: u.displayName || `${u.firstName} ${u.lastName}`,
+    phone: u.phone,
+    isActive: u.isActive !== false
+  }));
+  res.json(safeUsers);
+});
+
+// Modificar credenciales de un usuario en la BD
+app.put('/api/auth/users/:id', (req, res) => {
+  const user = db.users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+  const { username, email, password, isActive } = req.body;
+  if (username) user.username = username.trim();
+  if (email) user.email = email.trim();
+  if (password && password.trim()) user.password = password.trim();
+  if (isActive !== undefined) user.isActive = Boolean(isActive);
+
+  res.json({
+    success: true,
+    message: `Credenciales actualizadas en la base de datos para ${user.displayName || user.username}.`,
+    user: { id: user.id, username: user.username, email: user.email, role: user.role }
+  });
 });
 
 // Iniciar servidor

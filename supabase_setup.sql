@@ -90,6 +90,9 @@ CREATE TABLE IF NOT EXISTS profiles (
     auth_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE,
     phone VARCHAR(30) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE,
+    password_hash VARCHAR(255),
+    dni VARCHAR(20),
     role user_role NOT NULL DEFAULT 'client',
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -673,13 +676,13 @@ VALUES (
 ) ON CONFLICT DO NOTHING;
 
 -- 6.2 Perfiles y Usuarios
-INSERT INTO profiles (id, email, phone, role, first_name, last_name, is_active) VALUES
-('a0000000-0000-0000-0000-000000000001', 'gerencia@peluquerialosan.es', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
-('a0000000-0000-0000-0000-000000000002', 'elena@peluquerialosan.es', '+34 622 222 222', 'staff', 'Elena', 'Gómez', true),
-('a0000000-0000-0000-0000-000000000003', 'raquel@peluquerialosan.es', '+34 633 333 333', 'staff', 'Raquel', 'Santos', true),
-('a0000000-0000-0000-0000-000000000004', 'carmen@peluquerialosan.es', '+34 644 444 444', 'staff', 'Carmen', 'Vidal', true),
-('a0000000-0000-0000-0000-000000000005', 'laura@gmail.com', '+34 655 555 555', 'client', 'Laura', 'Martínez', true),
-('a0000000-0000-0000-0000-000000000006', 'sofia@gmail.com', '+34 666 666 666', 'client', 'Sofía', 'Morales', true)
+INSERT INTO profiles (id, username, email, password_hash, dni, phone, role, first_name, last_name, is_active) VALUES
+('a0000000-0000-0000-0000-000000000001', 'admin', 'admin@peluquerialosan.es', 'admin1234', '50123456M', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
+('a0000000-0000-0000-0000-000000000002', 'elena', 'elena@peluquerialosan.es', 'elena1234', '54321678E', '+34 622 222 222', 'staff', 'Elena', 'Gómez', true),
+('a0000000-0000-0000-0000-000000000003', 'raquel', 'raquel@peluquerialosan.es', 'raquel1234', '71234567R', '+34 633 333 333', 'staff', 'Raquel', 'Santos', true),
+('a0000000-0000-0000-0000-000000000004', 'carmen', 'carmen@peluquerialosan.es', 'carmen1234', '38912456C', '+34 644 444 444', 'staff', 'Carmen', 'Vidal', true),
+('a0000000-0000-0000-0000-000000000005', null, 'laura@gmail.com', null, '12345678Z', '+34 655 555 555', 'client', 'Laura', 'Martínez', true),
+('a0000000-0000-0000-0000-000000000006', null, 'sofia@gmail.com', null, '87654321X', '+34 666 666 666', 'client', 'Sofía', 'Morales', true)
 ON CONFLICT (phone) DO NOTHING;
 
 -- 6.3 Plantilla de Estilistas (Altas Activas)
