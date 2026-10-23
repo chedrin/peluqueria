@@ -50,6 +50,82 @@
     .luxury-card:hover {
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
     }
+
+    /* ========================================================================= */
+    /* 🚀 ESTILOS DRAG & DROP ULTRA-RÁPIDOS CON EFECTO MAGIA Y 60 FPS           */
+    /* ========================================================================= */
+    .appointment-card {
+      transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease, opacity 0.15s ease;
+      touch-action: pan-y;
+      user-select: none;
+    }
+    
+    .appointment-card.dragging {
+      opacity: 0.35 !important;
+      transform: scale(0.96) rotate(-1.5deg) !important;
+      box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.25) !important;
+      cursor: grabbing !important;
+    }
+
+    .appointment-card.just-moved {
+      animation: justMovedHighlight 1.8s ease-out forwards;
+    }
+
+    @keyframes justMovedHighlight {
+      0% {
+        transform: scale(0.92);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.6), 0 20px 25px -5px rgba(16, 185, 129, 0.3);
+        background-color: #ECFDF5;
+      }
+      50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: none;
+      }
+    }
+
+    .free-slot-dropzone {
+      transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    /* Cuando se inicia el arrastre, los huecos libres se iluminan como imanes */
+    body.is-dragging-appointment .free-slot-dropzone {
+      border-color: #10B981 !important;
+      background: rgba(236, 253, 245, 0.9) !important;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), inset 0 0 12px rgba(16, 185, 129, 0.08) !important;
+      animation: dropzoneGlow 1.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes dropzoneGlow {
+      from { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25); }
+      to { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(16, 185, 129, 0.2); }
+    }
+
+    /* Hueco libre cuando la cita vuela por encima (hover activo con imán magnético) */
+    .free-slot-dropzone.drag-hover {
+      transform: scale(1.04) !important;
+      background: #D1FAE5 !important;
+      border-color: #059669 !important;
+      border-style: solid !important;
+      box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.5), 0 10px 25px -3px rgba(16, 185, 129, 0.3) !important;
+      z-index: 10 !important;
+    }
+
+    body.is-dragging-appointment .appointment-card:not(.dragging) {
+      opacity: 0.65;
+    }
+
+    .agenda-toast {
+      animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from { transform: translateY(100%) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-rose-100 selection:text-rose-900">
@@ -1597,6 +1673,22 @@
       <!-- VISTA 3A: AGENDA MAESTRA & PROTOCOLO DE BAJA MÉDICA -->
       <div id="aview-agenda" class="space-y-6">
         
+        <!-- Banner flotante de Modo Reubicación Activo (0 ms) -->
+        <div id="moving-appointment-banner" class="hidden p-3.5 rounded-2xl bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 text-white shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 border border-purple-500/50">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center flex-shrink-0">
+              <i data-lucide="move" class="w-4 h-4 animate-bounce"></i>
+            </div>
+            <div>
+              <strong class="text-xs font-bold block">Modo Reubicación Activo (0 ms de Latencia)</strong>
+              <p class="text-[11px] text-purple-200" id="moving-appointment-text">Haz clic en cualquier hora libre verde para colocar la cita al instante.</p>
+            </div>
+          </div>
+          <button type="button" onclick="cancelAppointmentMove()" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition cursor-pointer flex-shrink-0">
+            ✕ Cancelar
+          </button>
+        </div>
+
         <!-- Barra de Emergencia: Protocolo de Baja Médica Repentina -->
         <div class="bg-rose-50/70 border border-rose-200 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
           <div class="flex items-center gap-3">
@@ -8077,6 +8169,21 @@
       if (colCarmen) colCarmen.innerHTML = renderColumnSlots('stf-3');
 
       updateAgendaCounters();
+
+      // Control del banner de modo reubicación
+      const movingBanner = document.getElementById('moving-appointment-banner');
+      if (movingBanner) {
+        if (state.selectedAppointmentToMove) {
+          const movingApt = (state.appointments || []).find(a => a.id === state.selectedAppointmentToMove);
+          const clientName = movingApt ? movingApt.clientName : 'Clienta';
+          const movingText = document.getElementById('moving-appointment-text');
+          if (movingText) movingText.innerText = `Reubicando cita de ${clientName}. Haz clic en cualquier hueco libre verde para colocarla al instante.`;
+          movingBanner.classList.remove('hidden');
+        } else {
+          movingBanner.classList.add('hidden');
+        }
+      }
+
       lucide.createIcons();
     }
 
@@ -8143,11 +8250,13 @@
           const staffBorderColor = staffId === 'stf-1' ? 'border-l-purple-600' : (staffId === 'stf-2' ? 'border-l-pink-600' : 'border-l-indigo-600');
           const staffBadgeBg = staffId === 'stf-1' ? 'bg-purple-600' : (staffId === 'stf-2' ? 'bg-pink-600' : 'bg-indigo-600');
 
+          const isJustMoved = state.justMovedAppointmentId === a.id;
+
           html += `
             <div draggable="true" 
                  ondragstart="handleAppointmentDragStart(event, '${a.id}')" 
                  ondragend="handleAppointmentDragEnd(event)" 
-                 class="appointment-card p-4 bg-gradient-to-br from-white via-indigo-50/25 to-purple-50/40 border-2 ${isSelectedToMove ? 'border-purple-600 ring-4 ring-purple-300 bg-purple-50/90' : 'border-indigo-200 hover:border-indigo-400'} border-l-[6px] ${staffBorderColor} rounded-2xl space-y-2.5 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all relative group">
+                 class="appointment-card ${isJustMoved ? 'just-moved' : ''} p-4 bg-gradient-to-br from-white via-indigo-50/25 to-purple-50/40 border-2 ${isSelectedToMove ? 'border-purple-600 ring-4 ring-purple-300 bg-purple-50/90' : 'border-indigo-200 hover:border-indigo-400'} border-l-[6px] ${staffBorderColor} rounded-2xl space-y-2.5 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all relative group">
               
               <!-- Cabecera de Hora y Badge de Ocupación de Alto Contraste -->
               <div class="flex flex-wrap items-center justify-between gap-1.5">
@@ -8233,29 +8342,31 @@
           const isMoveTarget = !!state.selectedAppointmentToMove;
 
           html += `
-            <div class="free-slot-dropzone p-3 bg-emerald-50/60 hover:bg-emerald-100/90 border-2 border-dashed ${isMoveTarget ? 'border-emerald-600 ring-4 ring-emerald-300 animate-pulse bg-emerald-100' : 'border-emerald-400 hover:border-emerald-600'} rounded-2xl transition-all duration-200 flex items-center justify-between gap-2 group cursor-pointer shadow-2xs"
+            <div class="free-slot-dropzone p-3 bg-emerald-50/60 hover:bg-emerald-100/90 border-2 border-dashed ${isMoveTarget ? 'border-emerald-600 ring-4 ring-emerald-300 animate-pulse bg-emerald-100' : 'border-emerald-400 hover:border-emerald-600'} rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 group cursor-pointer shadow-2xs"
                  data-staff-id="${staffId}" 
                  data-slot-time="${slotTime}"
                  ondragover="handleSlotDragOver(event)" 
+                 ondragenter="handleSlotDragOver(event)"
                  ondragleave="handleSlotDragLeave(event)" 
                  ondrop="handleSlotDrop(event, '${staffId}', '${slotTime}')"
                  onclick="handleFreeSlotClick('${staffId}', '${slotTime}')">
               
               <div class="flex items-center gap-2.5">
-                <span class="font-mono-code font-bold text-xs text-emerald-950 bg-white px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs">${slotTime}</span>
+                <span class="font-mono-code font-bold text-xs text-emerald-950 bg-white px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs dropzone-time-badge">${slotTime}</span>
                 <div>
                   <div class="flex items-center gap-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <strong class="text-xs font-black text-emerald-900 tracking-wide">HORA LIBRE DISPONIBLE</strong>
+                    <strong class="text-xs font-black text-emerald-900 tracking-wide dropzone-title">${isMoveTarget ? '⚡ SOLTAR AQUÍ' : 'HORA LIBRE DISPONIBLE'}</strong>
                   </div>
                   <span class="text-[10px] text-emerald-700 block font-medium dropzone-hint">
-                    ${isMoveTarget ? '👉 Haz clic para soltar la cita aquí' : '✨ Clic para reservar cita manual / Sin cita previa (Walk-in)'}
+                    ${isMoveTarget ? '👉 Clic para reubicar la cita aquí al instante' : '✨ Arrastra una cita aquí para reubicar al instante'}
                   </span>
                 </div>
               </div>
 
               <span class="text-[10px] bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg shadow-2xs group-hover:bg-emerald-700 group-hover:scale-105 transition flex items-center gap-1 flex-shrink-0">
-                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> + Reservar
+                <i data-lucide="${isMoveTarget ? 'check-circle' : 'calendar-plus'}" class="w-3.5 h-3.5"></i>
+                <span>${isMoveTarget ? 'Soltar aquí' : '+ Reservar'}</span>
               </span>
             </div>
           `;
@@ -8320,47 +8431,119 @@
       renderMasterAgenda();
     }
 
+    // =========================================================================
+    // ⚡ MOTOR DE DRAG & DROP ULTRA-RÁPIDO CON ACTUALIZACIÓN OPTIMISTA (0 MS)
+    // =========================================================================
+    let currentAgendaToastTimeout = null;
+
+    function showAgendaToast(title, subtitle = '', iconName = 'check-circle-2', undoCallback = null) {
+      try {
+        const existing = document.getElementById('floating-agenda-toast');
+        if (existing) existing.remove();
+        if (currentAgendaToastTimeout) clearTimeout(currentAgendaToastTimeout);
+
+        const toast = document.createElement('div');
+        toast.id = 'floating-agenda-toast';
+        toast.className = 'agenda-toast fixed bottom-6 right-6 z-[9999] bg-stone-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl border border-stone-700/80 flex items-center gap-3.5 max-w-md';
+
+        const iconColor = iconName === 'alert-circle' ? 'text-rose-400' : 'text-emerald-400';
+        const iconBg = iconName === 'alert-circle' ? 'bg-rose-500/20' : 'bg-emerald-500/20';
+
+        let undoBtnHtml = '';
+        if (undoCallback) {
+          undoBtnHtml = `
+            <button type="button" id="btn-agenda-toast-undo" class="ml-2 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer flex-shrink-0">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Deshacer</span>
+            </button>
+          `;
+        }
+
+        toast.innerHTML = `
+          <div class="w-10 h-10 rounded-xl ${iconBg} ${iconColor} flex items-center justify-center flex-shrink-0">
+            <i data-lucide="${iconName}" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <strong class="text-xs font-bold block text-white leading-snug">${title}</strong>
+            ${subtitle ? `<span class="text-[11px] text-stone-300 block truncate leading-tight mt-0.5">${subtitle}</span>` : ''}
+          </div>
+          ${undoBtnHtml}
+          <button type="button" onclick="this.closest('#floating-agenda-toast').remove()" class="text-stone-400 hover:text-white p-1 rounded-lg transition ml-1 cursor-pointer">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        `;
+
+        document.body.appendChild(toast);
+        if (window.lucide) lucide.createIcons();
+
+        if (undoCallback) {
+          const undoBtn = document.getElementById('btn-agenda-toast-undo');
+          if (undoBtn) {
+            undoBtn.addEventListener('click', () => {
+              toast.remove();
+              undoCallback();
+            });
+          }
+        }
+
+        currentAgendaToastTimeout = setTimeout(() => {
+          toast.style.transition = 'all 0.35s ease';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(20px) scale(0.95)';
+          setTimeout(() => toast.remove(), 350);
+        }, 4500);
+      } catch (e) {
+        console.warn('Error showing agenda toast:', e);
+      }
+    }
+
     function handleAppointmentDragStart(e, appointmentId) {
       draggedAppointmentId = appointmentId;
-      e.dataTransfer.setData('text/plain', appointmentId);
-      e.dataTransfer.effectAllowed = 'move';
+      if (e.dataTransfer) {
+        e.dataTransfer.setData('text/plain', appointmentId);
+        e.dataTransfer.effectAllowed = 'move';
+      }
 
-      document.querySelectorAll('.free-slot-dropzone').forEach(el => {
-        el.classList.add('ring-2', 'ring-purple-400', 'bg-purple-50/60', 'border-purple-400');
-        const hint = el.querySelector('.dropzone-hint');
-        if (hint) hint.innerText = '✨ ¡Suelta aquí para reubicar!';
-      });
+      // Activar feedback magnético en toda la página
+      document.body.classList.add('is-dragging-appointment');
+
+      const card = e.currentTarget;
+      if (card) {
+        setTimeout(() => card.classList.add('dragging'), 0);
+      }
     }
 
     function handleAppointmentDragEnd(e) {
-      document.querySelectorAll('.free-slot-dropzone').forEach(el => {
-        el.classList.remove('ring-2', 'ring-purple-400', 'bg-purple-50/60', 'border-purple-400', 'bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
-        const hint = el.querySelector('.dropzone-hint');
-        if (hint) hint.innerText = 'Disponible · Suelta una ficha aquí';
-      });
+      document.body.classList.remove('is-dragging-appointment');
+      document.querySelectorAll('.appointment-card.dragging').forEach(c => c.classList.remove('dragging'));
+      document.querySelectorAll('.free-slot-dropzone.drag-hover').forEach(z => z.classList.remove('drag-hover'));
     }
 
     function handleSlotDragOver(e) {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
       const slotEl = e.currentTarget;
-      slotEl.classList.remove('bg-purple-50/60');
-      slotEl.classList.add('bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
+      if (slotEl && !slotEl.classList.contains('drag-hover')) {
+        slotEl.classList.add('drag-hover');
+      }
     }
 
     function handleSlotDragLeave(e) {
       const slotEl = e.currentTarget;
-      slotEl.classList.remove('bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
-      if (draggedAppointmentId) {
-        slotEl.classList.add('bg-purple-50/60', 'border-purple-400');
+      if (slotEl) {
+        slotEl.classList.remove('drag-hover');
       }
     }
 
     async function handleSlotDrop(e, targetStaffId, slotTime) {
       e.preventDefault();
+      const slotEl = e.currentTarget;
+      if (slotEl) slotEl.classList.remove('drag-hover');
       handleAppointmentDragEnd(e);
 
-      const aptId = draggedAppointmentId || e.dataTransfer.getData('text/plain');
+      const aptId = draggedAppointmentId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
       draggedAppointmentId = null;
       if (!aptId) return;
 
@@ -8373,6 +8556,11 @@
       } else {
         state.selectedAppointmentToMove = appointmentId;
       }
+      renderMasterAgenda();
+    }
+
+    function cancelAppointmentMove() {
+      state.selectedAppointmentToMove = null;
       renderMasterAgenda();
     }
 
@@ -8393,15 +8581,20 @@
     async function executeRescheduleAppointment(aptId, targetStaffId, slotTime) {
       const apt = (state.appointments || []).find(a => a.id === aptId);
       if (!apt) {
-        alert('Cita no encontrada.');
+        showAgendaToast('Cita no encontrada', 'No se ha podido localizar en la agenda', 'alert-circle');
         return;
       }
 
       const activeDate = state.masterAgendaDate || '2026-10-23';
       const newStaff = (state.staff || []).find(s => s.id === targetStaffId) || { name: 'Estilista' };
       const prevStaff = (state.staff || []).find(s => s.id === apt.staffId) || { name: apt.staffName || 'Estilista Salón' };
+      
+      const prevStaffId = apt.staffId;
+      const prevStaffName = apt.staffName;
+      const prevStartTime = apt.startTime;
+      const prevEndTime = apt.endTime;
 
-      // Calcular duración de la cita original (por defecto 30 min)
+      // Calcular duración exacta de la cita
       const oldStart = new Date(apt.startTime);
       const oldEnd = new Date(apt.endTime);
       let durationMs = oldEnd.getTime() - oldStart.getTime();
@@ -8418,6 +8611,64 @@
       const newStartIso = newStart.toISOString();
       const newEndIso = newEnd.toISOString();
 
+      // ======================================================================
+      // ⚡ ACTUALIZACIÓN OPTIMISTA AL INSTANTE (0 ms DE LATENCIA)
+      // ======================================================================
+      apt.staffId = targetStaffId;
+      apt.staffName = newStaff.name;
+      apt.startTime = newStartIso;
+      apt.endTime = newEndIso;
+      state.justMovedAppointmentId = aptId;
+      state.selectedAppointmentToMove = null;
+
+      // Renderizado inmediato: la cita aparece al instante en su nuevo sillón/hora
+      renderMasterAgenda();
+
+      // Ráfaga de confeti
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 30, spread: 60, origin: { y: 0.65 } });
+      }
+
+      // Vibración táctil si el dispositivo lo soporta
+      if (navigator.vibrate) {
+        navigator.vibrate([25, 35, 25]);
+      }
+
+      const isSameStaff = prevStaffId === targetStaffId;
+      const toastTitle = isSameStaff 
+        ? `⚡ Cita reubicada a las ${slotTime}`
+        : `⚡ Cita trasladada a ${newStaff.name} a las ${slotTime}`;
+      const toastSubtitle = `${apt.clientName} · ${apt.serviceNames || 'Servicio'}`;
+
+      // Notificación flotante suave con botón "Deshacer"
+      showAgendaToast(toastTitle, toastSubtitle, 'check-circle-2', async () => {
+        // --- CALLBACK DE DESHACER (UNDO) ---
+        apt.staffId = prevStaffId;
+        apt.staffName = prevStaffName;
+        apt.startTime = prevStartTime;
+        apt.endTime = prevEndTime;
+        state.justMovedAppointmentId = aptId;
+        renderMasterAgenda();
+        showAgendaToast('Movimiento deshecho', `Cita devuelta a ${prevStaff.name} a su hora original`, 'rotate-ccw');
+        
+        try {
+          await fetch(`/api/appointments/${aptId}/reschedule`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              staffId: prevStaffId,
+              startTime: prevStartTime,
+              endTime: prevEndTime
+            })
+          });
+        } catch (err) {
+          console.warn('Error revirtiendo cita en servidor:', err);
+        }
+      });
+
+      // ======================================================================
+      // 📡 PERSISTENCIA EN EL SERVIDOR EN SEGUNDO PLANO (BACKGROUND SYNC)
+      // ======================================================================
       try {
         const res = await fetch(`/api/appointments/${aptId}/reschedule`, {
           method: 'PUT',
@@ -8428,27 +8679,32 @@
             endTime: newEndIso
           })
         });
+
         const data = await res.json();
 
-        if (res.ok) {
-          if (typeof confetti === 'function') confetti({ particleCount: 35, spread: 60 });
-          
-          const isSameStaff = apt.staffId === targetStaffId;
-          const msg = isSameStaff 
-            ? `✅ Cita de ${apt.clientName} movida a las ${slotTime} con ${newStaff.name}.`
-            : `✅ Cita de ${apt.clientName} trasladada de ${prevStaff.name} a ${newStaff.name} a las ${slotTime}. ¡Ambas estilistas han sido notificadas!`;
-          
-          alert(msg);
-          await fetchInitialData();
+        if (!res.ok) {
+          // Si el servidor rechazó el cambio (colisión en concurrencia), revertimos
+          apt.staffId = prevStaffId;
+          apt.staffName = prevStaffName;
+          apt.startTime = prevStartTime;
+          apt.endTime = prevEndTime;
+          state.justMovedAppointmentId = null;
           renderMasterAgenda();
-          if (typeof loadAdminUsersTable === 'function') loadAdminUsersTable();
+          showAgendaToast('No se pudo reubicar', data.error || 'Horario ocupado', 'alert-circle');
+        } else {
+          // Éxito en backend
           if (typeof pollAdminNotifications === 'function') pollAdminNotifications();
           if (typeof renderWorkerAgenda === 'function') renderWorkerAgenda();
-        } else {
-          alert('⚠️ ' + data.error);
         }
       } catch (err) {
-        alert('Error al reasignar cita.');
+        // En caso de corte de red, revertimos optimismo
+        apt.staffId = prevStaffId;
+        apt.staffName = prevStaffName;
+        apt.startTime = prevStartTime;
+        apt.endTime = prevEndTime;
+        state.justMovedAppointmentId = null;
+        renderMasterAgenda();
+        showAgendaToast('Error de conexión', 'No se pudo guardar en el servidor', 'alert-circle');
       }
     }
 
