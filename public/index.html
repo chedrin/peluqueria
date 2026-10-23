@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Peluquería & Estilismo Losan — Gestión Integral</title>
+  <!-- PWA Manifest & Mobile Configuration -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Estilistas Losan">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -940,6 +947,107 @@
     <!-- PORTAL 2: PORTAL TRABAJADORAS (AGENDA INDIVIDUAL & EXPEDIENTES TÉCNICOS) -->
     <!-- ======================================================================= -->
     <div id="portal-staff" class="hidden space-y-6">
+
+      <!-- BANNER PWA: INSTALACIÓN EN MÓVIL / TABLET PARA ESTILISTAS -->
+      <div id="pwa-install-banner" class="bg-gradient-to-r from-purple-950 via-stone-900 to-indigo-950 text-white p-4 sm:p-5 rounded-2xl shadow-md border border-purple-800/40 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-400/30 flex items-center justify-center text-purple-300 flex-shrink-0 text-2xl shadow-inner">
+            📱
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-bold text-purple-300">Aplicación Móvil PWA (Progressive Web App)</span>
+              <span id="pwa-network-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online
+              </span>
+            </div>
+            <h4 class="text-sm sm:text-base font-bold text-white font-serif-luxury mt-0.5">App de Estilista & Control de Jornada</h4>
+            <p class="text-xs text-stone-300 max-w-xl">Instala la aplicación en la pantalla de inicio de tu móvil para acceder a tus citas, fichar tus horas de entrada y salida, y consultar expedientes sin abrir el navegador.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button id="btn-install-pwa" onclick="installPWA()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm shadow-purple-900/50 cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>📲 Instalar App en el Móvil</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MÓDULO DE CONTROL HORARIO & FICHAJE DE JORNADA (RD-LEY 8/2019) -->
+      <div id="widget-staff-time-tracking" class="luxury-card rounded-2xl p-5 border-l-4 border-l-purple-600 space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
+              <i data-lucide="clock" class="w-5 h-5 text-purple-600"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Registro Oficial de Jornada Laboral</h4>
+                <span class="text-[10px] bg-stone-100 text-stone-600 font-semibold px-2 py-0.5 rounded-full">RD-ley 8/2019</span>
+              </div>
+              <p class="text-xs text-stone-500">Ficha tus entradas, descansos y salidas diarias con validez legal.</p>
+            </div>
+          </div>
+
+          <!-- Reloj digital en vivo -->
+          <div class="flex items-center gap-3 bg-stone-900 text-white px-4 py-2 rounded-xl shadow-xs font-mono-code">
+            <div class="text-right">
+              <span class="text-[10px] text-stone-400 block uppercase tracking-wider">Hora Oficial (Madrid)</span>
+              <span id="live-digital-clock" class="text-base font-bold text-amber-400 tracking-wider">11:00:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado actual de la estilista y contador de tiempo -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Columna 1: Estado del Turno -->
+          <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 flex flex-col justify-between">
+            <div>
+              <span class="text-[11px] text-stone-500 font-medium block">Estado de tu Jornada Hoy</span>
+              <div id="staff-clock-status-badge" class="mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Cargando estado...
+              </div>
+            </div>
+            <p id="staff-clock-details-text" class="text-xs text-stone-600 mt-2 font-medium">Verificando registro horario de hoy...</p>
+          </div>
+
+          <!-- Columna 2: Contador de Tiempo Efectivo Trabajado -->
+          <div class="p-4 bg-purple-50/70 rounded-xl border border-purple-200 flex flex-col justify-between">
+            <div>
+              <span class="text-[11px] text-purple-800 font-medium block">Tiempo Efectivo en Turno Hoy</span>
+              <div class="mt-1 flex items-baseline gap-2">
+                <span id="shift-live-timer" class="text-2xl font-black text-purple-900 font-mono-code">00h 00m 00s</span>
+              </div>
+            </div>
+            <p id="shift-breaks-summary" class="text-[11px] text-purple-700 mt-2">Pausas acumuladas: 0 min</p>
+          </div>
+
+          <!-- Columna 3: Botones de Acción de Fichaje -->
+          <div class="p-4 bg-white rounded-xl border border-stone-200 flex flex-col justify-center gap-2" id="staff-clock-actions-container">
+            <!-- Botones dinámicos según el estado -->
+            <button id="btn-clock-in" onclick="clockInStaff()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>🟢 Fichar Entrada</span>
+            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btn-toggle-break" onclick="toggleStaffBreak()" class="bg-amber-500 hover:bg-amber-400 text-white font-semibold py-2 px-2 rounded-xl text-xs flex items-center justify-center gap-1 transition">
+                <i data-lucide="coffee" class="w-3.5 h-3.5"></i>
+                <span id="btn-break-text">☕ Pausa</span>
+              </button>
+              <button id="btn-clock-out" onclick="clockOutStaff()" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2 px-2 rounded-xl text-xs flex items-center justify-center gap-1 transition">
+                <i data-lucide="square" class="w-3.5 h-3.5"></i>
+                <span>🔴 Fichar Salida</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observaciones / Incidencias del Fichaje -->
+        <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+          <input type="text" id="staff-clock-notes-input" placeholder="Observaciones de jornada o incidencias (ej: 10 min retraso por transporte público, horas extra autorizadas...)" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-purple-500">
+          <span class="text-[11px] text-stone-400 whitespace-nowrap">Se guardará junto con tu próximo fichaje</span>
+        </div>
+      </div>
       
       <!-- Selector de Trabajadora Conectada -->
       <div class="luxury-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1136,6 +1244,9 @@
         </button>
         <button onclick="switchAdminTab('salon')" id="tab-a-salon" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
           <i data-lucide="store" class="w-4 h-4 text-stone-500"></i> Datos de la Peluquería
+        </button>
+        <button onclick="switchAdminTab('time-tracking')" id="tab-a-timetracking" class="admin-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition whitespace-nowrap">
+          <i data-lucide="clock" class="w-4 h-4 text-stone-500"></i> Control Horario & Fichajes
         </button>
       </div>
 
@@ -1927,11 +2038,225 @@
         </div>
       </div>
 
+      <!-- VISTA 3I: CONTROL HORARIO, AUDITORÍA DE FICHAJES Y DESCARGA EXCEL -->
+      <div id="aview-timetracking" class="hidden space-y-6">
+        
+        <!-- Cabecera y Botones de Descarga Excel / Inspección de Trabajo -->
+        <div class="luxury-card rounded-2xl p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="clock" class="w-6 h-6 text-indigo-600"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-lg font-bold text-stone-900 font-serif-luxury">Control Horario & Registro Oficial de Jornada</h3>
+                <span class="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-0.5 rounded-full">RD-ley 8/2019 Cumplido</span>
+              </div>
+              <p class="text-xs text-stone-500 mt-0.5">Supervisión en tiempo real del personal de peluquería y registro de auditoría legal de 4 años para la Inspección de Trabajo.</p>
+            </div>
+          </div>
+
+          <!-- Botones de Acción: Descargar Excel y Fichaje Manual -->
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <button onclick="downloadTimeTrackingExcel('xlsx')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm shadow-emerald-200 cursor-pointer">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              <span>📥 Descargar Excel Oficial (.xlsx)</span>
+            </button>
+            <button onclick="downloadTimeTrackingExcel('csv')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition border border-stone-300 cursor-pointer">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>CSV</span>
+            </button>
+            <button onclick="openManualClockModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm shadow-indigo-200 cursor-pointer">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Fichaje Manual</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas Resumen en Tiempo Real de Hoy -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="admin-time-kpis-container">
+          <div class="luxury-card rounded-2xl p-4 text-center">
+            <span class="text-[11px] text-stone-500 font-medium block">🟢 En Jornada Ahora</span>
+            <span class="text-2xl font-black text-emerald-600 font-mono-code" id="kpi-clock-working">1</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5">Estilistas trabajando</span>
+          </div>
+          <div class="luxury-card rounded-2xl p-4 text-center">
+            <span class="text-[11px] text-stone-500 font-medium block">☕ En Descanso / Pausa</span>
+            <span class="text-2xl font-black text-amber-600 font-mono-code" id="kpi-clock-break">1</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5">Almuerzo o descanso</span>
+          </div>
+          <div class="luxury-card rounded-2xl p-4 text-center">
+            <span class="text-[11px] text-stone-500 font-medium block">🔵 Turno Finalizado</span>
+            <span class="text-2xl font-black text-indigo-600 font-mono-code" id="kpi-clock-completed">1</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5">Jornada cerrada hoy</span>
+          </div>
+          <div class="luxury-card rounded-2xl p-4 text-center bg-gradient-to-br from-stone-900 to-indigo-950 text-white">
+            <span class="text-[11px] text-stone-300 font-medium block">⏱️ Horas Totales Hoy</span>
+            <span class="text-2xl font-black text-amber-300 font-mono-code" id="kpi-clock-total-hours">14.83 h</span>
+            <span class="text-[10px] text-stone-400 block mt-0.5">Horas efectivas registradas</span>
+          </div>
+        </div>
+
+        <!-- Panel en Vivo: Presencia del Personal en Salón -->
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-stone-100 pb-3">
+            <div>
+              <h4 class="text-base font-bold text-stone-900 font-serif-luxury flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
+                Presencia de Estilistas en Tiempo Real (Hoy)
+              </h4>
+              <p class="text-xs text-stone-500">Monitor en directo del estado de fichaje de cada trabajadora del salón.</p>
+            </div>
+            <button onclick="renderAdminTimeTracking()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Actualizar Ahora
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-50 text-stone-500 uppercase tracking-wider font-semibold border-b border-stone-200">
+                <tr>
+                  <th class="p-3">Estilista</th>
+                  <th class="p-3">DNI</th>
+                  <th class="p-3">Puesto / Sillón</th>
+                  <th class="p-3 text-center">Estado Actual</th>
+                  <th class="p-3">Hora Entrada</th>
+                  <th class="p-3">Hora Salida</th>
+                  <th class="p-3 text-center">Pausas</th>
+                  <th class="p-3 text-right">Horas Hoy</th>
+                  <th class="p-3">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-staff-presence-tbody" class="divide-y divide-stone-100">
+                <!-- Se rellena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Histórico Completo de Fichajes para Auditoría & Inspección de Trabajo -->
+        <div class="luxury-card rounded-2xl p-6 space-y-4">
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-stone-100 pb-4">
+            <div>
+              <h4 class="text-base font-bold text-stone-900 font-serif-luxury flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+                Libro de Registro Laboral & Auditoría Histórica
+              </h4>
+              <p class="text-xs text-stone-500">Histórico inmutable de fichajes con firma digital y cálculo de horas extraordinarias.</p>
+            </div>
+
+            <!-- Filtros de Búsqueda -->
+            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+              <select id="filter-timetrack-staff" onchange="renderAdminTimeTracking()" class="bg-stone-50 border border-stone-300 text-stone-900 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none">
+                <option value="all">Todas las Estilistas</option>
+                <option value="stf-1">Elena Gómez</option>
+                <option value="stf-2">Raquel Santos</option>
+                <option value="stf-3">Carmen Vidal</option>
+              </select>
+
+              <select id="filter-timetrack-month" onchange="renderAdminTimeTracking()" class="bg-stone-50 border border-stone-300 text-stone-900 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none">
+                <option value="2026-10">Octubre 2026 (Mes Actual)</option>
+                <option value="2026-09">Septiembre 2026</option>
+                <option value="all">Todo el Histórico</option>
+              </select>
+
+              <button onclick="downloadTimeTrackingExcel('xlsx')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Selección
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-50 text-stone-500 uppercase tracking-wider font-semibold border-b border-stone-200">
+                <tr>
+                  <th class="p-3">ID / Fecha</th>
+                  <th class="p-3">Trabajadora</th>
+                  <th class="p-3">DNI</th>
+                  <th class="p-3">Entrada</th>
+                  <th class="p-3">Salida</th>
+                  <th class="p-3 text-center">Pausa (min)</th>
+                  <th class="p-3 text-right">Efectivas</th>
+                  <th class="p-3 text-right">Horas Extra</th>
+                  <th class="p-3 text-center">Estado</th>
+                  <th class="p-3">Dispositivo / Fichaje</th>
+                  <th class="p-3">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-time-records-tbody" class="divide-y divide-stone-100 font-sans">
+                <!-- Se rellena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </div>
 
   </main>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: REGISTRO MANUAL DE FICHAJE / CORRECCIÓN -->
+  <div id="manual-clock-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <h4 class="text-base font-bold text-stone-900 font-serif-luxury flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-5 h-5 text-indigo-600"></i>
+          Registro Manual de Jornada
+        </h4>
+        <button onclick="closeManualClockModal()" class="text-stone-400 hover:text-stone-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Estilista *:</label>
+          <select id="modal-clock-staff-id" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2 font-semibold">
+            <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
+            <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
+            <option value="stf-3">Carmen Vidal (Tratamientos & Salud Capilar)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Fecha de Jornada *:</label>
+          <input type="date" id="modal-clock-date" value="2026-10-23" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-stone-700 mb-1">Hora Entrada *:</label>
+            <input type="time" id="modal-clock-in" value="09:30" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-stone-700 mb-1">Hora Salida *:</label>
+            <input type="time" id="modal-clock-out" value="19:30" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Tiempo de Descanso / Pausas (minutos):</label>
+          <input type="number" id="modal-clock-break" value="60" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-700 mb-1">Motivo / Observaciones Administrativas:</label>
+          <textarea id="modal-clock-notes" rows="2" placeholder="Ej: Olvido de fichaje por móvil sin batería, horas extra autorizadas por gerencia..." class="w-full bg-stone-50 border border-stone-300 rounded-lg p-2"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-stone-100">
+        <button onclick="closeManualClockModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2.5 rounded-xl text-xs transition">
+          Cancelar
+        </button>
+        <button onclick="submitManualClockEntry()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm shadow-indigo-200">
+          Guardar Registro
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE NOTIFICACIONES WHATSAPP -->
   <!-- ========================================================================= -->
   <div id="whatsapp-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -1983,6 +2308,13 @@
       tpvVoucherDiscount: 0,
       tpvVoucherCode: '',
       workerTechTab: 'formulas',
+      timeTracking: {
+        currentStatus: 'NOT_STARTED',
+        activeRecord: null,
+        timerSeconds: 0,
+        timerInterval: null
+      },
+      deferredPwaPrompt: null,
 
       // Colecciones
       services: [],
@@ -2035,6 +2367,8 @@
       renderPackagesAndGiftCards();
       renderLookbook();
       renderAdminKpis();
+      initPWA();
+      loadStaffTimeTrackingStatus();
     });
 
     async function fetchInitialData() {
@@ -2268,6 +2602,7 @@
         document.getElementById('portal-staff').classList.remove('hidden');
         document.getElementById('btn-portal-staff').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
         renderWorkerAgenda();
+        loadStaffTimeTrackingStatus();
       } else if (portal === 'admin') {
         document.getElementById('portal-admin').classList.remove('hidden');
         document.getElementById('btn-portal-admin').classList.add('bg-white', 'text-stone-900', 'shadow-sm', 'border', 'border-stone-200/60');
@@ -2323,7 +2658,7 @@
         activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
       }
 
-      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis, #aview-staff, #aview-salon').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis, #aview-staff, #aview-salon, #aview-loyalty, #aview-timetracking').forEach(el => el.classList.add('hidden'));
       const targetView = document.getElementById('aview-' + tabKey);
       if (targetView) targetView.classList.remove('hidden');
 
@@ -2337,6 +2672,8 @@
         loadSalonInfo();
       } else if (tabKey === 'loyalty') {
         renderAdminLoyaltyManagement();
+      } else if (tabKey === 'timetracking' || tabKey === 'time') {
+        renderAdminTimeTracking();
       }
       lucide.createIcons();
     }
@@ -2567,6 +2904,7 @@
 
       renderWorkerAgenda();
       renderStaffPerformance();
+      loadStaffTimeTrackingStatus();
     }
 
     function renderWorkerAgenda() {
@@ -2595,31 +2933,49 @@
 
       container.innerHTML = myApts.map(a => {
         const isSelected = a.id === state.selectedAppointmentId;
+        const client = state.clients.find(c => c.id === a.clientId);
+        const phone = (client && client.phone) ? client.phone : (a.clientPhone || '34655555555');
+        const dni = (client && client.dni) ? client.dni : (a.clientDni || 'DNI Registrado');
+        const phoneClean = phone.replace(/[^0-9]/g, '');
+        const waMsg = encodeURIComponent(`Hola ${a.clientName}, te escribo desde Peluquería Losan respecto a tu cita programada de hoy a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})} (${a.serviceNames}). ¡Estamos preparándolo todo para recibirte!`);
+
         return `
-          <div onclick="selectClientForTechnicalRecord('${a.clientId}', '${a.id}')" class="p-4 rounded-xl flex items-center justify-between gap-4 cursor-pointer transition ${
+          <div onclick="selectClientForTechnicalRecord('${a.clientId}', '${a.id}')" class="p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer transition ${
             isSelected 
               ? 'bg-purple-50/80 border-2 border-purple-500 shadow-sm' 
               : 'bg-white border border-stone-200 hover:border-stone-300 shadow-2xs'
           }">
-            <div class="flex items-center gap-3.5">
-              <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200">
+            <div class="flex items-start sm:items-center gap-3.5">
+              <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200 flex-shrink-0">
                 <span class="text-xs font-bold text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
                 <span class="text-[10px] text-stone-400">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
               </div>
-              <div>
-                <div class="flex items-center gap-2">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
                   <h5 class="text-sm font-bold text-stone-900">${a.clientName}</h5>
-                  ${isSelected ? '<span class="text-[10px] bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full">Activa</span>' : ''}
+                  <span class="text-[10px] bg-stone-100 text-stone-600 font-mono-code font-bold px-2 py-0.5 rounded-full">DNI: ${dni}</span>
+                  ${isSelected ? '<span class="text-[10px] bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full">Seleccionada</span>' : ''}
                 </div>
-                <p class="text-xs text-stone-500">${a.serviceNames}</p>
-                ${a.clientComments ? `<p class="text-[11px] text-stone-400 italic mt-0.5">"${a.clientComments}"</p>` : ''}
+                <p class="text-xs font-medium text-purple-900 flex items-center gap-1.5">
+                  <i data-lucide="scissors" class="w-3.5 h-3.5 text-purple-600"></i>
+                  ${a.serviceNames}
+                </p>
+                ${a.clientComments ? `<p class="text-[11px] text-stone-500 italic bg-stone-50 px-2 py-1 rounded border border-stone-200/60">💬 "${a.clientComments}"</p>` : ''}
               </div>
             </div>
-            <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
-              isSelected ? 'bg-purple-600 text-white shadow-xs' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-            }">
-              <i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Ver Ficha
-            </button>
+
+            <!-- Botones de Acción de Cita: WhatsApp Directo y Ficha Técnica -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+              <a href="https://wa.me/${phoneClean}?text=${waMsg}" target="_blank" onclick="event.stopPropagation()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition shadow-2xs">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span class="hidden md:inline">WhatsApp</span>
+              </a>
+              <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+                isSelected ? 'bg-purple-600 text-white shadow-xs' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+              }">
+                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Ver Ficha
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -5546,14 +5902,456 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           </div>
           <script>
             window.onload = function() { window.print(); }
-          </script>
+          <\/script>
         </body>
         </html>
       `);
       printWindow.document.close();
     }
 
-</script>
+    // ========================================================================
+    // 19. MÓDULO PWA (PROGRESSIVE WEB APP) & REGISTRO DE SERVICE WORKER
+    // ========================================================================
+    function initPWA() {
+      // 1. Registro del Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then((registration) => {
+          console.log('[PWA] Service Worker registrado correctamente:', registration.scope);
+        }).catch((err) => {
+          console.log('[PWA] Service worker info:', err);
+        });
+      }
+
+      // 2. Evento beforeinstallprompt para instalación nativa
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        state.deferredPwaPrompt = e;
+        const btnInstall = document.getElementById('btn-install-pwa');
+        if (btnInstall) {
+          btnInstall.classList.add('animate-bounce');
+        }
+        console.log('[PWA] Prompt de instalación listo');
+      });
+
+      // 3. Monitor de estado Online / Offline
+      function updateOnlineStatus() {
+        const badge = document.getElementById('pwa-network-badge');
+        if (!badge) return;
+        if (navigator.onLine) {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online';
+        } else {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 flex items-center gap-1';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Modo Offline (Sin Red)';
+        }
+      }
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+
+      // 4. Reloj digital en vivo en el widget de estilistas
+      setInterval(() => {
+        const clockEl = document.getElementById('live-digital-clock');
+        if (clockEl) {
+          clockEl.innerText = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+      }, 1000);
+
+      // 5. Soporte para URL start_url ?portal=staff
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('portal') === 'staff') {
+        switchPortal('staff');
+      }
+    }
+
+    async function installPWA() {
+      if (state.deferredPwaPrompt) {
+        state.deferredPwaPrompt.prompt();
+        const { outcome } = await state.deferredPwaPrompt.userChoice;
+        console.log('[PWA] Resultado de instalación:', outcome);
+        state.deferredPwaPrompt = null;
+      } else {
+        // En iOS Safari o escritorio donde ya está disponible
+        alert('📲 Para instalar la App de Estilistas en tu teléfono:\n\n• En Android / Chrome: Pulsa los 3 puntos (⋮) y selecciona "Instalar aplicación" o "Añadir a la pantalla de inicio".\n• En iPhone / iOS (Safari): Pulsa el botón Compartir (cuadrado con flecha hacia arriba) y selecciona "Añadir a pantalla de inicio".');
+      }
+    }
+
+    // ========================================================================
+    // 20. CONTROL HORARIO & FICHAJE DE ESTILISTAS (RD-LEY 8/2019)
+    // ========================================================================
+    async function loadStaffTimeTrackingStatus() {
+      const staffId = state.activeStaffId || 'stf-1';
+      try {
+        const res = await fetch('/api/time-tracking/status/' + staffId);
+        const data = await res.json();
+        
+        state.timeTracking.currentStatus = data.status || 'NOT_STARTED';
+        state.timeTracking.activeRecord = data.record;
+
+        renderStaffClockWidget(data);
+      } catch (err) {
+        console.error('Error al cargar estado de fichaje:', err);
+      }
+    }
+
+    function renderStaffClockWidget(data) {
+      const badge = document.getElementById('staff-clock-status-badge');
+      const details = document.getElementById('staff-clock-details-text');
+      const breaksSummary = document.getElementById('shift-breaks-summary');
+      const timerEl = document.getElementById('shift-live-timer');
+      const actionsContainer = document.getElementById('staff-clock-actions-container');
+
+      if (!badge || !actionsContainer) return;
+
+      // Limpiar intervalo anterior si existía
+      if (state.timeTracking.timerInterval) {
+        clearInterval(state.timeTracking.timerInterval);
+        state.timeTracking.timerInterval = null;
+      }
+
+      const status = data.status;
+      const record = data.record;
+
+      if (status === 'WORKING') {
+        badge.className = 'mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 🟢 EN JORNADA (Trabajando)';
+
+        const inTime = record.clockIn ? new Date(record.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+        details.innerHTML = `Entrada registrada a las <strong>${inTime}</strong> · Turno activo`;
+        breaksSummary.innerText = `Pausas acumuladas hoy: ${record.breakMinutes || 0} min`;
+
+        // Iniciar cronómetro en vivo
+        let totalElapsedSec = data.currentElapsedSeconds || (record.effectiveMinutes ? record.effectiveMinutes * 60 : 0);
+        updateTimerDisplay(totalElapsedSec);
+
+        state.timeTracking.timerInterval = setInterval(() => {
+          totalElapsedSec++;
+          updateTimerDisplay(totalElapsedSec);
+        }, 1000);
+
+        actionsContainer.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="toggleStaffBreak('start')" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+              <i data-lucide="coffee" class="w-4 h-4"></i>
+              <span>☕ Iniciar Pausa</span>
+            </button>
+            <button onclick="clockOutStaff()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+              <i data-lucide="square" class="w-4 h-4"></i>
+              <span>🔴 Fichar Salida</span>
+            </button>
+          </div>
+        `;
+
+      } else if (status === 'ON_BREAK') {
+        badge.className = 'mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> ☕ EN DESCANSO / PAUSA';
+
+        const breakStart = record.currentBreakStart ? new Date(record.currentBreakStart).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+        details.innerHTML = `Pausa iniciada a las <strong>${breakStart}</strong> (${record.currentBreakReason || 'Descanso'})`;
+        breaksSummary.innerText = `Pausas previas acumuladas: ${record.breakMinutes || 0} min`;
+
+        const effectiveMin = record.effectiveMinutes || 0;
+        updateTimerDisplay(effectiveMin * 60);
+
+        actionsContainer.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="toggleStaffBreak('end')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>▶️ Reanudar Jornada</span>
+            </button>
+            <button onclick="clockOutStaff()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer">
+              <i data-lucide="square" class="w-4 h-4"></i>
+              <span>🔴 Fichar Salida</span>
+            </button>
+          </div>
+        `;
+
+      } else if (status === 'COMPLETED') {
+        badge.className = 'mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200';
+        badge.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5 text-indigo-600"></i> 🔵 JORNADA FINALIZADA';
+
+        const outTime = record.clockOut ? new Date(record.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+        details.innerHTML = `Salida registrada a las <strong>${outTime}</strong> · Turno completado`;
+        breaksSummary.innerText = `Total pausas: ${record.breakMinutes || 0} min | Extras: ${record.overtimeHours || 0}h`;
+
+        const totalSec = Math.round((record.effectiveHours || 0) * 3600);
+        updateTimerDisplay(totalSec);
+
+        actionsContainer.innerHTML = `
+          <button onclick="clockInStaff()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>🔄 Fichar Nueva Entrada (Horas Extras / Turno Partido)</span>
+          </button>
+        `;
+
+      } else {
+        // NOT_STARTED
+        badge.className = 'mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-700 border border-stone-300';
+        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-stone-400"></span> ⚪ PENDIENTE DE FICHAR';
+
+        details.innerText = 'Aún no has registrado la entrada para el día de hoy.';
+        breaksSummary.innerText = 'Pausas acumuladas: 0 min';
+        updateTimerDisplay(0);
+
+        actionsContainer.innerHTML = `
+          <button onclick="clockInStaff()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm shadow-emerald-200 transition cursor-pointer">
+            <i data-lucide="play" class="w-4 h-4"></i>
+            <span>🟢 Fichar Entrada de Turno</span>
+          </button>
+        `;
+      }
+
+      lucide.createIcons();
+    }
+
+    function updateTimerDisplay(totalSeconds) {
+      const timerEl = document.getElementById('shift-live-timer');
+      if (!timerEl) return;
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      timerEl.innerText = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+    }
+
+    async function clockInStaff() {
+      const staffId = state.activeStaffId || 'stf-1';
+      const notes = document.getElementById('staff-clock-notes-input') ? document.getElementById('staff-clock-notes-input').value : '';
+      
+      try {
+        const res = await fetch('/api/time-tracking/clock-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            staffId,
+            notes,
+            device: 'PWA Móvil Estilista (App Instalada)'
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'No se pudo registrar la entrada');
+          return;
+        }
+
+        // Celebración con confetti sutil
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+        }
+
+        alert(data.message);
+        if (document.getElementById('staff-clock-notes-input')) {
+          document.getElementById('staff-clock-notes-input').value = '';
+        }
+        await loadStaffTimeTrackingStatus();
+      } catch (err) {
+        alert('Error al conectar con el servidor para fichar entrada');
+      }
+    }
+
+    async function toggleStaffBreak(actionOverride) {
+      const staffId = state.activeStaffId || 'stf-1';
+      const isCurrentlyBreak = state.timeTracking.currentStatus === 'ON_BREAK';
+      const action = actionOverride || (isCurrentlyBreak ? 'end' : 'start');
+      const reason = action === 'start' ? prompt('Motivo de la pausa (ej: Almuerzo, Pausa Café):', 'Pausa Almuerzo') : '';
+      
+      if (action === 'start' && reason === null) return; // cancelado por usuario
+
+      try {
+        const res = await fetch('/api/time-tracking/break', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, action, reason })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'No se pudo actualizar el descanso');
+          return;
+        }
+
+        alert(data.message);
+        await loadStaffTimeTrackingStatus();
+      } catch (err) {
+        alert('Error de conexión al gestionar descanso');
+      }
+    }
+
+    async function clockOutStaff() {
+      const staffId = state.activeStaffId || 'stf-1';
+      const notes = document.getElementById('staff-clock-notes-input') ? document.getElementById('staff-clock-notes-input').value : '';
+
+      if (!confirm('¿Confirmas que deseas finalizar tu jornada laboral de hoy? Se registrará tu hora de salida oficial.')) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/time-tracking/clock-out', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, notes })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'No se pudo registrar la salida');
+          return;
+        }
+
+        alert(data.message);
+        if (document.getElementById('staff-clock-notes-input')) {
+          document.getElementById('staff-clock-notes-input').value = '';
+        }
+        await loadStaffTimeTrackingStatus();
+      } catch (err) {
+        alert('Error al fichar salida');
+      }
+    }
+
+    // ========================================================================
+    // 21. ADMINISTRACIÓN: PANEL DE CONTROL HORARIO & DESCARGA EXCEL
+    // ========================================================================
+    async function renderAdminTimeTracking() {
+      try {
+        // 1. Cargar resumen en vivo de hoy
+        const summaryRes = await fetch('/api/time-tracking/summary-today');
+        const summary = await summaryRes.json();
+
+        document.getElementById('kpi-clock-working').innerText = summary.workingCount;
+        document.getElementById('kpi-clock-break').innerText = summary.breakCount;
+        document.getElementById('kpi-clock-completed').innerText = summary.completedCount;
+        document.getElementById('kpi-clock-total-hours').innerText = summary.totalEffectiveHoursToday.toFixed(2) + ' h';
+
+        // 2. Renderizar tabla de presencia en tiempo real
+        const presenceTbody = document.getElementById('admin-staff-presence-tbody');
+        if (presenceTbody && summary.staffStatusList) {
+          presenceTbody.innerHTML = summary.staffStatusList.map(s => {
+            let statusBadge = '';
+            if (s.status === 'WORKING') {
+              statusBadge = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Trabajando</span>';
+            } else if (s.status === 'ON_BREAK') {
+              statusBadge = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> En Descanso</span>';
+            } else if (s.status === 'COMPLETED') {
+              statusBadge = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center gap-1"><i data-lucide="check" class="w-3 h-3 text-indigo-600"></i> Finalizada</span>';
+            } else {
+              statusBadge = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-600 border border-stone-200 flex items-center justify-center gap-1">Sin Fichar</span>';
+            }
+
+            return `
+              <tr class="hover:bg-stone-50/60 transition">
+                <td class="p-3 font-bold text-stone-900 flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold" style="background-color: ${s.displayColor}">
+                    ${s.name.split(' ').map(n=>n[0]).join('')}
+                  </span>
+                  ${s.name}
+                </td>
+                <td class="p-3 font-mono-code text-stone-600">${s.dni}</td>
+                <td class="p-3 text-stone-500">${s.chair}</td>
+                <td class="p-3 text-center">${statusBadge}</td>
+                <td class="p-3 font-mono-code font-bold text-stone-700">${s.clockIn}</td>
+                <td class="p-3 font-mono-code text-stone-700">${s.clockOut}</td>
+                <td class="p-3 text-center font-mono-code text-stone-600">${s.breakMinutes} min</td>
+                <td class="p-3 text-right font-mono-code font-bold text-purple-900">${(s.effectiveHours || 0).toFixed(2)} h</td>
+                <td class="p-3 text-stone-500 text-[11px] italic max-w-xs truncate">${s.notes || '-'}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // 3. Cargar histórico con filtros
+        const staffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
+        const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '2026-10';
+
+        const historyRes = await fetch(`/api/time-tracking/records?staffId=${staffFilter}&month=${monthFilter}`);
+        const historyData = await historyRes.json();
+
+        const historyTbody = document.getElementById('admin-time-records-tbody');
+        if (historyTbody && historyData.records) {
+          historyTbody.innerHTML = historyData.records.map(r => {
+            const inFormatted = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+            const outFormatted = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : (r.status === 'WORKING' ? 'En Curso' : (r.status === 'ON_BREAK' ? 'En Pausa' : '-'));
+
+            return `
+              <tr class="hover:bg-stone-50/70 transition">
+                <td class="p-3 font-mono-code text-stone-700">
+                  <span class="font-bold block">${r.date}</span>
+                  <span class="text-[10px] text-stone-400">${r.id}</span>
+                </td>
+                <td class="p-3 font-bold text-stone-900">${r.staffName}</td>
+                <td class="p-3 font-mono-code text-stone-600">${r.staffDni || 'N/A'}</td>
+                <td class="p-3 font-mono-code font-bold text-emerald-800">${inFormatted}</td>
+                <td class="p-3 font-mono-code font-bold text-rose-800">${outFormatted}</td>
+                <td class="p-3 text-center font-mono-code text-stone-600">${r.breakMinutes || 0}</td>
+                <td class="p-3 text-right font-mono-code font-black text-purple-900">${(r.effectiveHours || 0).toFixed(2)} h</td>
+                <td class="p-3 text-right font-mono-code text-amber-700 font-semibold">${(r.overtimeHours || 0).toFixed(2)} h</td>
+                <td class="p-3 text-center">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    r.status === 'COMPLETED' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                    r.status === 'WORKING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    'bg-amber-50 text-amber-700 border border-amber-200'
+                  }">
+                    ${r.status === 'COMPLETED' ? 'Cerrada' : (r.status === 'WORKING' ? 'Trabajando' : 'Descanso')}
+                  </span>
+                </td>
+                <td class="p-3 text-stone-500 text-[11px] truncate max-w-xs">${r.device || 'PWA Móvil'}</td>
+                <td class="p-3 text-stone-600 text-[11px] italic max-w-xs">${r.notes || '-'}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        lucide.createIcons();
+      } catch (err) {
+        console.error('Error al renderizar Control Horario en Admin:', err);
+      }
+    }
+
+    function downloadTimeTrackingExcel(format = 'xlsx') {
+      const staffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
+      const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '2026-10';
+
+      const downloadUrl = `/api/time-tracking/export-excel?month=${monthFilter}&staffId=${staffFilter}&format=${format}`;
+      window.location.href = downloadUrl;
+    }
+
+    function openManualClockModal() {
+      document.getElementById('manual-clock-modal').classList.remove('hidden');
+    }
+
+    function closeManualClockModal() {
+      document.getElementById('manual-clock-modal').classList.add('hidden');
+    }
+
+    async function submitManualClockEntry() {
+      const staffId = document.getElementById('modal-clock-staff-id').value;
+      const date = document.getElementById('modal-clock-date').value;
+      const clockIn = document.getElementById('modal-clock-in').value;
+      const clockOut = document.getElementById('modal-clock-out').value;
+      const breakMinutes = document.getElementById('modal-clock-break').value;
+      const notes = document.getElementById('modal-clock-notes').value;
+
+      if (!date || !clockIn || !clockOut) {
+        alert('Por favor, indica la fecha, hora de entrada y hora de salida.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/time-tracking/manual-entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, date, clockIn, clockOut, breakMinutes, notes })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Error al guardar el fichaje');
+          return;
+        }
+
+        alert(data.message);
+        closeManualClockModal();
+        renderAdminTimeTracking();
+      } catch (err) {
+        alert('Error de conexión al guardar fichaje manual');
+      }
+    }
+  </script>
 
   <!-- ========================================================================= -->
   <!-- MODAL DAR DE ALTA NUEVA ESTILISTA -->

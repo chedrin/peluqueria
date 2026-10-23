@@ -3,6 +3,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const XLSX = require('xlsx');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,6 +44,7 @@ const db = {
       id: 'stf-1',
       userId: 'usr-staff-1',
       name: 'Elena Gómez',
+      dni: '54321678E',
       displayColor: '#8B5CF6',
       specialty: 'Colorimetría & Balayage',
       chair: 'Sillón 1 (Color)',
@@ -66,6 +68,7 @@ const db = {
       id: 'stf-2',
       userId: 'usr-staff-2',
       name: 'Raquel Santos',
+      dni: '71234567R',
       displayColor: '#EC4899',
       specialty: 'Cortes & Estilismo',
       chair: 'Sillón 2 (Cortes)',
@@ -89,6 +92,7 @@ const db = {
       id: 'stf-3',
       userId: 'usr-staff-3',
       name: 'Carmen Vidal',
+      dni: '38912456C',
       displayColor: '#10B981',
       specialty: 'Tratamientos & Salud Capilar',
       chair: 'Sillón 3 (Tratamientos)',
@@ -711,6 +715,254 @@ const db = {
     { id: 'tip-1', staffId: 'stf-1', amount: 5.00, paymentMethod: 'bizum', clientName: 'Laura Martínez', date: '2026-10-21' },
     { id: 'tip-2', staffId: 'stf-2', amount: 3.50, paymentMethod: 'card', clientName: 'Sofía Morales', date: '2026-10-22' },
     { id: 'tip-3', staffId: 'stf-3', amount: 6.00, paymentMethod: 'cash', clientName: 'Clara Sanz', date: '2026-10-22' }
+  ],
+
+  // --------------------------------------------------------------------------
+  // 18. REGISTRO DE JORNADA LABORAL Y FICHAJES (RD-LEY 8/2019)
+  // --------------------------------------------------------------------------
+  timeRecords: [
+    // --- SEMANA 42 (Octubre 2026) ---
+    // Elena Gómez (stf-1 - Colorimetría)
+    {
+      id: 'tr-elena-1019',
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: '2026-10-19',
+      clockIn: '2026-10-19T09:25:00.000Z',
+      clockOut: '2026-10-19T19:35:00.000Z',
+      breaks: [{ start: '2026-10-19T14:00:00.000Z', end: '2026-10-19T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 550,
+      effectiveHours: 9.17,
+      overtimeHours: 1.17,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Jornada completa. Balayages intensivos por la tarde.'
+    },
+    {
+      id: 'tr-elena-1020',
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: '2026-10-20',
+      clockIn: '2026-10-20T09:28:00.000Z',
+      clockOut: '2026-10-20T19:30:00.000Z',
+      breaks: [{ start: '2026-10-20T14:15:00.000Z', end: '2026-10-20T15:15:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 542,
+      effectiveHours: 9.03,
+      overtimeHours: 1.03,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Turno sin incidencias.'
+    },
+    {
+      id: 'tr-elena-1021',
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: '2026-10-21',
+      clockIn: '2026-10-21T09:30:00.000Z',
+      clockOut: '2026-10-21T19:40:00.000Z',
+      breaks: [{ start: '2026-10-21T14:00:00.000Z', end: '2026-10-21T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 550,
+      effectiveHours: 9.17,
+      overtimeHours: 1.17,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Horas extras por retoque de novia imprevisto.'
+    },
+    {
+      id: 'tr-elena-1022',
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: '2026-10-22',
+      clockIn: '2026-10-22T09:22:00.000Z',
+      clockOut: '2026-10-22T19:32:00.000Z',
+      breaks: [{ start: '2026-10-22T14:05:00.000Z', end: '2026-10-22T15:05:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 550,
+      effectiveHours: 9.17,
+      overtimeHours: 1.17,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Turno habitual.'
+    },
+    {
+      id: 'tr-elena-1023',
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: '2026-10-23',
+      clockIn: '2026-10-23T09:28:15.000Z',
+      clockOut: null,
+      breaks: [{ start: '2026-10-23T14:00:00.000Z', end: '2026-10-23T14:30:00.000Z', durationMinutes: 30, reason: 'Pausa Almuerzo Rápido' }],
+      breakMinutes: 30,
+      effectiveMinutes: 320,
+      effectiveHours: 5.33,
+      overtimeHours: 0,
+      status: 'WORKING',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Jornada activa hoy viernes. Coloración y mechas balayage.'
+    },
+
+    // Raquel Santos (stf-2 - Cortes & Estilismo)
+    {
+      id: 'tr-raquel-1020',
+      staffId: 'stf-2',
+      staffDni: '71234567R',
+      staffName: 'Raquel Santos',
+      chair: 'Sillón 2 (Cortes)',
+      date: '2026-10-20',
+      clockIn: '2026-10-20T09:18:00.000Z',
+      clockOut: '2026-10-20T19:30:00.000Z',
+      breaks: [{ start: '2026-10-20T13:45:00.000Z', end: '2026-10-20T14:45:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 552,
+      effectiveHours: 9.20,
+      overtimeHours: 1.20,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (iOS / Safari)',
+      notes: 'Cortes masculinos y femeninos.'
+    },
+    {
+      id: 'tr-raquel-1021',
+      staffId: 'stf-2',
+      staffDni: '71234567R',
+      staffName: 'Raquel Santos',
+      chair: 'Sillón 2 (Cortes)',
+      date: '2026-10-21',
+      clockIn: '2026-10-21T09:20:00.000Z',
+      clockOut: '2026-10-21T19:25:00.000Z',
+      breaks: [{ start: '2026-10-21T14:00:00.000Z', end: '2026-10-21T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 545,
+      effectiveHours: 9.08,
+      overtimeHours: 1.08,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (iOS / Safari)',
+      notes: 'Jornada normal.'
+    },
+    {
+      id: 'tr-raquel-1022',
+      staffId: 'stf-2',
+      staffDni: '71234567R',
+      staffName: 'Raquel Santos',
+      chair: 'Sillón 2 (Cortes)',
+      date: '2026-10-22',
+      clockIn: '2026-10-22T09:25:00.000Z',
+      clockOut: '2026-10-22T19:35:00.000Z',
+      breaks: [{ start: '2026-10-22T14:00:00.000Z', end: '2026-10-22T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 550,
+      effectiveHours: 9.17,
+      overtimeHours: 1.17,
+      status: 'COMPLETED',
+      device: 'PWA Móvil (iOS / Safari)',
+      notes: 'Mucho volumen en corte Bob y peinados.'
+    },
+    {
+      id: 'tr-raquel-1023',
+      staffId: 'stf-2',
+      staffDni: '71234567R',
+      staffName: 'Raquel Santos',
+      chair: 'Sillón 2 (Cortes)',
+      date: '2026-10-23',
+      clockIn: '2026-10-23T09:15:30.000Z',
+      clockOut: null,
+      breaks: [],
+      currentBreakStart: '2026-10-23T13:45:00.000Z',
+      currentBreakReason: 'Pausa Comida',
+      breakMinutes: 0,
+      effectiveMinutes: 270,
+      effectiveHours: 4.50,
+      overtimeHours: 0,
+      status: 'ON_BREAK',
+      device: 'PWA Móvil (iOS / Safari)',
+      notes: 'En descanso de almuerzo actualmente.'
+    },
+
+    // Carmen Vidal (stf-3 - Tratamientos)
+    {
+      id: 'tr-carmen-1020',
+      staffId: 'stf-3',
+      staffDni: '38912456C',
+      staffName: 'Carmen Vidal',
+      chair: 'Sillón 3 (Tratamientos)',
+      date: '2026-10-20',
+      clockIn: '2026-10-20T09:30:00.000Z',
+      clockOut: '2026-10-20T19:30:00.000Z',
+      breaks: [{ start: '2026-10-20T14:00:00.000Z', end: '2026-10-20T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 540,
+      effectiveHours: 9.00,
+      overtimeHours: 1.00,
+      status: 'COMPLETED',
+      device: 'PWA Tablet Salón',
+      notes: 'Tratamientos Olaplex y keratina.'
+    },
+    {
+      id: 'tr-carmen-1021',
+      staffId: 'stf-3',
+      staffDni: '38912456C',
+      staffName: 'Carmen Vidal',
+      chair: 'Sillón 3 (Tratamientos)',
+      date: '2026-10-21',
+      clockIn: '2026-10-21T09:28:00.000Z',
+      clockOut: '2026-10-21T19:32:00.000Z',
+      breaks: [{ start: '2026-10-21T14:00:00.000Z', end: '2026-10-21T15:00:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 544,
+      effectiveHours: 9.07,
+      overtimeHours: 1.07,
+      status: 'COMPLETED',
+      device: 'PWA Tablet Salón',
+      notes: 'Reconstrucciones capilares.'
+    },
+    {
+      id: 'tr-carmen-1022',
+      staffId: 'stf-3',
+      staffDni: '38912456C',
+      staffName: 'Carmen Vidal',
+      chair: 'Sillón 3 (Tratamientos)',
+      date: '2026-10-22',
+      clockIn: '2026-10-22T09:25:00.000Z',
+      clockOut: '2026-10-22T19:30:00.000Z',
+      breaks: [{ start: '2026-10-22T14:10:00.000Z', end: '2026-10-22T15:10:00.000Z', durationMinutes: 60, reason: 'Almuerzo' }],
+      breakMinutes: 60,
+      effectiveMinutes: 545,
+      effectiveHours: 9.08,
+      overtimeHours: 1.08,
+      status: 'COMPLETED',
+      device: 'PWA Tablet Salón',
+      notes: 'Jornada completa.'
+    },
+    {
+      id: 'tr-carmen-1023',
+      staffId: 'stf-3',
+      staffDni: '38912456C',
+      staffName: 'Carmen Vidal',
+      chair: 'Sillón 3 (Tratamientos)',
+      date: '2026-10-23',
+      clockIn: '2026-10-23T09:30:00.000Z',
+      clockOut: '2026-10-23T14:30:00.000Z',
+      breaks: [],
+      breakMinutes: 0,
+      effectiveMinutes: 300,
+      effectiveHours: 5.00,
+      overtimeHours: 0,
+      status: 'COMPLETED',
+      device: 'PWA Tablet Salón',
+      notes: 'Turno intensivo de mañana cerrado con éxito.'
+    }
   ]
 };
 
@@ -2200,6 +2452,528 @@ app.get('/api/analytics/kpis', (req, res) => {
       { name: 'Tratamiento Olaplex', count: 6, share: '12%' }
     ]
   });
+});
+
+
+// ============================================================================
+// 18. MÓDULO DE CONTROL HORARIO, FICHAJES PWA Y EXPORTACIÓN A EXCEL
+// ============================================================================
+
+// A. Obtener estado de fichaje actual de una estilista para hoy
+app.get('/api/time-tracking/status/:staffId', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const record = db.timeRecords.find(r => r.staffId === staff.id && r.date === todayStr);
+
+  if (!record) {
+    return res.json({
+      status: 'NOT_STARTED',
+      staff: { id: staff.id, name: staff.name, dni: staff.dni, chair: staff.chair },
+      record: null
+    });
+  }
+
+  // Si está trabajando, calcular segundos en jornada transcurridos
+  let currentElapsedSeconds = 0;
+  if (record.status === 'WORKING' && record.clockIn) {
+    const elapsedMs = Date.now() - new Date(record.clockIn).getTime();
+    const breakMs = (record.breakMinutes || 0) * 60 * 1000;
+    currentElapsedSeconds = Math.max(0, Math.floor((elapsedMs - breakMs) / 1000));
+  } else if (record.status === 'ON_BREAK' && record.currentBreakStart) {
+    const elapsedBreakMs = Date.now() - new Date(record.currentBreakStart).getTime();
+    record.currentBreakSeconds = Math.floor(elapsedBreakMs / 1000);
+  }
+
+  res.json({
+    status: record.status,
+    staff: { id: staff.id, name: staff.name, dni: staff.dni, chair: staff.chair },
+    record,
+    currentElapsedSeconds
+  });
+});
+
+// B. Fichar entrada (Clock-In)
+app.post('/api/time-tracking/clock-in', (req, res) => {
+  const { staffId, notes, device } = req.body;
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let record = db.timeRecords.find(r => r.staffId === staff.id && r.date === todayStr);
+
+  if (record) {
+    if (record.status === 'WORKING') {
+      return res.status(400).json({ error: 'Ya has fichado la entrada para la jornada de hoy.', record });
+    }
+    if (record.status === 'ON_BREAK') {
+      return res.status(400).json({ error: 'Actualmente estás en pausa. Debes reanudar la jornada.', record });
+    }
+    if (record.status === 'COMPLETED') {
+      return res.status(400).json({ error: 'Ya has completado y cerrado tu jornada de hoy.', record });
+    }
+  }
+
+  const now = new Date();
+  const newRecord = {
+    id: 'tr-' + Date.now(),
+    staffId: staff.id,
+    staffDni: staff.dni || '54321678E',
+    staffName: staff.name,
+    chair: staff.chair,
+    date: todayStr,
+    clockIn: now.toISOString(),
+    clockOut: null,
+    breaks: [],
+    currentBreakStart: null,
+    breakMinutes: 0,
+    effectiveMinutes: 0,
+    effectiveHours: 0,
+    overtimeHours: 0,
+    status: 'WORKING',
+    device: device || 'PWA Móvil Estilista',
+    notes: notes || 'Entrada normal de turno'
+  };
+
+  db.timeRecords.push(newRecord);
+
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  res.status(201).json({
+    success: true,
+    message: `🟢 ¡Entrada fichada con éxito a las ${timeStr}! Buen turno, ${staff.name}.`,
+    record: newRecord
+  });
+});
+
+// C. Pausa / Descanso (Break Start / End)
+app.post('/api/time-tracking/break', (req, res) => {
+  const { staffId, action, reason } = req.body; // action: 'start' | 'end'
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const record = db.timeRecords.find(r => r.staffId === staff.id && r.date === todayStr);
+
+  if (!record) {
+    return res.status(400).json({ error: 'Debes fichar la entrada antes de gestionar un descanso.' });
+  }
+  if (record.status === 'COMPLETED') {
+    return res.status(400).json({ error: 'Esta jornada ya está finalizada.' });
+  }
+
+  const now = new Date();
+
+  if (action === 'start') {
+    if (record.status === 'ON_BREAK') {
+      return res.status(400).json({ error: 'Ya estás en periodo de descanso.' });
+    }
+    record.status = 'ON_BREAK';
+    record.currentBreakStart = now.toISOString();
+    record.currentBreakReason = reason || 'Pausa café / descanso';
+
+    const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    return res.json({
+      success: true,
+      message: `☕ Pausa iniciada a las ${timeStr}. ¡Disfruta de tu descanso!`,
+      record
+    });
+  } else if (action === 'end') {
+    if (record.status !== 'ON_BREAK' || !record.currentBreakStart) {
+      return res.status(400).json({ error: 'No tienes ninguna pausa activa en este momento.' });
+    }
+
+    const startMs = new Date(record.currentBreakStart).getTime();
+    const durationMin = Math.max(1, Math.round((now.getTime() - startMs) / 60000));
+
+    record.breaks.push({
+      start: record.currentBreakStart,
+      end: now.toISOString(),
+      durationMinutes: durationMin,
+      reason: record.currentBreakReason || 'Pausa descanso'
+    });
+
+    record.breakMinutes = (record.breakMinutes || 0) + durationMin;
+    record.currentBreakStart = null;
+    record.currentBreakReason = null;
+    record.status = 'WORKING';
+
+    return res.json({
+      success: true,
+      message: `▶️ Jornada reanudada. Descanso registrado de ${durationMin} min. (Total acumulado: ${record.breakMinutes} min)`,
+      record
+    });
+  } else {
+    return res.status(400).json({ error: 'Acción no válida. Usa "start" o "end".' });
+  }
+});
+
+// D. Fichar salida (Clock-Out)
+app.post('/api/time-tracking/clock-out', (req, res) => {
+  const { staffId, notes } = req.body;
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const record = db.timeRecords.find(r => r.staffId === staff.id && r.date === todayStr);
+
+  if (!record || record.status === 'COMPLETED') {
+    return res.status(400).json({ error: 'No hay ninguna jornada activa pendiente de salida hoy.' });
+  }
+
+  const now = new Date();
+
+  // Si estaba en descanso, cerrarlo automáticamente
+  if (record.status === 'ON_BREAK' && record.currentBreakStart) {
+    const startMs = new Date(record.currentBreakStart).getTime();
+    const durationMin = Math.max(1, Math.round((now.getTime() - startMs) / 60000));
+    record.breaks.push({
+      start: record.currentBreakStart,
+      end: now.toISOString(),
+      durationMinutes: durationMin,
+      reason: record.currentBreakReason || 'Pausa descanso'
+    });
+    record.breakMinutes = (record.breakMinutes || 0) + durationMin;
+    record.currentBreakStart = null;
+  }
+
+  record.clockOut = now.toISOString();
+  record.status = 'COMPLETED';
+
+  // Calcular tiempo bruto y neto efectivo
+  const grossMinutes = Math.max(0, Math.round((now.getTime() - new Date(record.clockIn).getTime()) / 60000));
+  const effectiveMinutes = Math.max(0, grossMinutes - (record.breakMinutes || 0));
+  record.effectiveMinutes = effectiveMinutes;
+  record.effectiveHours = Math.round((effectiveMinutes / 60) * 100) / 100;
+
+  // Cálculo horas extras (jornada ordinaria estándar: 8h = 480 min)
+  const regularMinutes = 480;
+  record.overtimeHours = effectiveMinutes > regularMinutes 
+    ? Math.round(((effectiveMinutes - regularMinutes) / 60) * 100) / 100 
+    : 0;
+
+  if (notes) {
+    record.notes = (record.notes ? record.notes + ' | ' : '') + notes;
+  }
+
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  res.json({
+    success: true,
+    message: `🔴 ¡Salida registrada a las ${timeStr}! Has completado ${record.effectiveHours}h efectivas de trabajo hoy. ¡Gracias por tu dedicación!`,
+    record
+  });
+});
+
+// E. Resumen en tiempo real del personal para el Dashboard de Administración
+app.get('/api/time-tracking/summary-today', (req, res) => {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const activeStaff = db.staff.filter(s => s.isActive !== false);
+
+  const staffStatusList = activeStaff.map(s => {
+    const record = db.timeRecords.find(r => r.staffId === s.id && r.date === todayStr);
+    let currentStatus = 'NOT_STARTED';
+    let clockInFormatted = '-';
+    let clockOutFormatted = '-';
+    let breakMin = 0;
+    let effectiveHours = 0;
+    let notes = '';
+
+    if (record) {
+      currentStatus = record.status;
+      clockInFormatted = record.clockIn ? new Date(record.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+      clockOutFormatted = record.clockOut ? new Date(record.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+      breakMin = record.breakMinutes || 0;
+      effectiveHours = record.effectiveHours || 0;
+      notes = record.notes || '';
+    }
+
+    return {
+      staffId: s.id,
+      name: s.name,
+      dni: s.dni || 'N/A',
+      specialty: s.specialty,
+      chair: s.chair,
+      displayColor: s.displayColor,
+      status: currentStatus,
+      clockIn: clockInFormatted,
+      clockOut: clockOutFormatted,
+      breakMinutes: breakMin,
+      effectiveHours,
+      notes,
+      recordId: record ? record.id : null
+    };
+  });
+
+  const workingCount = staffStatusList.filter(s => s.status === 'WORKING').length;
+  const breakCount = staffStatusList.filter(s => s.status === 'ON_BREAK').length;
+  const completedCount = staffStatusList.filter(s => s.status === 'COMPLETED').length;
+  const notStartedCount = staffStatusList.filter(s => s.status === 'NOT_STARTED').length;
+
+  const totalEffectiveHoursToday = staffStatusList.reduce((sum, s) => sum + s.effectiveHours, 0);
+
+  res.json({
+    date: todayStr,
+    totalStaff: activeStaff.length,
+    workingCount,
+    breakCount,
+    completedCount,
+    notStartedCount,
+    totalEffectiveHoursToday: Math.round(totalEffectiveHoursToday * 100) / 100,
+    staffStatusList
+  });
+});
+
+// F. Listado histórico de fichajes con filtros (Administración)
+app.get('/api/time-tracking/records', (req, res) => {
+  const { staffId, date, month, status } = req.query;
+  let records = [...db.timeRecords];
+
+  if (staffId && staffId !== 'all') {
+    records = records.filter(r => r.staffId === staffId);
+  }
+  if (date) {
+    records = records.filter(r => r.date === date);
+  }
+  if (month) {
+    records = records.filter(r => r.date.startsWith(month));
+  }
+  if (status && status !== 'all') {
+    records = records.filter(r => r.status === status);
+  }
+
+  // Ordenar cronológicamente descendente (más recientes primero)
+  records.sort((a, b) => new Date(b.date + ' ' + (b.clockIn || '00:00')) - new Date(a.date + ' ' + (a.clockIn || '00:00')));
+
+  res.json({
+    count: records.length,
+    records
+  });
+});
+
+// G. Crear o corregir fichaje manual (Administración)
+app.post('/api/time-tracking/manual-entry', (req, res) => {
+  const { staffId, date, clockIn, clockOut, breakMinutes = 0, notes } = req.body;
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+  if (!date || !clockIn || !clockOut) {
+    return res.status(400).json({ error: 'Fecha, hora de entrada y hora de salida son obligatorias.' });
+  }
+
+  const clockInDate = new Date(`${date}T${clockIn}:00.000Z`);
+  const clockOutDate = new Date(`${date}T${clockOut}:00.000Z`);
+  const grossMinutes = Math.max(0, Math.round((clockOutDate.getTime() - clockInDate.getTime()) / 60000));
+  const effectiveMin = Math.max(0, grossMinutes - Number(breakMinutes));
+  const effectiveHours = Math.round((effectiveMin / 60) * 100) / 100;
+  const overtimeHours = effectiveHours > 8 ? Math.round((effectiveHours - 8) * 100) / 100 : 0;
+
+  const newRecord = {
+    id: 'tr-man-' + Date.now(),
+    staffId: staff.id,
+    staffDni: staff.dni || '54321678E',
+    staffName: staff.name,
+    chair: staff.chair,
+    date,
+    clockIn: clockInDate.toISOString(),
+    clockOut: clockOutDate.toISOString(),
+    breaks: Number(breakMinutes) > 0 ? [{ start: '', end: '', durationMinutes: Number(breakMinutes), reason: 'Pausa Almuerzo' }] : [],
+    breakMinutes: Number(breakMinutes),
+    effectiveMinutes: effectiveMin,
+    effectiveHours,
+    overtimeHours,
+    status: 'COMPLETED',
+    device: 'Panel Administración (Corrección Manual)',
+    notes: (notes || 'Ajuste administrativo') + ' [Añadido por Gerencia]'
+  };
+
+  db.timeRecords.push(newRecord);
+
+  res.status(201).json({
+    success: true,
+    message: `Registro de jornada manual creado con éxito para ${staff.name} (${effectiveHours}h).`,
+    record: newRecord
+  });
+});
+
+// H. DESCARGA OFICIAL EXCEL (XLSX) Y CSV PARA INSPECCIÓN DE TRABAJO
+app.get('/api/time-tracking/export-excel', (req, res) => {
+  const { month = '2026-10', staffId, format = 'xlsx' } = req.query;
+  let records = [...db.timeRecords];
+
+  if (month && month !== 'all') {
+    records = records.filter(r => r.date.startsWith(month));
+  }
+  if (staffId && staffId !== 'all') {
+    records = records.filter(r => r.staffId === staffId);
+  }
+
+  // Ordenar por fecha ascendente y luego por nombre
+  records.sort((a, b) => a.date.localeCompare(b.date) || a.staffName.localeCompare(b.staffName));
+
+  const salon = db.salonInfo;
+
+  // Formato CSV si se solicita explícitamente
+  if (format === 'csv') {
+    const csvRows = [
+      'ID Registro;Fecha;DNI Empleada;Nombre Empleada;Puesto/Sillón;Hora Entrada;Hora Salida;Descanso (min);Horas Efectivas;Horas Extras;Estado;Dispositivo;Observaciones'
+    ];
+    records.forEach(r => {
+      const inTime = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+      const outTime = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (r.status === 'WORKING' ? 'En Curso' : (r.status === 'ON_BREAK' ? 'En Pausa' : '-'));
+      const effHours = (r.effectiveHours || 0).toString().replace('.', ',');
+      const extraHours = (r.overtimeHours || 0).toString().replace('.', ',');
+      csvRows.push([
+        r.id,
+        r.date,
+        r.staffDni || 'N/A',
+        r.staffName,
+        r.chair || 'Estilista',
+        inTime,
+        outTime,
+        r.breakMinutes || 0,
+        effHours,
+        extraHours,
+        r.status,
+        r.device || 'PWA Móvil',
+        `"${(r.notes || '').replace(/"/g, '""')}"`
+      ].join(';'));
+    });
+
+    const csvContent = '﻿' + csvRows.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_${month}.csv"`);
+    return res.send(csvContent);
+  }
+
+  // Generación nativa XLSX con SheetJS
+  const wb = XLSX.utils.book_new();
+
+  // Hoja 1: Registro Diario Oficial
+  const sheetData = [
+    [`REGISTRO DIARIO DE JORNADA LABORAL — ${salon.legalName.toUpperCase()}`],
+    [`Normativa: Real Decreto-ley 8/2019 de 8 de marzo (Obligatoriedad de Registro de Jornada - Art. 34.9 Estatuto de los Trabajadores)`],
+    [`NIF: ${salon.cif} | Centro: ${salon.address} | Tel: ${salon.phone}`],
+    [`Periodo Inspección: ${month === 'all' ? 'Histórico Completo' : month} | Generado el: ${new Date().toLocaleString('es-ES')}`],
+    [], // fila vacía
+    [
+      'ID Registro',
+      'Fecha',
+      'DNI / NIE',
+      'Trabajadora',
+      'Categoría / Sillón',
+      'Hora Entrada',
+      'Hora Salida',
+      'Descanso (min)',
+      'Horas Efectivas',
+      'Horas Extra',
+      'Estado Jornada',
+      'Dispositivo / Fichaje',
+      'Observaciones / Incidencias',
+      'Código Verificación'
+    ]
+  ];
+
+  records.forEach(r => {
+    const inTime = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+    const outTime = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (r.status === 'WORKING' ? 'En Curso' : (r.status === 'ON_BREAK' ? 'En Pausa' : '-'));
+    const statusText = r.status === 'COMPLETED' ? 'Finalizada' : (r.status === 'WORKING' ? 'Trabajando' : (r.status === 'ON_BREAK' ? 'En Descanso' : r.status));
+    const verificationCode = 'FICHAJE-OK-' + crypto.createHash('sha256').update(r.id + r.date + (r.clockIn || '')).digest('hex').slice(0, 8).toUpperCase();
+
+    sheetData.push([
+      r.id,
+      r.date,
+      r.staffDni || 'N/A',
+      r.staffName,
+      r.chair || 'Estilista',
+      inTime,
+      outTime,
+      r.breakMinutes || 0,
+      r.effectiveHours || 0,
+      r.overtimeHours || 0,
+      statusText,
+      r.device || 'PWA Móvil Estilista',
+      r.notes || 'Registro correcto',
+      verificationCode
+    ]);
+  });
+
+  const ws1 = XLSX.utils.aoa_to_sheet(sheetData);
+
+  // Ancho de columnas para visualización perfecta en Excel
+  ws1['!cols'] = [
+    { wch: 16 }, // ID
+    { wch: 12 }, // Fecha
+    { wch: 13 }, // DNI
+    { wch: 22 }, // Trabajadora
+    { wch: 24 }, // Categoría
+    { wch: 14 }, // Entrada
+    { wch: 14 }, // Salida
+    { wch: 14 }, // Descanso
+    { wch: 15 }, // Efectivas
+    { wch: 13 }, // Extras
+    { wch: 14 }, // Estado
+    { wch: 26 }, // Dispositivo
+    { wch: 38 }, // Observaciones
+    { wch: 20 }  // Hash Verificación
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Registro Fichajes');
+
+  // Hoja 2: Resumen Acumulado por Trabajadora (Auditoría de Nóminas)
+  const staffSummaryMap = {};
+  records.forEach(r => {
+    if (!staffSummaryMap[r.staffId]) {
+      staffSummaryMap[r.staffId] = {
+        name: r.staffName,
+        dni: r.staffDni,
+        days: 0,
+        totalEffectiveHours: 0,
+        totalOvertimeHours: 0,
+        totalBreakMinutes: 0
+      };
+    }
+    staffSummaryMap[r.staffId].days += 1;
+    staffSummaryMap[r.staffId].totalEffectiveHours += (r.effectiveHours || 0);
+    staffSummaryMap[r.staffId].totalOvertimeHours += (r.overtimeHours || 0);
+    staffSummaryMap[r.staffId].totalBreakMinutes += (r.breakMinutes || 0);
+  });
+
+  const summarySheetData = [
+    [`RESUMEN MENSUAL DE HORAS TRABAJADAS — ${salon.legalName.toUpperCase()}`],
+    [`Periodo: ${month === 'all' ? 'Histórico' : month} | Registro Laboral Oficial`],
+    [],
+    ['DNI / NIE', 'Trabajadora', 'Días Fichados', 'Total Horas Efectivas', 'Total Horas Extras', 'Pausas Acumuladas (min)', 'Media Horas / Día']
+  ];
+
+  Object.values(staffSummaryMap).forEach(s => {
+    const avgDaily = s.days > 0 ? (s.totalEffectiveHours / s.days).toFixed(2) : '0';
+    summarySheetData.push([
+      s.dni || 'N/A',
+      s.name,
+      s.days,
+      Math.round(s.totalEffectiveHours * 100) / 100,
+      Math.round(s.totalOvertimeHours * 100) / 100,
+      s.totalBreakMinutes,
+      Number(avgDaily)
+    ]);
+  });
+
+  const ws2 = XLSX.utils.aoa_to_sheet(summarySheetData);
+  ws2['!cols'] = [
+    { wch: 14 },
+    { wch: 24 },
+    { wch: 14 },
+    { wch: 22 },
+    { wch: 18 },
+    { wch: 22 },
+    { wch: 18 }
+  ];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen por Trabajadora');
+
+  const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_Losan_${month}.xlsx"`);
+  res.send(excelBuffer);
 });
 
 // Iniciar servidor

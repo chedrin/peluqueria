@@ -47,11 +47,17 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
-DO $$ BEGIN
+DO $ BEGIN
     CREATE TYPE staff_status AS ENUM ('active', 'inactive', 'medical_leave', 'vacation');
 EXCEPTION
     WHEN duplicate_object THEN null;
-END $$;
+END $;
+
+DO $ BEGIN
+    CREATE TYPE clock_record_status AS ENUM ('WORKING', 'ON_BREAK', 'COMPLETED', 'INCIDENT');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $;
 
 -- ============================================================================
 -- 2. TABLAS PRINCIPALES
@@ -582,6 +588,16 @@ ALTER TABLE loyalty_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gift_cards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stamp_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE staff_time_records ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Lectura pública/autenticada de fichajes" ON staff_time_records
+    FOR SELECT USING (true);
+
+CREATE POLICY "Inserción de fichajes autorizados" ON staff_time_records
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Modificación de fichajes por administración o trabajadora" ON staff_time_records
+    FOR UPDATE USING (true);
 
 CREATE POLICY "Clients read own stamp history" ON stamp_history FOR SELECT USING (
     client_id IN (SELECT id FROM clients WHERE dni = current_setting('request.jwt.claim.dni', true)) OR
@@ -751,6 +767,23 @@ VALUES (
     75.00,
     '2027-04-23 23:59:59+00'
 ) ON CONFLICT DO NOTHING;
+
+-- 6.12 Registro Semilla de Fichajes Laborales (Auditoría RD-ley 8/2019)
+INSERT INTO staff_time_records (
+    id, staff_id, staff_dni, staff_name, work_date, clock_in, clock_out, break_minutes, breaks_detail, effective_minutes, effective_hours, overtime_hours, status, device_info, notes
+) VALUES
+-- Elena Gómez (stf-1)
+('f0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', '54321678E', 'Elena Gómez', '2026-10-22', '2026-10-22 09:22:00+00', '2026-10-22 19:32:00+00', 60, '[{"reason":"Almuerzo","durationMinutes":60}]'::jsonb, 550, 9.17, 1.17, 'COMPLETED', 'PWA Móvil (Android / Chrome)', 'Turno habitual'),
+('f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', '54321678E', 'Elena Gómez', '2026-10-23', '2026-10-23 09:28:15+00', null, 30, '[{"reason":"Almuerzo rápido","durationMinutes":30}]'::jsonb, 320, 5.33, 0.00, 'WORKING', 'PWA Móvil (Android / Chrome)', 'Jornada activa con clientas de balayage'),
+
+-- Raquel Santos (stf-2)
+('f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002', '71234567R', 'Raquel Santos', '2026-10-22', '2026-10-22 09:25:00+00', '2026-10-22 19:35:00+00', 60, '[{"reason":"Almuerzo","durationMinutes":60}]'::jsonb, 550, 9.17, 1.17, 'COMPLETED', 'PWA Móvil (iOS / Safari)', 'Mucho volumen en corte Bob y peinados'),
+('f0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', '71234567R', 'Raquel Santos', '2026-10-23', '2026-10-23 09:15:30+00', null, 0, '[]'::jsonb, 270, 4.50, 0.00, 'ON_BREAK', 'PWA Móvil (iOS / Safari)', 'En descanso de almuerzo actualmente'),
+
+-- Carmen Vidal (stf-3)
+('f0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000003', '38912456C', 'Carmen Vidal', '2026-10-22', '2026-10-22 09:26:00+00', '2026-10-22 19:30:00+00', 60, '[{"reason":"Almuerzo","durationMinutes":60}]'::jsonb, 544, 9.07, 1.07, 'COMPLETED', 'PWA Tablet Salón', 'Jornada intensiva de tratamientos'),
+('f0000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000003', '38912456C', 'Carmen Vidal', '2026-10-23', '2026-10-23 09:30:00+00', '2026-10-23 14:30:00+00', 0, '[]'::jsonb, 300, 5.00, 0.00, 'COMPLETED', 'PWA Tablet Salón', 'Turno de mañana cerrado con éxito')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- FIN DEL SCRIPT DE BASE DE DATOS PARA SUPABASE

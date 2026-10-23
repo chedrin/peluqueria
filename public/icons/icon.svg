@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="50%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#6B21A8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background with rounded squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="url(#goldGrad)" stroke-width="4" opacity="0.6"/>
+
+  <!-- Decorative glow circle -->
+  <circle cx="256" cy="256" r="180" fill="url(#accentGrad)" opacity="0.2"/>
+
+  <!-- Salon Scissors & Comb Emblem -->
+  <!-- Scissors Left Blade & Loop -->
+  <g transform="translate(256, 256) rotate(-25) translate(-256, -256)" stroke="url(#goldGrad)" stroke-width="16" stroke-linecap="round" fill="none">
+    <!-- Blade 1 -->
+    <path d="M220 120 L256 256 L290 350"/>
+    <circle cx="305" cy="385" r="35" stroke="url(#goldGrad)" stroke-width="16"/>
+  </g>
+  <g transform="translate(256, 256) rotate(25) translate(-256, -256)" stroke="url(#goldGrad)" stroke-width="16" stroke-linecap="round" fill="none">
+    <!-- Blade 2 -->
+    <path d="M292 120 L256 256 L222 350"/>
+    <circle cx="207" cy="385" r="35" stroke="url(#goldGrad)" stroke-width="16"/>
+  </g>
+  <!-- Center pivot screw -->
+  <circle cx="256" cy="256" r="14" fill="#F59E0B" stroke="#0F172A" stroke-width="4"/>
+
+  <!-- Crown / Luxury Tiara on Top -->
+  <path d="M196 170 L216 130 L256 160 L296 130 L316 170 Z" fill="url(#goldGrad)" opacity="0.9"/>
+
+  <!-- Text / Monogram -->
+  <text x="256" y="465" font-family="Cinzel, Georgia, serif" font-size="34" font-weight="bold" fill="#F59E0B" text-anchor="middle" letter-spacing="6">LOSAN</text>
+  <text x="256" y="488" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" font-weight="600" fill="#E2E8F0" text-anchor="middle" letter-spacing="3">PORTAL ESTILISTAS</text>
+</svg>

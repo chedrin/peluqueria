@@ -1,0 +1,45 @@
+{
+  "name": "Peluquería Losan — Portal Estilistas & Fichajes",
+  "short_name": "Estilistas Losan",
+  "description": "App para estilistas de Peluquería Losan: agenda diaria de citas, expedientes técnicos, fórmulas de color y registro horario de jornada laboral (fichajes).",
+  "start_url": "/?portal=staff",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1c1917",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "lang": "es-ES",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Mi Agenda de Citas",
+      "url": "/?portal=staff",
+      "description": "Ver citas programadas para hoy"
+    },
+    {
+      "name": "Fichar Entrada / Salida",
+      "url": "/?portal=staff#fichajes",
+      "description": "Control de horario laboral"
+    }
+  ]
+}
