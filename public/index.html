@@ -1105,10 +1105,49 @@
         
         <!-- Columna 1 & 2: Agenda Diaria Individual -->
         <div class="lg:col-span-2 luxury-card rounded-2xl p-6">
-          <h3 class="text-base font-bold text-stone-900 mb-2 flex items-center justify-between font-serif-luxury text-lg">
-            <span id="worker-agenda-title">Agenda de Elena Gómez (Viernes 23 Oct)</span>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury text-lg" id="worker-agenda-title">
+              Agenda de Elena Gómez (Viernes 23 Oct)
+            </h3>
             <span class="text-xs text-stone-500 font-sans font-normal" id="worker-appointment-count">3 citas programadas</span>
-          </h3>
+          </div>
+
+          <!-- Barra de Control de Fecha y Filtro Rápido (Ayer, Hoy, Mañana, Selector Libre) -->
+          <div class="p-3.5 bg-stone-50 border border-stone-200 rounded-2xl mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
+            <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+              <button type="button" onclick="changeWorkerAgendaDate(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-white text-stone-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Día Anterior">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+              </button>
+              
+              <button type="button" onclick="setWorkerAgendaPreset('yesterday')" id="btn-worker-yesterday" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 transition cursor-pointer shadow-2xs">
+                Ayer
+              </button>
+              <button type="button" onclick="setWorkerAgendaPreset('today')" id="btn-worker-today" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-xs transition cursor-pointer">
+                Hoy (23 Oct)
+              </button>
+              <button type="button" onclick="setWorkerAgendaPreset('tomorrow')" id="btn-worker-tomorrow" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 transition cursor-pointer shadow-2xs">
+                Mañana
+              </button>
+
+              <button type="button" onclick="changeWorkerAgendaDate(1)" class="p-2 rounded-xl border border-stone-200 hover:bg-white text-stone-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Día Siguiente">
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <!-- Selector DatePicker de cualquier día libre -->
+              <div class="flex items-center gap-1.5 ml-1">
+                <span class="text-[10px] text-stone-400 font-bold uppercase hidden sm:inline">Día:</span>
+                <input type="date" id="worker-agenda-datepicker" value="2026-10-23" onchange="onWorkerAgendaDateChange(this.value)" class="bg-white border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold font-mono-code text-stone-900 focus:border-purple-500 shadow-2xs cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Indicador de Orden Cronológico de Citas -->
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200 font-bold flex items-center gap-1 text-[11px] whitespace-nowrap shadow-2xs">
+                <i data-lucide="arrow-down-up" class="w-3 h-3 text-purple-600"></i> Ordenadas por Hora
+              </span>
+            </div>
+          </div>
+
           <p class="text-xs text-stone-500 mb-4">Haz clic en cualquier cita para cargar y editar el expediente técnico de esa clienta.</p>
           <div class="space-y-3" id="worker-agenda-list">
             <!-- Citas asignadas a la trabajadora -->
@@ -2994,6 +3033,7 @@
       activeClientTab: 'ai-chat',
       activeAdminTab: 'agenda-master',
       activeStaffId: 'stf-1', // Estilista activa en Portal Trabajadoras
+      workerAgendaDate: '2026-10-23', // Fecha seleccionada en Portal Trabajadoras (Ayer, Hoy, Mañana o Selector)
       bookingCalendarStaffId: 'stf-1', // Estilista seleccionada para ver huecos en Calendario
       selectedClientId: 'cli-1', // Clienta activa en el expediente técnico
       selectedAppointmentId: null,
@@ -3717,16 +3757,59 @@
     // ========================================================================
     // PORTAL TRABAJADORAS: AGENDA Y EXPEDIENTES TÉCNICOS DINÁMICOS
     // ========================================================================
+    function getFriendlyWorkerDateLabel(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      
+      const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      
+      const weekday = weekdays[d.getDay()];
+      const day = d.getDate();
+      const month = months[d.getMonth()];
+      
+      if (dateStr === '2026-10-23') return `${weekday} ${day} ${month} (Hoy)`;
+      if (dateStr === '2026-10-22') return `${weekday} ${day} ${month} (Ayer)`;
+      if (dateStr === '2026-10-24') return `${weekday} ${day} ${month} (Mañana)`;
+      return `${weekday} ${day} ${month}`;
+    }
+
+    function onWorkerAgendaDateChange(newDate) {
+      if (!newDate) return;
+      state.workerAgendaDate = newDate;
+      renderWorkerAgenda();
+    }
+
+    function changeWorkerAgendaDate(offset) {
+      const curStr = state.workerAgendaDate || '2026-10-23';
+      const parts = curStr.split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      d.setDate(d.getDate() + offset);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      state.workerAgendaDate = `${y}-${m}-${day}`;
+      renderWorkerAgenda();
+    }
+
+    function setWorkerAgendaPreset(preset) {
+      if (preset === 'today') {
+        state.workerAgendaDate = '2026-10-23';
+      } else if (preset === 'yesterday') {
+        state.workerAgendaDate = '2026-10-22';
+      } else if (preset === 'tomorrow') {
+        state.workerAgendaDate = '2026-10-24';
+      }
+      renderWorkerAgenda();
+    }
+
     function changeActiveWorker() {
       state.activeStaffId = document.getElementById('select-active-worker').value;
       const worker = state.staff.find(s => s.id === state.activeStaffId);
       document.getElementById('staff-avatar').innerText = worker ? worker.name.split(' ').map(n=>n[0]).join('') : 'ST';
       
-      const titleElem = document.getElementById('worker-agenda-title');
-      if (titleElem && worker) {
-        titleElem.innerText = `Agenda de ${worker.name} (Viernes 23 Oct)`;
-      }
-
       renderWorkerAgenda();
       renderStaffPerformance();
       loadStaffTimeTrackingStatus();
@@ -3734,17 +3817,83 @@
 
     function renderWorkerAgenda() {
       const container = document.getElementById('worker-agenda-list');
-      const myApts = state.appointments.filter(a => a.staffId === state.activeStaffId && a.status !== 'cancelled');
-      document.getElementById('worker-appointment-count').innerText = `${myApts.length} cita(s) programada(s)`;
+      if (!container) return;
+
+      if (!state.workerAgendaDate) {
+        state.workerAgendaDate = '2026-10-23';
+      }
+
+      const activeDate = state.workerAgendaDate;
+
+      // Sincronizar input datepicker
+      const datepicker = document.getElementById('worker-agenda-datepicker');
+      if (datepicker) datepicker.value = activeDate;
+
+      // Sincronizar estilos de botones preset (Ayer, Hoy, Mañana)
+      const btnYesterday = document.getElementById('btn-worker-yesterday');
+      const btnToday = document.getElementById('btn-worker-today');
+      const btnTomorrow = document.getElementById('btn-worker-tomorrow');
+
+      if (btnYesterday) {
+        btnYesterday.className = activeDate === '2026-10-22'
+          ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-xs transition cursor-pointer'
+          : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 transition cursor-pointer shadow-2xs';
+      }
+      if (btnToday) {
+        btnToday.className = activeDate === '2026-10-23'
+          ? 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-xs transition cursor-pointer'
+          : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 transition cursor-pointer shadow-2xs';
+      }
+      if (btnTomorrow) {
+        btnTomorrow.className = activeDate === '2026-10-24'
+          ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-xs transition cursor-pointer'
+          : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 transition cursor-pointer shadow-2xs';
+      }
+
+      const worker = (state.staff || []).find(s => s.id === state.activeStaffId) || { name: 'Estilista' };
+      const friendlyDate = getFriendlyWorkerDateLabel(activeDate);
+
+      const titleElem = document.getElementById('worker-agenda-title');
+      if (titleElem) {
+        titleElem.innerText = `Agenda de ${worker.name} · ${friendlyDate}`;
+      }
+
+      // 1. FILTRAR CITAS POR ESTILISTA Y POR FECHA SELECCIONADA
+      const myApts = (state.appointments || []).filter(a => {
+        if (a.staffId !== state.activeStaffId || a.status === 'cancelled') return false;
+        const d = new Date(a.startTime);
+        const isoDate = d.toISOString().slice(0, 10);
+        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return isoDate === activeDate || localDate === activeDate;
+      });
+
+      // 2. ORDENAR CRONOLÓGICAMENTE POR HORA (MÁS TEMPRANO PRIMERO)
+      myApts.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+
+      const countElem = document.getElementById('worker-appointment-count');
+      if (countElem) {
+        const completedCount = myApts.filter(a => a.status === 'completed').length;
+        countElem.innerText = `${myApts.length} cita${myApts.length === 1 ? '' : 's'} (${completedCount} completada${completedCount === 1 ? '' : 's'})`;
+      }
 
       if (!myApts.length) {
         container.innerHTML = `
-          <div class="p-6 bg-stone-50 rounded-2xl text-center border border-dashed border-stone-300">
-            <p class="text-xs font-semibold text-stone-600 mb-1">Sin citas asignadas para hoy</p>
-            <p class="text-[11px] text-stone-400">Esta estilista tiene libre la jornada actual o aún no se han programado reservas.</p>
+          <div class="p-8 bg-stone-50 rounded-2xl text-center border-2 border-dashed border-stone-300 space-y-3">
+            <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center mx-auto text-xl shadow-2xs">
+              <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-stone-800 mb-0.5">Sin citas programadas para el ${friendlyDate}</p>
+              <p class="text-xs text-stone-500 max-w-sm mx-auto">Esta estilista tiene libre esta jornada o no se han agendado citas para este día.</p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-1">
+              <button type="button" onclick="setWorkerAgendaPreset('today')" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1.5">
+                <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> Ver Citas de Hoy (23 Oct)
+              </button>
+            </div>
           </div>
         `;
-        // Si no hay citas, limpiar expediente o cargar clienta 1
+        lucide.createIcons();
         renderClientTechnicalProfile('cli-1');
         return;
       }
@@ -3756,7 +3905,7 @@
         state.selectedClientId = myApts[0].clientId;
       }
 
-      container.innerHTML = myApts.map(a => {
+      container.innerHTML = myApts.map((a, idx) => {
         const isSelected = a.id === state.selectedAppointmentId;
         const client = state.clients.find(c => c.id === a.clientId);
         const phone = (client && client.phone) ? client.phone : (a.clientPhone || '34655555555');
@@ -3772,14 +3921,15 @@
           }">
             <div class="flex items-start sm:items-center gap-3.5">
               <div class="text-center font-mono-code bg-stone-50 px-3 py-2 rounded-lg border border-stone-200 flex-shrink-0">
-                <span class="text-xs font-bold text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-                <span class="text-[10px] text-stone-400">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                <span class="text-[9px] font-bold text-stone-400 block uppercase tracking-wider">#${idx + 1}</span>
+                <span class="text-xs font-black text-purple-700 block">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                <span class="text-[10px] text-stone-400 font-semibold">${new Date(a.endTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
               </div>
               <div class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <h5 class="text-sm font-bold text-stone-900">${a.clientName}</h5>
                   <span class="text-[10px] bg-stone-100 text-stone-600 font-mono-code font-bold px-2 py-0.5 rounded-full">DNI: ${dni}</span>
-                  ${isSelected ? '<span class="text-[10px] bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full">Seleccionada</span>' : ''}
+                  ${isSelected ? '<span class="text-[10px] bg-purple-600 text-white font-bold px-2 py-0.5 rounded-full shadow-2xs">Seleccionada</span>' : ''}
                 </div>
                 <p class="text-xs font-medium text-purple-900 flex items-center gap-1.5">
                   <i data-lucide="scissors" class="w-3.5 h-3.5 text-purple-600"></i>
