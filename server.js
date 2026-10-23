@@ -3428,6 +3428,46 @@ app.post('/api/time-tracking/manual-entry', (req, res) => {
   });
 });
 
+// Modificar registro de jornada existente (Administración)
+app.put('/api/time-tracking/records/:id', (req, res) => {
+  const record = db.timeRecords.find(r => r.id === req.params.id);
+  if (!record) return res.status(404).json({ error: 'Registro de fichaje no encontrado.' });
+
+  const { date, clockIn, clockOut, breakMinutes, status, notes } = req.body;
+  if (date) record.date = date;
+  if (clockIn) record.clockIn = clockIn.includes('T') ? clockIn : `${record.date}T${clockIn}:00.000Z`;
+  if (clockOut) record.clockOut = clockOut.includes('T') ? clockOut : `${record.date}T${clockOut}:00.000Z`;
+  if (breakMinutes !== undefined) record.breakMinutes = Number(breakMinutes);
+  if (status) record.status = status;
+  if (notes !== undefined) record.notes = notes;
+
+  if (record.clockIn && record.clockOut) {
+    const grossMinutes = Math.max(0, Math.round((new Date(record.clockOut).getTime() - new Date(record.clockIn).getTime()) / 60000));
+    const effectiveMin = Math.max(0, grossMinutes - (record.breakMinutes || 0));
+    record.effectiveMinutes = effectiveMin;
+    record.effectiveHours = Math.round((effectiveMin / 60) * 100) / 100;
+    record.overtimeHours = record.effectiveHours > 8 ? Math.round((record.effectiveHours - 8) * 100) / 100 : 0;
+  }
+
+  res.json({
+    success: true,
+    message: `Fichaje de ${record.staffName} actualizado correctamente.`,
+    record
+  });
+});
+
+// Eliminar registro de jornada (Administración)
+app.delete('/api/time-tracking/records/:id', (req, res) => {
+  const idx = db.timeRecords.findIndex(r => r.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Registro no encontrado.' });
+
+  const removed = db.timeRecords.splice(idx, 1)[0];
+  res.json({
+    success: true,
+    message: `Fichaje de ${removed.staffName} del día ${removed.date} eliminado correctamente.`
+  });
+});
+
 // H. DESCARGA OFICIAL EXCEL (XLSX) Y CSV PARA INSPECCIÓN DE TRABAJO
 app.get('/api/time-tracking/export-excel', (req, res) => {
   const { month = '2026-10', staffId, startDate, endDate, format = 'xlsx' } = req.query;

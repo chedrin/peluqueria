@@ -2474,6 +2474,7 @@
                   <th class="p-3 text-center">Pausas</th>
                   <th class="p-3 text-right">Horas Hoy</th>
                   <th class="p-3">Observaciones</th>
+                  <th class="p-3 text-center">Acciones Fichaje</th>
                 </tr>
               </thead>
               <tbody id="admin-staff-presence-tbody" class="divide-y divide-stone-100">
@@ -2548,6 +2549,7 @@
                   <th class="p-3 text-center">Estado</th>
                   <th class="p-3">Dispositivo / Fichaje</th>
                   <th class="p-3">Observaciones</th>
+                  <th class="p-3 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody id="admin-time-records-tbody" class="divide-y divide-stone-100 font-sans">
@@ -4755,6 +4757,83 @@
   </div>
 
 
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDITAR / REGULARIZAR REGISTRO DE FICHAJE HORARIO -->
+  <!-- ========================================================================= -->
+  <div id="modal-edit-time-record" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
+            <i data-lucide="clock" class="w-5 h-5 text-purple-600"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-stone-900 font-serif-luxury" id="edit-time-record-title">Modificar Fichaje</h4>
+            <span class="text-[11px] text-stone-500">Ajuste oficial de horas de entrada, salida y pausas</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditTimeRecordModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitEditTimeRecord(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="edit-record-id" value="">
+        <input type="hidden" id="edit-record-staff-id" value="">
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Estilista</label>
+          <input type="text" id="edit-record-staff-name" readonly class="w-full bg-stone-100 border border-stone-300 rounded-xl px-3 py-2 font-bold text-stone-800">
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Fecha del Fichaje *</label>
+          <input type="date" id="edit-record-date" required class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Hora Entrada *</label>
+            <input type="time" id="edit-record-clockin" required class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-emerald-800">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Hora Salida</label>
+            <input type="time" id="edit-record-clockout" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-rose-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Pausa / Descanso (min)</label>
+            <input type="number" min="0" id="edit-record-break" value="0" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Estado de Jornada</label>
+            <select id="edit-record-status" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-semibold">
+              <option value="WORKING">🟢 Trabajando</option>
+              <option value="ON_BREAK">☕ En Pausa / Descanso</option>
+              <option value="COMPLETED">🔵 Jornada Finalizada</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Observaciones / Motivo de regularización</label>
+          <textarea id="edit-record-notes" rows="2" placeholder="Ej: Corrección por olvido de fichaje al salir a almorzar..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-stone-100">
+          <button type="button" onclick="closeEditTimeRecordModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">Cancelar</button>
+          <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i> Guardar Fichaje
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <!-- JAVASCRIPT DE LA APLICACIÓN -->
   <script>
     // ========================================================================
@@ -5252,40 +5331,65 @@
 
     function switchAdminTab(tab) {
       state.activeAdminTab = tab;
-      const tabKey = tab.split('-')[0];
+      
+      const tabMap = {
+        'agenda-master': { view: 'aview-agenda', btn: 'tab-a-agenda', key: 'agenda' },
+        'agenda': { view: 'aview-agenda', btn: 'tab-a-agenda', key: 'agenda' },
+        'pos-tpv': { view: 'aview-tpv', btn: 'tab-a-tpv', key: 'tpv' },
+        'tpv': { view: 'aview-tpv', btn: 'tab-a-tpv', key: 'tpv' },
+        'fiscal-verifactu': { view: 'aview-fiscal', btn: 'tab-a-fiscal', key: 'fiscal' },
+        'fiscal': { view: 'aview-fiscal', btn: 'tab-a-fiscal', key: 'fiscal' },
+        'stock': { view: 'aview-stock', btn: 'tab-a-stock', key: 'stock' },
+        'crm': { view: 'aview-crm', btn: 'tab-a-crm', key: 'crm' },
+        'kpis': { view: 'aview-kpis', btn: 'tab-a-kpis', key: 'kpis' },
+        'staff': { view: 'aview-staff', btn: 'tab-a-staff', key: 'staff' },
+        'loyalty': { view: 'aview-loyalty', btn: 'tab-a-loyalty', key: 'loyalty' },
+        'salon': { view: 'aview-salon', btn: 'tab-a-salon', key: 'salon' },
+        'time-tracking': { view: 'aview-timetracking', btn: 'tab-a-timetracking', key: 'timetracking' },
+        'timetracking': { view: 'aview-timetracking', btn: 'tab-a-timetracking', key: 'timetracking' },
+        'time': { view: 'aview-timetracking', btn: 'tab-a-timetracking', key: 'timetracking' },
+        'fichajes': { view: 'aview-timetracking', btn: 'tab-a-timetracking', key: 'timetracking' },
+        'services': { view: 'aview-services', btn: 'tab-a-services', key: 'services' },
+        'packages': { view: 'aview-packages', btn: 'tab-a-packages', key: 'packages' },
+        'users': { view: 'aview-users', btn: 'tab-a-users', key: 'users' }
+      };
+
+      const info = tabMap[tab] || { view: 'aview-' + tab, btn: 'tab-a-' + tab, key: tab };
+      
       document.querySelectorAll('.admin-tab').forEach(b => {
         b.classList.remove('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
         b.classList.add('text-stone-600');
       });
-      const activeBtn = document.getElementById('tab-a-' + tabKey);
+      const activeBtn = document.getElementById(info.btn);
       if (activeBtn) {
         activeBtn.classList.add('bg-indigo-50', 'text-indigo-700', 'border', 'border-indigo-200', 'shadow-2xs', 'active');
       }
 
       document.querySelectorAll('#aview-agenda, #aview-tpv, #aview-fiscal, #aview-stock, #aview-crm, #aview-kpis, #aview-staff, #aview-salon, #aview-loyalty, #aview-timetracking, #aview-users, #aview-services, #aview-packages').forEach(el => el.classList.add('hidden'));
-      const targetView = document.getElementById('aview-' + tabKey);
+      const targetView = document.getElementById(info.view);
       if (targetView) targetView.classList.remove('hidden');
 
-      if (tabKey === 'crm') {
+      const k = info.key;
+      if (k === 'crm') {
         renderAdminCrmTable();
-      } else if (tabKey === 'kpis') {
+      } else if (k === 'kpis') {
         renderAdminKpis();
-      } else if (tabKey === 'staff') {
+      } else if (k === 'staff') {
         renderAdminStaffTable();
-      } else if (tabKey === 'salon') {
+      } else if (k === 'salon') {
         loadSalonInfo();
-      } else if (tabKey === 'loyalty') {
+      } else if (k === 'loyalty') {
         renderAdminLoyaltyManagement();
         loadVipClientDetails();
-      } else if (tabKey === 'timetracking' || tabKey === 'time') {
+      } else if (k === 'timetracking') {
         renderAdminTimeTracking();
-      } else if (tabKey === 'users') {
+      } else if (k === 'users') {
         loadAdminUsersTable();
-      } else if (tabKey === 'stock') {
+      } else if (k === 'stock') {
         renderStockTable();
-      } else if (tabKey === 'services') {
+      } else if (k === 'services') {
         renderAdminServicesTable();
-      } else if (tabKey === 'packages') {
+      } else if (k === 'packages') {
         renderAdminPackagesAndLookbook();
       }
       lucide.createIcons();
@@ -9572,6 +9676,47 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
               statusBadge = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-stone-100 text-stone-600 border border-stone-200 flex items-center justify-center gap-1">Sin Fichar</span>';
             }
 
+            let actionsHtml = '';
+            if (s.status === 'WORKING') {
+              actionsHtml = `
+                <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <button type="button" onclick="adminToggleStaffBreak('${s.staffId}', 'start')" class="bg-amber-500 hover:bg-amber-400 text-white font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Iniciar Pausa de Descanso">
+                    <i data-lucide="coffee" class="w-3.5 h-3.5"></i> Pausa
+                  </button>
+                  <button type="button" onclick="adminClockOutStaff('${s.staffId}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Cerrar Jornada / Fichar Salida">
+                    <i data-lucide="square" class="w-3.5 h-3.5"></i> Salida
+                  </button>
+                </div>
+              `;
+            } else if (s.status === 'ON_BREAK') {
+              actionsHtml = `
+                <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <button type="button" onclick="adminToggleStaffBreak('${s.staffId}', 'end')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Reanudar Jornada">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Reanudar
+                  </button>
+                  <button type="button" onclick="adminClockOutStaff('${s.staffId}')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Cerrar Jornada">
+                    <i data-lucide="square" class="w-3.5 h-3.5"></i> Salida
+                  </button>
+                </div>
+              `;
+            } else if (s.status === 'COMPLETED') {
+              actionsHtml = `
+                <div class="flex items-center justify-center whitespace-nowrap">
+                  <button type="button" onclick="adminClockInStaff('${s.staffId}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Reabrir Jornada / Horas Extras">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reanudar
+                  </button>
+                </div>
+              `;
+            } else {
+              actionsHtml = `
+                <div class="flex items-center justify-center whitespace-nowrap">
+                  <button type="button" onclick="adminClockInStaff('${s.staffId}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-2xs transition cursor-pointer" title="Fichar Entrada de Turno">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Fichar Entrada
+                  </button>
+                </div>
+              `;
+            }
+
             return `
               <tr class="hover:bg-stone-50/60 transition">
                 <td class="p-3 font-bold text-stone-900 flex items-center gap-2">
@@ -9588,6 +9733,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
                 <td class="p-3 text-center font-mono-code text-stone-600">${s.breakMinutes} min</td>
                 <td class="p-3 text-right font-mono-code font-bold text-purple-900">${(s.effectiveHours || 0).toFixed(2)} h</td>
                 <td class="p-3 text-stone-500 text-[11px] italic max-w-xs truncate">${s.notes || '-'}</td>
+                <td class="p-3 text-center">${actionsHtml}</td>
               </tr>
             `;
           }).join('');
@@ -9648,6 +9794,14 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
                   </td>
                   <td class="p-3 text-stone-500 text-[11px] truncate max-w-xs">${r.device || 'PWA Móvil'}</td>
                   <td class="p-3 text-stone-600 text-[11px] italic max-w-xs">${r.notes || '-'}</td>
+                  <td class="p-3 text-center whitespace-nowrap space-x-1">
+                    <button type="button" onclick="openEditTimeRecordModal('${r.id}')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold px-2 py-1 rounded-lg text-xs transition cursor-pointer" title="Modificar Fichaje">
+                      ✏️ Editar
+                    </button>
+                    <button type="button" onclick="deleteTimeRecord('${r.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-2 py-1 rounded-lg text-xs transition cursor-pointer" title="Eliminar Registro">
+                      🗑️
+                    </button>
+                  </td>
                 </tr>
               `;
             }).join('');
@@ -9721,6 +9875,152 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       }
 
       window.location.href = `/api/time-tracking/export-excel?${params.toString()}`;
+    }
+
+    
+    // Helper handlers for Admin Control Horario actions
+    async function adminClockInStaff(staffId) {
+      try {
+        const res = await fetch('/api/time-tracking/clock-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, notes: 'Fichaje de entrada registrado desde Administración', device: 'Panel Administración' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('🟢 ' + (data.message || 'Entrada registrada'));
+          await renderAdminTimeTracking();
+          if (state.activeStaffId === staffId) await loadStaffTimeTrackingStatus();
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo fichar entrada'));
+        }
+      } catch (err) {
+        alert('Error de conexión al fichar entrada');
+      }
+    }
+
+    async function adminToggleStaffBreak(staffId, action) {
+      const reason = action === 'start' ? (prompt('Motivo de la pausa (ej: Almuerzo, Café):', 'Pausa Almuerzo') || 'Descanso') : '';
+      try {
+        const res = await fetch('/api/time-tracking/break', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, action, reason })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert((action === 'start' ? '☕ ' : '▶️ ') + (data.message || 'Pausa actualizada'));
+          await renderAdminTimeTracking();
+          if (state.activeStaffId === staffId) await loadStaffTimeTrackingStatus();
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo actualizar la pausa'));
+        }
+      } catch (err) {
+        alert('Error al gestionar descanso');
+      }
+    }
+
+    async function adminClockOutStaff(staffId) {
+      if (!confirm('¿Confirmas que deseas cerrar y finalizar la jornada laboral de esta estilista?')) return;
+      try {
+        const res = await fetch('/api/time-tracking/clock-out', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffId, notes: 'Salida registrada desde Panel Administración' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('🔴 ' + (data.message || 'Salida registrada'));
+          await renderAdminTimeTracking();
+          if (state.activeStaffId === staffId) await loadStaffTimeTrackingStatus();
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo fichar salida'));
+        }
+      } catch (err) {
+        alert('Error al registrar salida');
+      }
+    }
+
+    let currentEditingRecord = null;
+    async function openEditTimeRecordModal(recordId) {
+      try {
+        const res = await fetch('/api/time-tracking/records');
+        const data = await res.json();
+        const record = (data.records || []).find(r => r.id === recordId);
+        if (!record) {
+          alert('No se encontró el registro.');
+          return;
+        }
+
+        currentEditingRecord = record;
+        document.getElementById('edit-record-id').value = record.id;
+        document.getElementById('edit-record-staff-id').value = record.staffId;
+        document.getElementById('edit-record-staff-name').value = record.staffName + ' (' + record.staffDni + ')';
+        document.getElementById('edit-record-date').value = record.date;
+        
+        const inTime = record.clockIn ? new Date(record.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '09:30';
+        const outTime = record.clockOut ? new Date(record.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '19:30';
+        
+        document.getElementById('edit-record-clockin').value = inTime;
+        document.getElementById('edit-record-clockout').value = record.clockOut ? outTime : '';
+        document.getElementById('edit-record-break').value = record.breakMinutes || 0;
+        document.getElementById('edit-record-status').value = record.status || 'COMPLETED';
+        document.getElementById('edit-record-notes').value = record.notes || '';
+
+        document.getElementById('modal-edit-time-record').classList.remove('hidden');
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function closeEditTimeRecordModal() {
+      document.getElementById('modal-edit-time-record').classList.add('hidden');
+    }
+
+    async function submitEditTimeRecord(event) {
+      event.preventDefault();
+      const id = document.getElementById('edit-record-id').value;
+      const date = document.getElementById('edit-record-date').value;
+      const clockIn = document.getElementById('edit-record-clockin').value;
+      const clockOut = document.getElementById('edit-record-clockout').value;
+      const breakMinutes = parseInt(document.getElementById('edit-record-break').value, 10) || 0;
+      const status = document.getElementById('edit-record-status').value;
+      const notes = document.getElementById('edit-record-notes').value.trim();
+
+      try {
+        const res = await fetch('/api/time-tracking/records/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date, clockIn, clockOut, breakMinutes, status, notes })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ' + (data.message || 'Fichaje actualizado'));
+          closeEditTimeRecordModal();
+          await renderAdminTimeTracking();
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo actualizar'));
+        }
+      } catch (err) {
+        alert('Error al guardar el fichaje');
+      }
+    }
+
+    async function deleteTimeRecord(recordId) {
+      if (!confirm('¿Seguro que deseas eliminar este registro de fichaje del historial de inspección?')) return;
+      try {
+        const res = await fetch('/api/time-tracking/records/' + recordId, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          alert('🗑️ ' + (data.message || 'Registro eliminado'));
+          await renderAdminTimeTracking();
+        } else {
+          alert('Error: ' + (data.error || 'No se pudo eliminar'));
+        }
+      } catch (err) {
+        alert('Error al eliminar registro');
+      }
     }
 
     function openManualClockModal() {
