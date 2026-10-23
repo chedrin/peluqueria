@@ -177,11 +177,11 @@ const db = {
     }
   ],
   services: [
-    { id: 'srv-1', name: 'Corte y Estilismo', category: 'corte', durationMinutes: 30, price: 22.00, vatRate: 21.0 },
-    { id: 'srv-2', name: 'Coloración Completa (Tinte)', category: 'coloracion', durationMinutes: 60, price: 38.00, vatRate: 21.0 },
-    { id: 'srv-3', name: 'Mechas Balayage & Matiz', category: 'coloracion', durationMinutes: 90, price: 65.00, vatRate: 21.0 },
-    { id: 'srv-4', name: 'Peinado & Brushing', category: 'peinado', durationMinutes: 30, price: 18.00, vatRate: 21.0 },
-    { id: 'srv-5', name: 'Tratamiento Olaplex / Keratina', category: 'tratamiento', durationMinutes: 45, price: 35.00, vatRate: 21.0 },
+    { id: 'srv-1', name: 'Corte y Estilismo', category: 'corte', durationMinutes: 30, price: 22.00, vatRate: 21.0, requiredMaterials: 'Tijeras de corte ergonómicas, capa desechable, champú neutro dermo-protector' },
+    { id: 'srv-2', name: 'Coloración Completa (Tinte)', category: 'coloracion', durationMinutes: 60, price: 38.00, vatRate: 21.0, requiredMaterials: 'Tubo tinte Igora (60g), oxidante en crema 20vol (60ml), guantes nitrilo, protector contorno' },
+    { id: 'srv-3', name: 'Mechas Balayage & Matiz', category: 'coloracion', durationMinutes: 90, price: 65.00, vatRate: 21.0, requiredMaterials: 'Polvo decolorante Blondme (45g), oxidante 20vol (90ml), matizador perlado 9.5-1 (30g), paletina balayage' },
+    { id: 'srv-4', name: 'Peinado & Brushing', category: 'peinado', durationMinutes: 30, price: 18.00, vatRate: 21.0, requiredMaterials: 'Cepillo térmico cerámico, protector térmico Kérastase, secador iónico profesional' },
+    { id: 'srv-5', name: 'Tratamiento Olaplex / Keratina', category: 'tratamiento', durationMinutes: 45, price: 35.00, vatRate: 21.0, requiredMaterials: 'Olaplex Nº1 Bond Multiplier (15ml), Olaplex Nº2 (30ml), campana vapor ozonizado' }
   ],
   clients: [
     {
@@ -370,10 +370,81 @@ const db = {
     }
   ],
   products: [
-    { id: 'prd-1', sku: 'COS-001', name: 'Champú Hidratante Argán Bio (250ml)', brand: 'Moroccanoil', price: 24.50, costPrice: 12.00, stock: 8, vatRate: 21.0, isShowcase: true, img: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80' },
-    { id: 'prd-2', sku: 'COS-002', name: 'Mascarilla Reparadora Proteína (200ml)', brand: 'Olaplex Nº3', price: 29.90, costPrice: 15.50, stock: 4, vatRate: 21.0, isShowcase: true, img: 'https://images.unsplash.com/photo-1608248597359-21626f21295f?auto=format&fit=crop&w=300&q=80' },
-    { id: 'prd-3', sku: 'COS-003', name: 'Sérum Sellador de Puntas (100ml)', brand: 'Kérastase Elixir', price: 34.00, costPrice: 18.00, stock: 6, vatRate: 21.0, isShowcase: true, img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
-    { id: 'prd-4', sku: 'INT-001', name: 'Tubo Tinte 6.1 Rubio Oscuro Ceniza (60g)', brand: 'Igora', price: 9.50, costPrice: 4.80, stock: 18, vatRate: 21.0, isShowcase: false, img: '' }
+    {
+      id: 'prd-1',
+      sku: 'COS-001',
+      name: 'Champú Hidratante Argán Bio (250ml)',
+      brand: 'Moroccanoil',
+      supplier: 'Moroccanoil España S.L.',
+      price: 24.50,
+      costPrice: 12.00,
+      lastCostPrice: 11.50,
+      stock: 8,
+      minStock: 3,
+      vatRate: 21.0,
+      isShowcase: true,
+      img: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80',
+      purchaseHistory: [
+        { id: 'pch-101', date: '2026-09-01', quantity: 12, costPrice: 11.50, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-8812', notes: 'Lote inicial de septiembre' },
+        { id: 'pch-102', date: '2026-10-05', quantity: 10, costPrice: 12.00, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-9941', notes: 'Reposición mensual con subida tarifa 0,50€' }
+      ]
+    },
+    {
+      id: 'prd-2',
+      sku: 'COS-002',
+      name: 'Mascarilla Reparadora Proteína (200ml)',
+      brand: 'Olaplex Nº3',
+      supplier: 'Cosmética Profesional Olaplex S.A.',
+      price: 29.90,
+      costPrice: 15.50,
+      lastCostPrice: 14.80,
+      stock: 4,
+      minStock: 2,
+      vatRate: 21.0,
+      isShowcase: true,
+      img: 'https://images.unsplash.com/photo-1608248597359-21626f21295f?auto=format&fit=crop&w=300&q=80',
+      purchaseHistory: [
+        { id: 'pch-201', date: '2026-08-20', quantity: 8, costPrice: 14.80, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-3312', notes: 'Campaña verano' },
+        { id: 'pch-202', date: '2026-10-02', quantity: 6, costPrice: 15.50, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-4451', notes: 'Lote nuevo' }
+      ]
+    },
+    {
+      id: 'prd-3',
+      sku: 'COS-003',
+      name: 'Sérum Sellador de Puntas (100ml)',
+      brand: 'Kérastase Elixir',
+      supplier: 'L Oreal Luxe España S.A.',
+      price: 34.00,
+      costPrice: 18.00,
+      lastCostPrice: 17.50,
+      stock: 6,
+      minStock: 3,
+      vatRate: 21.0,
+      isShowcase: true,
+      img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80',
+      purchaseHistory: [
+        { id: 'pch-301', date: '2026-09-15', quantity: 10, costPrice: 17.50, supplier: 'L Oreal Luxe España S.A.', invoiceRef: 'FAC-KER-102', notes: 'Pack promocional expositor' }
+      ]
+    },
+    {
+      id: 'prd-4',
+      sku: 'INT-001',
+      name: 'Tubo Tinte 6.1 Rubio Oscuro Ceniza (60g)',
+      brand: 'Igora Royal',
+      supplier: 'Schwarzkopf Professional España',
+      price: 9.50,
+      costPrice: 4.80,
+      lastCostPrice: 4.50,
+      stock: 18,
+      minStock: 5,
+      vatRate: 21.0,
+      isShowcase: false,
+      img: '',
+      purchaseHistory: [
+        { id: 'pch-401', date: '2026-09-10', quantity: 25, costPrice: 4.50, supplier: 'Schwarzkopf Professional España', invoiceRef: 'FAC-SK-774', notes: 'Caja 25 unidades técnica' },
+        { id: 'pch-402', date: '2026-10-15', quantity: 15, costPrice: 4.80, supplier: 'Schwarzkopf Professional España', invoiceRef: 'FAC-SK-889', notes: 'Lote reposición quincenal' }
+      ]
+    }
   ],
   // CITAS REALISTAS Y DIFERENTES PARA CADA ESTILISTA
   appointments: [
@@ -775,10 +846,39 @@ const db = {
   // PROPINAS Y REGISTRO DE RENDIMIENTO
   // --------------------------------------------------------------------------
   staffTips: [
-    { id: 'tip-1', staffId: 'stf-1', amount: 5.00, paymentMethod: 'bizum', clientName: 'Laura Martínez', date: '2026-10-21' },
-    { id: 'tip-2', staffId: 'stf-2', amount: 3.50, paymentMethod: 'card', clientName: 'Sofía Morales', date: '2026-10-22' },
-    { id: 'tip-3', staffId: 'stf-3', amount: 6.00, paymentMethod: 'cash', clientName: 'Clara Sanz', date: '2026-10-22' }
+    { id: 'tip-1', staffId: 'stf-1', amount: 5.00, paymentMethod: 'bizum', reason: 'Balayage espectacular y trato exquisito', clientName: 'Laura Martínez', date: '2026-10-23', time: '11:45' },
+    { id: 'tip-2', staffId: 'stf-2', amount: 3.50, paymentMethod: 'efectivo', reason: 'Corte Bob perfecto para evento', clientName: 'Sofía Morales', date: '2026-10-23', time: '12:15' },
+    { id: 'tip-3', staffId: 'stf-3', amount: 6.00, paymentMethod: 'tarjeta', reason: 'Tratamiento Olaplex salvador de puntas', clientName: 'Clara Sanz', date: '2026-10-22', time: '18:30' },
+    { id: 'tip-4', staffId: 'stf-1', amount: 10.00, paymentMethod: 'bizum', reason: 'Colorimetría de novia impecable', clientName: 'Marta Domínguez', date: '2026-10-21', time: '17:00' }
   ],
+
+  // --------------------------------------------------------------------------
+  // NOTIFICACIONES INTERNAS EN TIEMPO REAL (AVISOS A CAJA / ADMINISTRACIÓN)
+  // --------------------------------------------------------------------------
+  notifications: [
+    {
+      id: 'notif-seed-1',
+      type: 'SERVICE_COMPLETED',
+      title: 'Servicio Finalizado en Sillón 1',
+      message: 'Elena Gómez ha terminado el servicio de Laura Martínez (Coloración + Corte). Lista para cobro en TPV.',
+      staffName: 'Elena Gómez',
+      clientName: 'Laura Martínez',
+      appointmentId: 'apt-elena-1',
+      amount: 60.00,
+      timestamp: '2026-10-23T11:32:00.000Z',
+      timeFormatted: '11:32',
+      read: false
+    }
+  ],
+
+  // --------------------------------------------------------------------------
+  // HORARIOS Y TRAMOS BLOQUEADOS POR ESTILISTA (CONFIGURABLE DESDE ADMIN)
+  // --------------------------------------------------------------------------
+  staffScheduleOverrides: {
+    'stf-1': { disabledSlots: ['14:00', '14:30'] },
+    'stf-2': { disabledSlots: ['13:30', '14:00'] },
+    'stf-3': { disabledSlots: [] }
+  },
 
   // --------------------------------------------------------------------------
   // 18. REGISTRO DE JORNADA LABORAL Y FICHAJES (RD-LEY 8/2019)
@@ -2443,26 +2543,32 @@ app.post('/api/staff/:id/tips', (req, res) => {
   const staff = db.staff.find(s => s.id === req.params.id);
   if (!staff) return res.status(404).json({ error: 'Profesional no encontrada.' });
 
-  const { amount, paymentMethod = 'bizum', clientName } = req.body;
+  const { amount, paymentMethod = 'bizum', clientName, reason, time } = req.body;
   const numAmount = Number(amount);
   if (!numAmount || numAmount <= 0) {
     return res.status(400).json({ error: 'Importe de propina inválido.' });
   }
 
+  const now = new Date();
+  const timeStr = time || now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toISOString().slice(0, 10);
+
   const newTip = {
     id: 'tip-' + Date.now(),
     staffId: staff.id,
     amount: numAmount,
-    paymentMethod,
+    paymentMethod: paymentMethod || 'efectivo',
+    reason: reason || 'Atención personalizada y servicio excelente',
     clientName: clientName || 'Clienta agradecida',
-    date: new Date().toISOString().slice(0, 10)
+    date: dateStr,
+    time: timeStr
   };
 
   db.staffTips.push(newTip);
 
   res.status(201).json({
     success: true,
-    message: `¡Propina de ${numAmount.toFixed(2)} € registrada para ${staff.name}!`,
+    message: `¡Propina de ${numAmount.toFixed(2)} € registrada para ${staff.name} (${newTip.paymentMethod} - ${newTip.reason})!`,
     tip: newTip
   });
 });
@@ -2471,37 +2577,77 @@ app.post('/api/staff/:id/tips', (req, res) => {
 // 17. DASHBOARD DE KPIS & BUSINESS INTELLIGENCE
 // ============================================================================
 app.get('/api/analytics/kpis', (req, res) => {
-  const totalInvoices = db.invoices.length;
-  const totalRevenue = db.invoices.reduce((sum, i) => sum + i.totalAmount, 0);
+  const { period = 'all', startDate, endDate } = req.query;
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+
+  let filteredInvoices = [...db.invoices];
+  let filteredAppointments = db.appointments.filter(a => a.status === 'confirmed' || a.status === 'completed');
+
+  if (startDate && endDate) {
+    filteredInvoices = filteredInvoices.filter(i => {
+      const d = (i.issueDate || '').slice(0, 10);
+      return d >= startDate && d <= endDate;
+    });
+    filteredAppointments = filteredAppointments.filter(a => {
+      const d = (a.startTime || '').slice(0, 10);
+      return d >= startDate && d <= endDate;
+    });
+  } else if (period === 'today') {
+    filteredInvoices = filteredInvoices.filter(i => (i.issueDate || '').startsWith(todayStr));
+    filteredAppointments = filteredAppointments.filter(a => (a.startTime || '').startsWith(todayStr));
+  } else if (period === 'month') {
+    const currentMonth = todayStr.slice(0, 7);
+    filteredInvoices = filteredInvoices.filter(i => (i.issueDate || '').startsWith(currentMonth));
+    filteredAppointments = filteredAppointments.filter(a => (a.startTime || '').startsWith(currentMonth));
+  }
+
+  const totalInvoices = filteredInvoices.length;
+  const totalRevenue = filteredInvoices.reduce((sum, i) => sum + (i.totalAmount || 0), 0);
   const averageTicket = totalInvoices > 0 ? (totalRevenue / totalInvoices) : 38.50;
 
   const totalClients = db.clients.length;
-  const totalAppointments = db.appointments.filter(a => a.status === 'confirmed').length;
+  const totalAppointments = filteredAppointments.length;
 
-  // Tasa de ocupación: total minutos reservados vs minutos disponibles (3 estilistas x 10h = 1800 min)
   const totalBookedMinutes = totalAppointments * 45;
   const capacityMinutes = 3 * 10 * 60; // 1800 min
-  const occupancyRate = Math.min(100, Math.round((totalBookedMinutes / capacityMinutes) * 100));
+  const occupancyRate = Math.min(100, Math.round((totalBookedMinutes / capacityMinutes) * 100)) || 75;
+
+  // Rendimiento desglosado por estilista en el periodo seleccionado
+  const staffBreakdown = db.staff.map(s => {
+    const stfApts = filteredAppointments.filter(a => a.staffId === s.id);
+    const rev = stfApts.length * 35.00;
+    const comm = Math.round(rev * 0.15 * 100) / 100;
+    const tips = db.staffTips.filter(t => t.staffId === s.id);
+    const tipSum = tips.reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+      staffName: s.name,
+      appointmentsCompleted: stfApts.length,
+      revenueGenerated: rev,
+      commissionsEarned: comm,
+      tipsCollected: tipSum
+    };
+  });
 
   res.json({
+    period,
+    startDate: startDate || null,
+    endDate: endDate || null,
     totalRevenue: Math.round(totalRevenue * 100) / 100,
     averageTicket: Math.round(averageTicket * 100) / 100,
-    occupancyRate, // %
+    occupancyRate,
     totalAppointments,
     totalClients,
     totalInvoices,
-    rebookingRate: 78.5, // %
+    rebookingRate: 78.5,
     executiveCards: {
-      totalRevenueMonth: '8.450 €',
-      averageTicket: '44,50 €',
-      chairOccupancyRate: '87 %',
+      totalRevenueMonth: (totalRevenue > 0 ? totalRevenue.toFixed(2) : '8.450') + ' €',
+      averageTicket: averageTicket.toFixed(2).replace('.', ',') + ' €',
+      chairOccupancyRate: occupancyRate + ' %',
       clientRetentionRate: '74 %'
     },
-    staffPerformanceBreakdown: [
-      { staffName: 'Elena Gómez', appointmentsCompleted: 14, revenueGenerated: 3480.00, commissionsEarned: 522.00, tipsCollected: 115.00 },
-      { staffName: 'Raquel Santos', appointmentsCompleted: 19, revenueGenerated: 2790.00, commissionsEarned: 418.50, tipsCollected: 95.00 },
-      { staffName: 'Carmen Vidal', appointmentsCompleted: 11, revenueGenerated: 2180.00, commissionsEarned: 327.00, tipsCollected: 70.00 }
-    ],
+    staffPerformanceBreakdown: staffBreakdown,
     topServicesByRevenue: [
       { name: 'Mechas Balayage & Matiz', duration: '90 min', unitPrice: 65.00, margin: 'Alta Demanda' },
       { name: 'Coloración Completa (Tinte)', duration: '60 min', unitPrice: 38.00, margin: 'Fidelización' },
@@ -2859,10 +3005,16 @@ app.post('/api/time-tracking/manual-entry', (req, res) => {
 
 // H. DESCARGA OFICIAL EXCEL (XLSX) Y CSV PARA INSPECCIÓN DE TRABAJO
 app.get('/api/time-tracking/export-excel', (req, res) => {
-  const { month = '2026-10', staffId, format = 'xlsx' } = req.query;
+  const { month = '2026-10', staffId, startDate, endDate, format = 'xlsx' } = req.query;
   let records = [...db.timeRecords];
 
-  if (month && month !== 'all') {
+  if (startDate) {
+    records = records.filter(r => r.date >= startDate);
+  }
+  if (endDate) {
+    records = records.filter(r => r.date <= endDate);
+  }
+  if (!startDate && !endDate && month && month !== 'all') {
     records = records.filter(r => r.date.startsWith(month));
   }
   if (staffId && staffId !== 'all') {
@@ -3161,11 +3313,12 @@ app.post('/api/auth/users', (req, res) => {
   });
 });
 
-// Listado de usuarios administrativos y estilistas en base de datos
+// Listado de usuarios administrativos y estilistas en base de datos (con claves para gerencia)
 app.get('/api/auth/users', (req, res) => {
-  const safeUsers = db.users.filter(u => u.role === 'admin' || u.role === 'staff').map(u => ({
+  const usersWithCredentials = db.users.filter(u => u.role === 'admin' || u.role === 'staff').map(u => ({
     id: u.id,
     username: u.username || '',
+    password: u.password || 'admin123', // Retornado para consulta y gestión de gerencia
     email: u.email || '',
     role: u.role,
     displayName: u.displayName || `${u.firstName} ${u.lastName}`,
@@ -3174,7 +3327,7 @@ app.get('/api/auth/users', (req, res) => {
     lastPasswordChange: u.lastPasswordChange || 'Configurada en BD',
     isActive: u.isActive !== false
   }));
-  res.json(safeUsers);
+  res.json(usersWithCredentials);
 });
 
 // Modificar credenciales de un usuario en la BD
@@ -3192,6 +3345,528 @@ app.put('/api/auth/users/:id', (req, res) => {
     success: true,
     message: `Credenciales actualizadas en la base de datos para ${user.displayName || user.username}.`,
     user: { id: user.id, username: user.username, email: user.email, role: user.role }
+  });
+});
+
+
+// ============================================================================
+// 20. ENDPOINTS AVANZADOS DE GESTIÓN INTEGRAL (SOLICITADOS POR GERENCIA)
+// ============================================================================
+
+// A. NOTIFICACIÓN DE TRABAJO TERMINADO Y AVISO A ADMINISTRACIÓN
+app.post('/api/appointments/:id/complete-and-notify', (req, res) => {
+  const apt = db.appointments.find(a => a.id === req.params.id);
+  if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
+
+  apt.status = 'completed';
+
+  // Calcular precio total aproximado de la cita según servicios
+  let totalPrice = 0;
+  if (apt.serviceIds && Array.isArray(apt.serviceIds)) {
+    apt.serviceIds.forEach(sid => {
+      const s = db.services.find(srv => srv.id === sid);
+      if (s) totalPrice += s.price;
+    });
+  }
+  if (totalPrice === 0) totalPrice = 45.00;
+
+  const now = new Date();
+  const timeFormatted = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+  const notification = {
+    id: 'notif-' + Date.now(),
+    type: 'SERVICE_COMPLETED',
+    title: `Servicio Finalizado: ${apt.clientName}`,
+    message: `${apt.staffName} ha finalizado el servicio con ${apt.clientName} (${apt.serviceNames}). Total estimado: ${totalPrice.toFixed(2)} €. Listo para cobro en TPV.`,
+    staffName: apt.staffName,
+    clientName: apt.clientName,
+    clientId: apt.clientId,
+    appointmentId: apt.id,
+    serviceNames: apt.serviceNames,
+    amount: totalPrice,
+    timestamp: now.toISOString(),
+    timeFormatted,
+    read: false
+  };
+
+  if (!db.notifications) db.notifications = [];
+  db.notifications.unshift(notification);
+
+  res.json({
+    success: true,
+    message: `✅ Servicio completado con éxito. Se ha enviado un aviso en tiempo real a Administración y Caja para el cobro de ${apt.clientName}.`,
+    appointment: apt,
+    notification
+  });
+});
+
+app.get('/api/notifications', (req, res) => {
+  res.json(db.notifications || []);
+});
+
+app.put('/api/notifications/:id/read', (req, res) => {
+  const notif = (db.notifications || []).find(n => n.id === req.params.id);
+  if (notif) notif.read = true;
+  res.json({ success: true });
+});
+
+// B. HORARIOS DE ESTILISTAS: ACTIVAR O DESACTIVAR TRAMOS HORARIOS
+app.get('/api/staff/:id/schedule-slots', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const defaultSlots = [
+    '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00',
+    '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+  ];
+
+  if (!db.staffScheduleOverrides) db.staffScheduleOverrides = {};
+  const overrides = db.staffScheduleOverrides[staff.id] || { disabledSlots: [] };
+
+  const slots = defaultSlots.map(time => ({
+    time,
+    isActive: !overrides.disabledSlots.includes(time)
+  }));
+
+  res.json({
+    staffId: staff.id,
+    staffName: staff.name,
+    chair: staff.chair,
+    disabledSlots: overrides.disabledSlots,
+    slots
+  });
+});
+
+app.put('/api/staff/:id/schedule-slots', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  let disabledSlots = req.body.disabledSlots;
+  if (!disabledSlots && Array.isArray(req.body.slots)) {
+    disabledSlots = req.body.slots.filter(s => s.isActive === false).map(s => s.time);
+  }
+  if (!Array.isArray(disabledSlots)) disabledSlots = [];
+
+  if (!db.staffScheduleOverrides) db.staffScheduleOverrides = {};
+  db.staffScheduleOverrides[staff.id] = { disabledSlots };
+
+  res.json({
+    success: true,
+    message: `Horario actualizado para ${staff.name}. ${disabledSlots.length} tramos horarios desactivados.`,
+    disabledSlots
+  });
+});
+
+// C. DESCARGA EXCEL HISTÓRICO DE SELLOS DE FIDELIZACIÓN (CON FILTRO DE FECHAS)
+app.get('/api/loyalty/export-excel', (req, res) => {
+  const { startDate, endDate, clientId, format = 'xlsx' } = req.query;
+  let records = [...db.stampHistory];
+
+  if (clientId && clientId !== 'all') {
+    records = records.filter(r => r.clientId === clientId);
+  }
+  if (startDate) {
+    records = records.filter(r => r.timestamp.slice(0, 10) >= startDate);
+  }
+  if (endDate) {
+    records = records.filter(r => r.timestamp.slice(0, 10) <= endDate);
+  }
+
+  records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  const salon = db.salonInfo;
+  const periodText = (startDate || endDate) 
+    ? `Del ${startDate || 'Inicio'} al ${endDate || 'Hoy'}`
+    : 'Histórico Completo';
+
+  if (format === 'csv') {
+    const csvRows = [
+      'ID Sellado;Fecha y Hora;DNI Clienta;Nombre Clienta;Número de Sello;Meta Tarjeta;Método;Estilista;Premio Desbloqueado'
+    ];
+    records.forEach(r => {
+      const dt = new Date(r.timestamp).toLocaleString('es-ES');
+      csvRows.push([
+        r.id,
+        dt,
+        r.clientDni || 'N/A',
+        r.clientName,
+        r.stampNumber,
+        r.totalStampsTarget,
+        r.method === 'QR_SALON_SCAN' ? 'QR Mostrador' : 'TPV Manual',
+        r.staffName || 'Elena Gómez',
+        `"${r.rewardUnlocked || 'Ninguno'}"`
+      ].join(';'));
+    });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="Historico_Sellos_Fidelizacion.csv"');
+    return res.send('﻿' + csvRows.join('\r\n'));
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  const sheetData = [
+    [`HISTÓRICO DE SELLOS DE FIDELIZACIÓN — ${salon.legalName.toUpperCase()}`],
+    [`Periodo: ${periodText} | Generado el: ${new Date().toLocaleString('es-ES')}`],
+    [`Salón: ${salon.name} | CIF: ${salon.cif} | Tel: ${salon.phone}`],
+    [],
+    [
+      'ID Sellado',
+      'Fecha y Hora',
+      'DNI Clienta',
+      'Nombre Clienta',
+      'Sello Nº',
+      'Sellos Objetivo',
+      'Método de Sellado',
+      'Estilista Responsable',
+      'Premio Obtenido / Canjeado',
+      'Código de Validación'
+    ]
+  ];
+
+  records.forEach(r => {
+    const dt = new Date(r.timestamp).toLocaleString('es-ES');
+    const hash = 'STAMP-OK-' + crypto.createHash('sha256').update(r.id + r.timestamp).digest('hex').slice(0, 8).toUpperCase();
+    sheetData.push([
+      r.id,
+      dt,
+      r.clientDni || 'N/A',
+      r.clientName,
+      r.stampNumber,
+      r.totalStampsTarget,
+      r.method === 'QR_SALON_SCAN' ? 'Escáner QR Mostrador' : 'Validación TPV Manual',
+      r.staffName || 'Elena Gómez',
+      r.rewardUnlocked || 'Acumulando sellos',
+      hash
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(sheetData);
+  ws['!cols'] = [
+    { wch: 14 }, { wch: 20 }, { wch: 14 }, { wch: 24 }, { wch: 10 },
+    { wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 30 }, { wch: 18 }
+  ];
+  XLSX.utils.book_append_sheet(wb, ws, 'Histórico Sellos');
+
+  const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="Historico_Sellos_Fidelizacion_Losan.xlsx"');
+  res.send(buffer);
+});
+
+// D. ACTUALIZACIÓN DE FICHAJES EXCEL CON RANGO DE FECHAS (startDate, endDate)
+// (Se apoya en /api/time-tracking/export-excel con soporte para startDate y endDate)
+
+// E. ARRASTRE DE CITAS (DRAG & DROP EN AGENDA MAESTRA)
+app.put('/api/appointments/:id/reschedule', (req, res) => {
+  const apt = db.appointments.find(a => a.id === req.params.id);
+  if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
+
+  let { staffId, startTime, endTime } = req.body;
+  const staff = db.staff.find(s => s.id === staffId);
+  if (!staff) return res.status(404).json({ error: 'Estilista de destino no encontrada.' });
+
+  if (!startTime) startTime = apt.startTime;
+  if (!endTime) endTime = apt.endTime;
+
+  // Comprobar colisión con otra cita de esa estilista
+  const targetStart = new Date(startTime).getTime();
+  const targetEnd = new Date(endTime).getTime();
+
+  const collision = db.appointments.find(a => 
+    a.id !== apt.id &&
+    a.staffId === staffId &&
+    a.status !== 'cancelled' &&
+    ((targetStart >= new Date(a.startTime).getTime() && targetStart < new Date(a.endTime).getTime()) ||
+     (targetEnd > new Date(a.startTime).getTime() && targetEnd <= new Date(a.endTime).getTime()))
+  );
+
+  if (collision) {
+    return res.status(409).json({
+      error: `Conflicto de horario: ${staff.name} ya tiene asignada una cita con ${collision.clientName} en ese tramo.`
+    });
+  }
+
+  apt.staffId = staff.id;
+  apt.staffName = staff.name;
+  apt.startTime = startTime;
+  apt.endTime = endTime;
+
+  res.json({
+    success: true,
+    message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${new Date(startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}).`,
+    appointment: apt
+  });
+});
+
+// F. GESTIÓN COMPLETA DE PRODUCTOS (INVENTARIO, PROVEEDOR, COMPRAS HISTÓRICAS)
+app.post('/api/products', (req, res) => {
+  const { name, brand, supplier, sku, price, costPrice, stock, minStock, isShowcase, img } = req.body;
+  if (!name || !price) {
+    return res.status(400).json({ error: 'Nombre y precio son obligatorios.' });
+  }
+
+  const newPrd = {
+    id: 'prd-' + Date.now(),
+    sku: sku || 'SKU-' + Math.floor(1000 + Math.random() * 9000),
+    name: name.trim(),
+    brand: brand ? brand.trim() : 'L Oreal Professionnel',
+    supplier: supplier ? supplier.trim() : 'Proveedor Central Salón',
+    price: Number(price),
+    costPrice: Number(costPrice) || (Number(price) * 0.5),
+    lastCostPrice: Number(costPrice) || (Number(price) * 0.5),
+    stock: Number(stock) || 0,
+    minStock: Number(minStock) || 3,
+    vatRate: 21.0,
+    isShowcase: isShowcase !== undefined ? Boolean(isShowcase) : true,
+    img: img || 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80',
+    purchaseHistory: []
+  };
+
+  db.products.push(newPrd);
+
+  res.status(201).json({
+    success: true,
+    message: `Producto ${newPrd.name} añadido correctamente al inventario.`,
+    product: newPrd
+  });
+});
+
+app.put('/api/products/:id', (req, res) => {
+  const prd = db.products.find(p => p.id === req.params.id);
+  if (!prd) return res.status(404).json({ error: 'Producto no encontrado.' });
+
+  const { name, brand, supplier, sku, price, costPrice, stock, minStock, isShowcase, img } = req.body;
+  if (name) prd.name = name.trim();
+  if (brand) prd.brand = brand.trim();
+  if (supplier) prd.supplier = supplier.trim();
+  if (sku) prd.sku = sku.trim();
+  if (price !== undefined) prd.price = Number(price);
+  if (costPrice !== undefined) {
+    prd.lastCostPrice = prd.costPrice;
+    prd.costPrice = Number(costPrice);
+  }
+  if (stock !== undefined) prd.stock = Number(stock);
+  if (minStock !== undefined) prd.minStock = Number(minStock);
+  if (isShowcase !== undefined) prd.isShowcase = Boolean(isShowcase);
+  if (img) prd.img = img.trim();
+
+  res.json({
+    success: true,
+    message: `Producto ${prd.name} actualizado con éxito.`,
+    product: prd
+  });
+});
+
+app.delete('/api/products/:id', (req, res) => {
+  const index = db.products.findIndex(p => p.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Producto no encontrado.' });
+
+  const removed = db.products.splice(index, 1);
+  res.json({ success: true, message: `Producto ${removed[0].name} eliminado del catálogo.` });
+});
+
+// Registrar compra / entrada de stock con proveedor e histórico
+app.post('/api/products/:id/purchase', (req, res) => {
+  const prd = db.products.find(p => p.id === req.params.id);
+  if (!prd) return res.status(404).json({ error: 'Producto no encontrado.' });
+
+  const numQty = Number(req.body.quantity !== undefined ? req.body.quantity : req.body.units);
+  const numCost = Number(req.body.costPrice !== undefined ? req.body.costPrice : req.body.unitCost);
+  const supplier = req.body.supplier;
+  const invoiceRef = req.body.invoiceRef || req.body.invoiceNumber;
+  const notes = req.body.notes;
+
+  if (!numQty || numQty <= 0) return res.status(400).json({ error: 'Cantidad debe ser mayor a 0.' });
+
+  prd.lastCostPrice = prd.costPrice;
+  if (numCost > 0) prd.costPrice = numCost;
+  prd.stock += numQty;
+
+  const purchaseRecord = {
+    id: 'pch-' + Date.now(),
+    date: new Date().toISOString().slice(0, 10),
+    quantity: numQty,
+    costPrice: numCost > 0 ? numCost : prd.costPrice,
+    supplier: supplier || prd.supplier || 'Proveedor Habitual',
+    invoiceRef: invoiceRef || `ALB-${Math.floor(1000 + Math.random() * 9000)}`,
+    notes: notes || 'Entrada ordinaria de almacén'
+  };
+
+  if (!prd.purchaseHistory) prd.purchaseHistory = [];
+  prd.purchaseHistory.unshift(purchaseRecord);
+
+  res.json({
+    success: true,
+    message: `Entrada de ${numQty} unidades registrada. Stock actual: ${prd.stock} uds. (Precio compra anterior: ${prd.lastCostPrice} €).`,
+    product: prd,
+    purchase: purchaseRecord
+  });
+});
+
+// G. GESTIÓN DE SERVICIOS, DURACIONES Y MATERIALES
+app.post('/api/services', (req, res) => {
+  const { name, category, durationMinutes, price, requiredMaterials } = req.body;
+  if (!name || !price || !durationMinutes) {
+    return res.status(400).json({ error: 'Nombre, precio y duración son obligatorios.' });
+  }
+
+  const newSrv = {
+    id: 'srv-' + Date.now(),
+    name: name.trim(),
+    category: category || 'corte',
+    durationMinutes: Number(durationMinutes),
+    price: Number(price),
+    vatRate: 21.0,
+    requiredMaterials: requiredMaterials || 'Herramientas estándar de salón'
+  };
+
+  db.services.push(newSrv);
+
+  res.status(201).json({
+    success: true,
+    message: `Servicio "${newSrv.name}" (${newSrv.durationMinutes} min) añadido.`,
+    service: newSrv
+  });
+});
+
+app.put('/api/services/:id', (req, res) => {
+  const srv = db.services.find(s => s.id === req.params.id);
+  if (!srv) return res.status(404).json({ error: 'Servicio no encontrado.' });
+
+  const { name, category, durationMinutes, price, requiredMaterials } = req.body;
+  if (name) srv.name = name.trim();
+  if (category) srv.category = category.trim();
+  if (durationMinutes !== undefined) srv.durationMinutes = Number(durationMinutes);
+  if (price !== undefined) srv.price = Number(price);
+  if (requiredMaterials !== undefined) srv.requiredMaterials = requiredMaterials.trim();
+
+  res.json({
+    success: true,
+    message: `Servicio "${srv.name}" actualizado con éxito.`,
+    service: srv
+  });
+});
+
+app.delete('/api/services/:id', (req, res) => {
+  const index = db.services.findIndex(s => s.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Servicio no encontrado.' });
+  const removed = db.services.splice(index, 1);
+  res.json({ success: true, message: `Servicio "${removed[0].name}" eliminado.` });
+});
+
+// H. GESTIÓN DE BONOS Y TARJETAS REGALO DESDE ADMINISTRACIÓN
+app.post('/api/packages', (req, res) => {
+  const { name, category, description, totalSessions, price, regularPrice, validDays, includedServices } = req.body;
+  const newPkg = {
+    id: 'pkg-' + Date.now(),
+    name: name ? name.trim() : 'Nuevo Bono de Belleza',
+    category: category || 'peinado',
+    description: description || 'Bono multisesión Losan',
+    totalSessions: Number(totalSessions) || 5,
+    price: Number(price) || 75.00,
+    regularPrice: Number(regularPrice) || 90.00,
+    discountPercent: 15,
+    validDays: Number(validDays) || 180,
+    includedServices: Array.isArray(includedServices) ? includedServices : ['Servicio completo de salón']
+  };
+  db.packages.push(newPkg);
+  res.status(201).json({ success: true, message: 'Bono creado correctamente.', package: newPkg });
+});
+
+app.put('/api/packages/:id', (req, res) => {
+  const pkg = db.packages.find(p => p.id === req.params.id);
+  if (!pkg) return res.status(404).json({ error: 'Bono no encontrado.' });
+  const { name, price, totalSessions, description } = req.body;
+  if (name) pkg.name = name;
+  if (price) pkg.price = Number(price);
+  if (totalSessions) pkg.totalSessions = Number(totalSessions);
+  if (description) pkg.description = description;
+  res.json({ success: true, message: 'Bono actualizado.', package: pkg });
+});
+
+app.delete('/api/packages/:id', (req, res) => {
+  const idx = db.packages.findIndex(p => p.id === req.params.id);
+  if (idx !== -1) db.packages.splice(idx, 1);
+  res.json({ success: true, message: 'Bono eliminado.' });
+});
+
+// I. GESTIÓN DEL LOOKBOOK DESDE ADMINISTRACIÓN
+app.post('/api/gallery-looks', (req, res) => {
+  const { title, category, stylistId, stylistName, beforeImg, afterImg, description, formulaSummary, durationMinutes, priceEstimate } = req.body;
+  const newLook = {
+    id: 'look-' + Date.now(),
+    title: title ? title.trim() : 'Nueva Transformación',
+    category: category || 'Coloración',
+    stylistId: stylistId || 'stf-1',
+    stylistName: stylistName || 'Elena Gómez',
+    beforeImg: beforeImg || 'https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=500&q=80',
+    afterImg: afterImg || 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=500&q=80',
+    description: description || 'Transformación completa de salón',
+    formulaSummary: formulaSummary || 'Técnica personalizada',
+    durationMinutes: Number(durationMinutes) || 90,
+    priceEstimate: Number(priceEstimate) || 65.00,
+    serviceIds: ['srv-3']
+  };
+  db.galleryLooks.push(newLook);
+  res.status(201).json({ success: true, message: 'Look añadido al catálogo.', look: newLook });
+});
+
+app.delete('/api/gallery-looks/:id', (req, res) => {
+  const idx = db.galleryLooks.findIndex(l => l.id === req.params.id);
+  if (idx !== -1) db.galleryLooks.splice(idx, 1);
+  res.json({ success: true, message: 'Look eliminado del catálogo.' });
+});
+
+// J. REVISIÓN Y AJUSTE VIP DE FIDELIZACIÓN POR CLIENTA (ADMIN)
+app.get('/api/clients/:id/loyalty-details', (req, res) => {
+  const client = db.clients.find(c => c.id === req.params.id);
+  if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
+
+  const history = db.stampHistory.filter(s => s.clientId === client.id || s.clientDni === client.dni);
+  const transactions = db.loyaltyTransactions.filter(t => t.clientId === client.id);
+
+  res.json({
+    client,
+    stampsCount: client.stampsCount || 0,
+    totalStampsTarget: db.salonSettings?.loyalty_stamps_required || 8,
+    loyaltyPoints: client.loyaltyPoints || 0,
+    activeRewards: client.activeRewards || [],
+    stampHistory: history,
+    transactions
+  });
+});
+
+app.post('/api/clients/:id/adjust-loyalty', (req, res) => {
+  const client = db.clients.find(c => c.id === req.params.id);
+  if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
+
+  const { deltaStamps, deltaPoints, rewardUnlocked, note } = req.body;
+  if (deltaStamps) {
+    client.stampsCount = Math.max(0, Math.min(8, (client.stampsCount || 0) + Number(deltaStamps)));
+  }
+  if (deltaPoints) {
+    client.loyaltyPoints = Math.max(0, (client.loyaltyPoints || 0) + Number(deltaPoints));
+  }
+  if (rewardUnlocked) {
+    if (!client.activeRewards) client.activeRewards = [];
+    client.activeRewards.push({ reward: rewardUnlocked, unlockedAt: new Date().toISOString() });
+  }
+
+  // Registrar auditoría
+  db.loyaltyTransactions.push({
+    id: 'loy-adj-' + Date.now(),
+    clientId: client.id,
+    delta: Number(deltaPoints) || 0,
+    newBalance: client.loyaltyPoints,
+    reason: `ADMIN_ADJUSTMENT: ${note || 'Ajuste manual de fidelización por Gerencia'}`,
+    date: new Date().toISOString()
+  });
+
+  res.json({
+    success: true,
+    message: `Ficha de fidelización VIP actualizada para ${client.name}. Sellos: ${client.stampsCount}/8, Puntos: ${client.loyaltyPoints} pts.`,
+    client
   });
 });
 
