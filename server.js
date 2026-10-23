@@ -3490,6 +3490,13 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
   records.sort((a, b) => a.date.localeCompare(b.date) || a.staffName.localeCompare(b.staffName));
 
   const salon = db.salonInfo;
+  const periodLabel = (startDate && endDate) 
+    ? `${startDate}_al_${endDate}` 
+    : (startDate ? `desde_${startDate}` : (endDate ? `hasta_${endDate}` : (month === 'all' ? 'Historico_Completo' : (month || 'Historico'))));
+
+  const periodReadable = (startDate && endDate)
+    ? `${startDate} al ${endDate}`
+    : (startDate ? `Desde ${startDate}` : (endDate ? `Hasta ${endDate}` : (month === 'all' ? 'Histórico Completo' : month)));
 
   // Formato CSV si se solicita explícitamente
   if (format === 'csv') {
@@ -3520,7 +3527,7 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
 
     const csvContent = '﻿' + csvRows.join('\r\n');
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_${month}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_${periodLabel}.csv"`);
     return res.send(csvContent);
   }
 
@@ -3532,7 +3539,7 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
     [`REGISTRO DIARIO DE JORNADA LABORAL — ${salon.legalName.toUpperCase()}`],
     [`Normativa: Real Decreto-ley 8/2019 de 8 de marzo (Obligatoriedad de Registro de Jornada - Art. 34.9 Estatuto de los Trabajadores)`],
     [`NIF: ${salon.cif} | Centro: ${salon.address} | Tel: ${salon.phone}`],
-    [`Periodo Inspección: ${month === 'all' ? 'Histórico Completo' : month} | Generado el: ${new Date().toLocaleString('es-ES')}`],
+    [`Periodo Inspección: ${periodReadable} | Generado el: ${new Date().toLocaleString('es-ES')}`],
     [], // fila vacía
     [
       'ID Registro',
@@ -3618,8 +3625,8 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
   });
 
   const summarySheetData = [
-    [`RESUMEN MENSUAL DE HORAS TRABAJADAS — ${salon.legalName.toUpperCase()}`],
-    [`Periodo: ${month === 'all' ? 'Histórico' : month} | Registro Laboral Oficial`],
+    [`RESUMEN DE HORAS TRABAJADAS — ${salon.legalName.toUpperCase()}`],
+    [`Periodo: ${periodReadable} | Registro Laboral Oficial`],
     [],
     ['DNI / NIE', 'Trabajadora', 'Días Fichados', 'Total Horas Efectivas', 'Total Horas Extras', 'Pausas Acumuladas (min)', 'Media Horas / Día']
   ];
@@ -3652,7 +3659,7 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
   const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_Losan_${month}.xlsx"`);
+  res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_Losan_${periodLabel}.xlsx"`);
   res.send(excelBuffer);
 });
 

@@ -2407,11 +2407,11 @@
 
           <!-- Botones de Acción: Descargar Excel y Fichaje Manual -->
           <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-            <button onclick="downloadTimeTrackingExcel('xlsx')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm shadow-emerald-200 cursor-pointer">
+            <button onclick="openExportTimeTrackingModal('xlsx')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm shadow-emerald-200 cursor-pointer">
               <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
               <span>📥 Descargar Excel Oficial (.xlsx)</span>
             </button>
-            <button onclick="downloadTimeTrackingExcel('csv')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition border border-stone-300 cursor-pointer">
+            <button onclick="openExportTimeTrackingModal('csv')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition border border-stone-300 cursor-pointer">
               <i data-lucide="file-text" class="w-4 h-4"></i>
               <span>CSV</span>
             </button>
@@ -2528,7 +2528,7 @@
                 <option value="all">Todo el Histórico</option>
               </select>
 
-              <button onclick="downloadTimeTrackingExcel('xlsx')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
+              <button onclick="openExportTimeTrackingModal('xlsx')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Selección
               </button>
             </div>
@@ -4830,6 +4830,129 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DESCARGAR EXCEL / INFORME OFICIAL DE CONTROL HORARIO (SELECCIÓN DE PERÍODO) -->
+  <!-- ========================================================================= -->
+  <div id="modal-export-timetracking" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-xs">
+            <i data-lucide="file-spreadsheet" class="w-6 h-6 text-emerald-600"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-stone-900 font-serif-luxury">Descargar Control Horario Oficial</h4>
+            <span class="text-[11px] text-stone-500">Elige el período, días o fechas a exportar (RD-ley 8/2019)</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeExportTimeTrackingModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <!-- 1. Selección de Período Rápido -->
+        <div>
+          <label class="block font-bold text-stone-800 mb-2">1. Selecciona el período o rango de días:</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="setExportModalPeriodPreset('today')" id="export-preset-today" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Hoy
+            </button>
+            <button type="button" onclick="setExportModalPeriodPreset('yesterday')" id="export-preset-yesterday" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100">
+              <i data-lucide="calendar-minus" class="w-3.5 h-3.5"></i> Ayer
+            </button>
+            <button type="button" onclick="setExportModalPeriodPreset('this_week')" id="export-preset-this_week" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100">
+              <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i> Esta Semana
+            </button>
+            <button type="button" onclick="setExportModalPeriodPreset('this_month')" id="export-preset-this_month" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs">
+              <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i> Este Mes
+            </button>
+            <button type="button" onclick="setExportModalPeriodPreset('last_month')" id="export-preset-last_month" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100">
+              <i data-lucide="history" class="w-3.5 h-3.5"></i> Mes Anterior
+            </button>
+            <button type="button" onclick="setExportModalPeriodPreset('all')" id="export-preset-all" class="export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100">
+              <i data-lucide="archive" class="w-3.5 h-3.5"></i> Todo el Año
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Rango de Fechas Detallado (Desde -> Hasta) -->
+        <div class="p-3 bg-stone-50 border border-stone-200 rounded-2xl space-y-2">
+          <span class="font-bold text-stone-700 block">Días específicos seleccionados:</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-stone-500 mb-1">Fecha Inicio (Desde):</label>
+              <input type="date" id="export-excel-start-date" onchange="updateExportPreviewCount()" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-stone-800 text-xs shadow-2xs">
+            </div>
+            <div>
+              <label class="block text-[11px] text-stone-500 mb-1">Fecha Fin (Hasta):</label>
+              <input type="date" id="export-excel-end-date" onchange="updateExportPreviewCount()" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-stone-800 text-xs shadow-2xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Filtrar por Estilista -->
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">2. Filtrar por Trabajadora:</label>
+          <select id="export-excel-staff-select" onchange="updateExportPreviewCount()" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-semibold text-stone-800">
+            <option value="all">Todas las Estilistas (Informe General del Salón)</option>
+            <option value="stf-1">Elena Gómez (Colorimetría & Balayage)</option>
+            <option value="stf-2">Raquel Santos (Cortes & Estilismo)</option>
+            <option value="stf-3">Carmen Vidal (Tratamientos & Salud Capilar)</option>
+          </select>
+        </div>
+
+        <!-- 4. Formato del Archivo -->
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">3. Formato del archivo a generar:</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+              <input type="radio" name="export-format-choice" value="xlsx" checked class="text-emerald-600 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-stone-900 block">📊 Excel (.xlsx)</span>
+                <span class="text-[10px] text-stone-500">Libro oficial con 2 hojas</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+              <input type="radio" name="export-format-choice" value="csv" class="text-emerald-600 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-stone-900 block">📄 CSV (.csv)</span>
+                <span class="text-[10px] text-stone-500">Texto separado por punto y coma</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Resumen previo dinámico -->
+        <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-center justify-between text-emerald-950">
+          <div class="flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            <span class="text-[11px] font-semibold" id="export-preview-summary-text">Cargando resumen del informe...</span>
+          </div>
+          <span class="text-xs font-mono-code font-bold text-emerald-700" id="export-preview-badge">...</span>
+        </div>
+
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="pt-2 flex items-center justify-between border-t border-stone-100">
+        <button type="button" onclick="closeExportTimeTrackingModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" onclick="executeExportTimeTracking()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-sm shadow-emerald-200 transition cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Descargar Informe</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -9855,27 +9978,156 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       renderAdminTimeTracking();
     }
 
-    function downloadTimeTrackingExcel(format = 'xlsx') {
-      const staffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
-      const startVal = document.getElementById('filter-timetrack-start') ? document.getElementById('filter-timetrack-start').value : '';
-      const endVal = document.getElementById('filter-timetrack-end') ? document.getElementById('filter-timetrack-end').value : '';
-      const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '2026-10';
 
-      const params = new URLSearchParams({ format });
-      if (staffFilter && staffFilter !== 'all') params.append('staffId', staffFilter);
-      if (startVal && endVal) {
-        params.append('startDate', startVal);
-        params.append('endDate', endVal);
-      } else if (startVal) {
-        params.append('startDate', startVal);
-      } else if (endVal) {
-        params.append('endDate', endVal);
-      } else if (monthFilter && monthFilter !== 'all') {
-        params.append('month', monthFilter);
+    // ========================================================================
+    // MODAL DE EXPORTACIÓN OFICIAL DE CONTROL HORARIO (SELECCIÓN DE PERÍODO)
+    // ========================================================================
+    function openExportTimeTrackingModal(initialFormat = 'xlsx') {
+      const modal = document.getElementById('modal-export-timetracking');
+      if (!modal) return;
+
+      // Sincronizar opciones de estilistas
+      const staffSelect = document.getElementById('export-excel-staff-select');
+      if (staffSelect && state.staff && state.staff.length) {
+        const currentStaffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
+        staffSelect.innerHTML = '<option value="all">Todas las Estilistas (Informe General del Salón)</option>' +
+          state.staff.map(s => `<option value="${s.id}" ${s.id === currentStaffFilter ? 'selected' : ''}>${s.name} (${s.chair || s.specialty || 'Estilista'})</option>`).join('');
       }
 
-      window.location.href = `/api/time-tracking/export-excel?${params.toString()}`;
+      // Sincronizar formato inicial (xlsx o csv)
+      const radios = document.querySelectorAll('input[name="export-format-choice"]');
+      radios.forEach(r => { r.checked = (r.value === initialFormat); });
+
+      // Inicializar con las fechas del filtro actual o Este Mes
+      const startInput = document.getElementById('filter-timetrack-start');
+      const endInput = document.getElementById('filter-timetrack-end');
+      if (startInput && endInput && startInput.value && endInput.value) {
+        document.getElementById('export-excel-start-date').value = startInput.value;
+        document.getElementById('export-excel-end-date').value = endInput.value;
+      } else {
+        setExportModalPeriodPreset('this_month');
+      }
+
+      modal.classList.remove('hidden');
+      updateExportPreviewCount();
+      lucide.createIcons();
     }
+
+    function closeExportTimeTrackingModal() {
+      const modal = document.getElementById('modal-export-timetracking');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function setExportModalPeriodPreset(preset) {
+      const startInput = document.getElementById('export-excel-start-date');
+      const endInput = document.getElementById('export-excel-end-date');
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+      if (preset === 'today') {
+        const todayStr = fmt(now);
+        if (startInput) startInput.value = todayStr;
+        if (endInput) endInput.value = todayStr;
+      } else if (preset === 'yesterday') {
+        const y = new Date(now.getTime() - 24 * 3600 * 1000);
+        const yStr = fmt(y);
+        if (startInput) startInput.value = yStr;
+        if (endInput) endInput.value = yStr;
+      } else if (preset === 'this_week') {
+        const day = now.getDay() || 7;
+        const monday = new Date(now.getTime() - (day - 1) * 24 * 3600 * 1000);
+        const sunday = new Date(monday.getTime() + 6 * 24 * 3600 * 1000);
+        if (startInput) startInput.value = fmt(monday);
+        if (endInput) endInput.value = fmt(sunday);
+      } else if (preset === 'this_month') {
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        if (startInput) startInput.value = fmt(firstDay);
+        if (endInput) endInput.value = fmt(lastDay);
+      } else if (preset === 'last_month') {
+        const firstDayPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastDayPrev = new Date(now.getFullYear(), now.getMonth(), 0);
+        if (startInput) startInput.value = fmt(firstDayPrev);
+        if (endInput) endInput.value = fmt(lastDayPrev);
+      } else if (preset === 'all') {
+        if (startInput) startInput.value = '2026-01-01';
+        if (endInput) endInput.value = '2026-12-31';
+      }
+
+      // Estilizar botones preset
+      document.querySelectorAll('.export-preset-btn').forEach(b => {
+        b.className = 'export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100';
+      });
+      const activeBtn = document.getElementById('export-preset-' + preset);
+      if (activeBtn) {
+        activeBtn.className = 'export-preset-btn p-2 rounded-xl border text-center font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1 bg-emerald-50 border-emerald-300 text-emerald-800 shadow-2xs';
+      }
+
+      updateExportPreviewCount();
+    }
+
+    async function updateExportPreviewCount() {
+      const startDate = document.getElementById('export-excel-start-date') ? document.getElementById('export-excel-start-date').value : '';
+      const endDate = document.getElementById('export-excel-end-date') ? document.getElementById('export-excel-end-date').value : '';
+      const staffId = document.getElementById('export-excel-staff-select') ? document.getElementById('export-excel-staff-select').value : 'all';
+
+      const summaryText = document.getElementById('export-preview-summary-text');
+      const badge = document.getElementById('export-preview-badge');
+
+      try {
+        const params = new URLSearchParams();
+        if (staffId && staffId !== 'all') params.append('staffId', staffId);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const res = await fetch('/api/time-tracking/records?' + params.toString());
+        const data = await res.json();
+        const count = data.count || 0;
+        const hours = data.totalEffectiveHours || 0;
+
+        if (summaryText) {
+          summaryText.innerText = count > 0 
+            ? `Se incluirán ${count} fichajes de jornada (${hours} horas efectivas registradas)` 
+            : 'Sin fichajes en este rango de fechas';
+        }
+        if (badge) {
+          badge.innerText = `${count} registros | ${hours} h`;
+        }
+      } catch (e) {
+        if (summaryText) summaryText.innerText = 'Rango listo para exportación';
+      }
+    }
+
+    function executeExportTimeTracking() {
+      const startDate = document.getElementById('export-excel-start-date') ? document.getElementById('export-excel-start-date').value : '';
+      const endDate = document.getElementById('export-excel-end-date') ? document.getElementById('export-excel-end-date').value : '';
+      const staffId = document.getElementById('export-excel-staff-select') ? document.getElementById('export-excel-staff-select').value : 'all';
+      
+      const formatChoice = document.querySelector('input[name="export-format-choice"]:checked');
+      const format = formatChoice ? formatChoice.value : 'xlsx';
+
+      if (!startDate || !endDate) {
+        alert('Por favor selecciona la fecha de inicio y la fecha de fin para generar el informe.');
+        return;
+      }
+
+      const params = new URLSearchParams({ format });
+      if (staffId && staffId !== 'all') params.append('staffId', staffId);
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+
+      closeExportTimeTrackingModal();
+
+      // Iniciar descarga
+      const downloadUrl = `/api/time-tracking/export-excel?${params.toString()}`;
+      window.location.href = downloadUrl;
+    }
+
+    function downloadTimeTrackingExcel(format = 'xlsx') {
+      openExportTimeTrackingModal(format);
+    }
+
 
     
     // Helper handlers for Admin Control Horario actions
@@ -11223,13 +11475,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       window.location.href = url;
     }
 
-    function downloadTimeTrackingExcel(format = 'xlsx') {
-      const start = document.getElementById('filter-timetrack-start').value;
-      const end = document.getElementById('filter-timetrack-end').value;
-      const staff = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
-      const url = `/api/time-tracking/export-excel?startDate=${start}&endDate=${end}&staffId=${staff}&format=${format}`;
-      window.location.href = url;
-    }
+
 
     // ========================================================================
     // FILTRADO DE KPIS POR FECHA O TOTALES
