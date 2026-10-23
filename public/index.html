@@ -1806,314 +1806,6 @@
             </table>
           </div>
         </div>
-
-        <!-- ========================================================================= -->
-        <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
-        <!-- ========================================================================= -->
-        <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5">
-          <div class="bg-white text-stone-900 rounded-3xl max-w-5xl w-full shadow-2xl relative border border-stone-200 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
-            
-            <!-- Barra Superior del Modal -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-stone-200 bg-stone-50/80 flex-shrink-0">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 flex-shrink-0">
-                  <i data-lucide="receipt" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-bold text-stone-900 font-serif-luxury text-base sm:text-lg" id="ticket-modal-title">Comprobante de Cobro & Facturación</h3>
-                    <span id="ticket-modal-badge" class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Veri*Factu AEAT
-                    </span>
-                  </div>
-                  <p class="text-xs text-stone-500" id="ticket-modal-subtitle">Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021</p>
-                </div>
-              </div>
-
-              <!-- Selector de Vista y Botón Cerrar -->
-              <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                <div class="flex items-center bg-stone-200/70 p-1 rounded-xl text-xs font-bold">
-                  <button type="button" onclick="switchInvoiceModalView('dual')" id="btn-view-dual" class="px-3 py-1.5 rounded-lg transition bg-white text-stone-900 shadow-xs cursor-pointer">
-                    🔀 Ambas Vistas
-                  </button>
-                  <button type="button" onclick="switchInvoiceModalView('pdf')" id="btn-view-pdf" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
-                    📄 Factura PDF (A4)
-                  </button>
-                  <button type="button" onclick="switchInvoiceModalView('ticket')" id="btn-view-ticket" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
-                    🧾 Ticket Digital
-                  </button>
-                </div>
-
-                <button onclick="closeTicketModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 flex items-center justify-center transition cursor-pointer">
-                  <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Cuerpo del Modal: Contenedor con Scroll -->
-            <div class="overflow-y-auto p-4 sm:p-6 bg-stone-100/60 flex-1">
-              
-              <!-- BANNER DE COMPROBACIÓN PREVIA ANTES DE COBRAR -->
-              <div id="invoice-precharge-actions-bar" class="hidden mb-5 p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-xs font-bold text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
-                      <span>Comprobación Previa al Cobro</span>
-                      <span class="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">Revisión Obligatoria</span>
-                    </h5>
-                    <p class="text-xs text-amber-900 font-medium mt-0.5">
-                      Verifica que los conceptos, la clienta y el desglose de IVA sean correctos antes de confirmar el cobro.
-                    </p>
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end flex-shrink-0">
-                  <!-- Selector rápido de método de pago en borrador -->
-                  <div class="flex items-center gap-1 bg-white/90 p-1 rounded-xl border border-amber-200 text-xs shadow-2xs">
-                    <span class="text-[10px] font-bold text-stone-500 px-1">Medio:</span>
-                    <button type="button" onclick="setPreChargePaymentMethod('card')" id="prepay-card" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💳 Tarjeta</button>
-                    <button type="button" onclick="setPreChargePaymentMethod('cash')" id="prepay-cash" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💵 Efectivo</button>
-                    <button type="button" onclick="setPreChargePaymentMethod('bizum')" id="prepay-bizum" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">📱 Bizum</button>
-                  </div>
-
-                  <button type="button" onclick="modifyTpvTicket()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer">
-                    <i data-lucide="edit-3" class="w-4 h-4 text-amber-700"></i>
-                    <span>Modificar</span>
-                  </button>
-                  <button type="button" id="btn-precharge-confirm-top" onclick="confirmAndExecuteCharge()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-emerald-200 cursor-pointer">
-                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
-                    <span id="btn-precharge-confirm-top-text">✓ Aceptar y Cobrar</span>
-                  </button>
-                </div>
-              </div>
-
-              <div id="invoice-modal-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
-                <!-- =========================================================== -->
-                <!-- COLUMNA IZQUIERDA (7 cols): FACTURA OFICIAL A4 (PDF)        -->
-                <!-- =========================================================== -->
-                <div id="panel-factura-pdf" class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-md space-y-6 text-stone-800">
-                  
-                  <!-- Cabecera de la Factura Oficial A4 -->
-                  <div class="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-stone-200 pb-5">
-                    <div class="space-y-1">
-                      <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-300 flex items-center justify-center text-white shadow-2xs">
-                          <i data-lucide="scissors" class="w-4 h-4"></i>
-                        </div>
-                        <h4 class="font-black text-lg text-stone-900 font-serif-luxury salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
-                      </div>
-                      <p class="text-xs text-stone-500 font-mono-code">N.I.F.: <strong class="text-stone-700">B-87654321</strong></p>
-                      <p class="text-xs text-stone-500">Calle Velázquez 42, 28001 Madrid (España)</p>
-                      <p class="text-xs text-stone-500">Tel: +34 912 345 678 | Email: facturacion@peluquerialosan.es</p>
-                      <p class="text-[10px] text-stone-400">Reg. Mercantil de Madrid, Tomo 34.567, Folio 89, Hoja M-621.450</p>
-                    </div>
-
-                    <div class="text-left sm:text-right bg-stone-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none w-full sm:w-auto border sm:border-0 border-stone-200 space-y-1">
-                      <div id="inv-a4-badge" class="inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs">
-                        FACTURA OFICIAL VERI*FACTU
-                      </div>
-                      <div class="pt-1">
-                        <span class="text-[11px] text-stone-500 block">Número de Serie:</span>
-                        <span class="text-base font-black text-stone-900 font-mono-code" id="inv-a4-number">FS2026-0001</span>
-                      </div>
-                      <div>
-                        <span class="text-[11px] text-stone-500 block">Fecha de Expedición:</span>
-                        <span class="text-xs font-bold text-stone-800" id="inv-a4-date">23/10/2026 18:30</span>
-                      </div>
-                      <div>
-                        <span class="text-[11px] text-stone-500 block">Medio de Pago:</span>
-                        <span class="text-xs font-bold text-emerald-700 uppercase" id="inv-a4-payment">TARJETA</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Datos del Cliente / Destinatario -->
-                  <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">DATOS DEL DESTINATARIO:</span>
-                      <strong class="text-sm font-bold text-stone-900 block" id="inv-a4-client-name">Laura Martínez</strong>
-                      <span class="text-stone-500 font-mono-code text-[11px]">DNI/NIF: <span id="inv-a4-client-nif" class="font-bold text-stone-700">12345678Z</span></span>
-                    </div>
-                    <div>
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">RÉGIMEN FISCAL:</span>
-                      <span class="text-stone-600 block">Régimen General del IVA (21%)</span>
-                      <span class="text-[11px] text-emerald-700 font-medium">Factura verificada y encadenada en AEAT</span>
-                    </div>
-                  </div>
-
-                  <!-- Tabla de Conceptos Reglamentaria -->
-                  <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
-                    <table class="w-full text-left text-xs">
-                      <thead class="bg-stone-100/90 text-stone-700 font-bold border-b border-stone-200">
-                        <tr>
-                          <th class="p-3">Descripción / Servicio</th>
-                          <th class="p-3 text-center">Cant.</th>
-                          <th class="p-3 text-right">P. Unit.</th>
-                          <th class="p-3 text-right">Base Imp.</th>
-                          <th class="p-3 text-center">% IVA</th>
-                          <th class="p-3 text-right">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody id="inv-a4-table-rows" class="divide-y divide-stone-100 font-mono-code text-xs">
-                        <!-- Generado dinámicamente -->
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- Desglose de Bases e Impuestos -->
-                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50 p-4 rounded-xl border border-stone-200">
-                    <div class="text-xs text-stone-500 space-y-1">
-                      <p><strong>Base Imponible:</strong> <span id="inv-a4-base" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
-                      <p><strong>Cuota IVA (21%):</strong> <span id="inv-a4-vat" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
-                      <p class="text-[11px] text-stone-400">Exenta de retención IRPF al tratarse de consumidor final.</p>
-                    </div>
-                    <div class="text-right sm:border-l sm:border-stone-200 sm:pl-6 w-full sm:w-auto">
-                      <span class="text-xs uppercase font-extrabold text-stone-400 block tracking-wider">TOTAL FACTURA (IVA Incluido):</span>
-                      <span class="text-2xl font-black text-emerald-700 font-mono-code" id="inv-a4-total">0,00 €</span>
-                    </div>
-                  </div>
-
-                  <!-- Pie y Certificación Veri*Factu -->
-                  <div class="pt-2 border-t border-dashed border-stone-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-stone-500">
-                    <div class="space-y-1 text-center sm:text-left">
-                      <p class="font-bold text-stone-800">Factura expedida mediante software garante conforme a la Ley 11/2021 (Veri*Factu).</p>
-                      <p class="font-mono-code break-all text-[9px] text-stone-400" id="inv-a4-hash">Huella Hash SHA-256: ...</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <canvas id="inv-a4-qr-canvas" width="80" height="80" class="border border-stone-200 rounded-lg p-1 bg-white"></canvas>
-                      <span class="text-[9px] text-emerald-700 font-bold max-w-[90px] leading-tight">Cotejo Sede Electrónica AEAT</span>
-                    </div>
-                  </div>
-
-                  <!-- Botones de Acción para la Factura PDF -->
-                  <div class="pt-2 flex flex-wrap items-center gap-2 justify-end border-t border-stone-100">
-                    <button type="button" onclick="downloadInvoicePDF()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
-                      <i data-lucide="download" class="w-4 h-4 text-emerald-300"></i>
-                      <span>Descargar Factura (PDF)</span>
-                    </button>
-                    <button type="button" onclick="printInvoiceA4()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
-                      <i data-lucide="printer" class="w-4 h-4"></i>
-                      <span>Imprimir Factura A4</span>
-                    </button>
-                    <button type="button" onclick="sendInvoiceWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
-                      <i data-lucide="send" class="w-4 h-4"></i>
-                      <span>Enviar WhatsApp</span>
-                    </button>
-                  </div>
-
-                </div>
-
-
-                <!-- =========================================================== -->
-                <!-- COLUMNA DERECHA (5 cols): TICKET DIGITAL TÉRMICO             -->
-                <!-- =========================================================== -->
-                <div id="panel-ticket-digital" class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-md space-y-4 font-mono-code text-xs">
-                  
-                  <div class="flex items-center justify-between border-b border-stone-100 pb-2">
-                    <div class="flex items-center gap-2">
-                      <i data-lucide="receipt" class="w-4 h-4 text-emerald-600"></i>
-                      <h4 class="font-bold font-serif-luxury text-sm text-stone-900">Ticket Térmico Digital</h4>
-                    </div>
-                    <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-bold">80 mm</span>
-                  </div>
-
-                  <!-- Bloque Ticket Estilo Papel Térmico -->
-                  <div class="bg-amber-50/30 p-4 rounded-xl border border-dashed border-stone-300 space-y-3">
-                    <div class="text-center border-b border-dashed border-stone-300 pb-2.5">
-                      <h4 class="font-bold text-xs uppercase font-serif-luxury tracking-wide salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
-                      <p class="text-[10px] text-stone-500">NIF: B-87654321</p>
-                      <p class="text-[10px] text-stone-500">Calle Velázquez 42, 28001 Madrid</p>
-                      <p id="ticket-badge" class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
-                        FACTURA SIMPLIFICADA (VERI*FACTU)
-                      </p>
-                    </div>
-
-                    <div class="space-y-1 text-[11px]">
-                      <div class="flex justify-between">
-                        <span class="text-stone-500">Número:</span>
-                        <span class="font-bold text-stone-900" id="ticket-num">FS2026-0002</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-stone-500">Fecha:</span>
-                        <span id="ticket-date">23/10/2026 18:00</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-stone-500">Cliente:</span>
-                        <span id="ticket-client" class="font-bold">Laura Martínez</span>
-                      </div>
-                    </div>
-
-                    <div class="border-t border-b border-dashed border-stone-300 py-2 space-y-1" id="ticket-items">
-                      <!-- Items -->
-                    </div>
-
-                    <!-- Resguardo Bancario de Pago con Tarjeta / Datáfono -->
-                    <div id="ticket-card-slip" class="hidden p-2.5 bg-white rounded-lg border border-dashed border-stone-300 font-mono-code text-[10px] space-y-0.5">
-                      <div class="text-center font-bold text-stone-800">*** COPIA OPERACIÓN CON TARJETA ***</div>
-                      <div class="text-center text-[9px] text-stone-500">TERMINAL TPV BANCARIO ACREDITADO</div>
-                      <div class="flex justify-between pt-1"><span>TARJETA:</span><span id="ticket-card-brand-mask" class="font-bold text-stone-900">VISA **** 4242</span></div>
-                      <div class="flex justify-between"><span>AUTORIZACIÓN:</span><span id="ticket-card-auth" class="font-bold text-stone-900">AUTH-849201</span></div>
-                      <div class="flex justify-between"><span>TERMINAL:</span><span id="ticket-card-terminal">TPV-LOSAN-01</span></div>
-                      <div class="flex justify-between"><span>TITULAR:</span><span id="ticket-card-holder">CLIENTA</span></div>
-                    </div>
-
-                    <div class="space-y-1 text-right text-[11px]">
-                      <div class="flex justify-between">
-                        <span class="text-stone-500">Base Imponible:</span>
-                        <span id="ticket-base">49.59 €</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span class="text-stone-500">IVA (21%):</span>
-                        <span id="ticket-vat">10.41 €</span>
-                      </div>
-                      <div class="flex justify-between font-bold text-sm border-t border-stone-200 pt-1 text-stone-900">
-                        <span>TOTAL:</span>
-                        <span id="ticket-total" class="text-emerald-700">60.00 €</span>
-                      </div>
-                    </div>
-
-                    <div class="text-center pt-1 flex flex-col items-center">
-                      <div class="p-2 bg-white border border-stone-200 rounded-xl mb-1.5 shadow-2xs">
-                        <canvas id="ticket-qr-canvas" width="110" height="110"></canvas>
-                      </div>
-                      <p class="text-[8px] text-stone-400 break-all font-mono-code" id="ticket-hash-snippet">
-                        SHA: a591a6d40b490f...
-                      </p>
-                      <span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1 border border-emerald-200">
-                        Cotejo en Sede Electrónica AEAT
-                      </span>
-                    </div>
-                  </div>
-
-                  <button type="button" onclick="printThermalTicket()" class="w-full bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-sans font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm">
-                    <i data-lucide="printer" class="w-4 h-4"></i>
-                    <span>Imprimir Ticket Térmico</span>
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Barra Inferior de Estado -->
-            <div class="p-3 sm:px-6 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-600 flex-shrink-0">
-              <div id="modal-footer-status" class="flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600" id="modal-footer-status-icon"></i>
-                <span id="modal-footer-status-text">Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.</span>
-              </div>
-              <div id="modal-footer-actions" class="flex items-center gap-2">
-                <button type="button" onclick="closeTicketModal()" class="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold transition cursor-pointer">
-                  Cerrar
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
       </div>
 
       <!-- VISTA 3D: CONTROL DE STOCK -->
@@ -4691,6 +4383,317 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
+  <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
+  <!-- ========================================================================= -->
+  <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-3 sm:p-5" style="z-index: 9999;">
+    <div class="bg-white text-stone-900 rounded-3xl max-w-5xl w-full shadow-2xl relative border border-stone-200 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
+  
+  <!-- Barra Superior del Modal -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-stone-200 bg-stone-50/80 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 flex-shrink-0">
+        <i data-lucide="receipt" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h3 class="font-bold text-stone-900 font-serif-luxury text-base sm:text-lg" id="ticket-modal-title">Comprobante de Cobro & Facturación</h3>
+          <span id="ticket-modal-badge" class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Veri*Factu AEAT
+          </span>
+        </div>
+        <p class="text-xs text-stone-500" id="ticket-modal-subtitle">Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021</p>
+      </div>
+    </div>
+
+    <!-- Selector de Vista y Botón Cerrar -->
+    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+      <div class="flex items-center bg-stone-200/70 p-1 rounded-xl text-xs font-bold">
+        <button type="button" onclick="switchInvoiceModalView('dual')" id="btn-view-dual" class="px-3 py-1.5 rounded-lg transition bg-white text-stone-900 shadow-xs cursor-pointer">
+          🔀 Ambas Vistas
+        </button>
+        <button type="button" onclick="switchInvoiceModalView('pdf')" id="btn-view-pdf" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
+          📄 Factura PDF (A4)
+        </button>
+        <button type="button" onclick="switchInvoiceModalView('ticket')" id="btn-view-ticket" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
+          🧾 Ticket Digital
+        </button>
+      </div>
+
+      <button onclick="closeTicketModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 flex items-center justify-center transition cursor-pointer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Cuerpo del Modal: Contenedor con Scroll -->
+  <div class="overflow-y-auto p-4 sm:p-6 bg-stone-100/60 flex-1">
+    
+    <!-- BANNER DE COMPROBACIÓN PREVIA ANTES DE COBRAR -->
+    <div id="invoice-precharge-actions-bar" class="hidden mb-5 p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+          <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h5 class="text-xs font-bold text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
+            <span>Comprobación Previa al Cobro</span>
+            <span class="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">Revisión Obligatoria</span>
+          </h5>
+          <p class="text-xs text-amber-900 font-medium mt-0.5">
+            Verifica que los conceptos, la clienta y el desglose de IVA sean correctos antes de confirmar el cobro.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end flex-shrink-0">
+        <!-- Selector rápido de método de pago en borrador -->
+        <div class="flex items-center gap-1 bg-white/90 p-1 rounded-xl border border-amber-200 text-xs shadow-2xs">
+          <span class="text-[10px] font-bold text-stone-500 px-1">Medio:</span>
+          <button type="button" onclick="setPreChargePaymentMethod('card')" id="prepay-card" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💳 Tarjeta</button>
+          <button type="button" onclick="setPreChargePaymentMethod('cash')" id="prepay-cash" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💵 Efectivo</button>
+          <button type="button" onclick="setPreChargePaymentMethod('bizum')" id="prepay-bizum" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">📱 Bizum</button>
+        </div>
+
+        <button type="button" onclick="modifyTpvTicket()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer">
+          <i data-lucide="edit-3" class="w-4 h-4 text-amber-700"></i>
+          <span>Modificar</span>
+        </button>
+        <button type="button" id="btn-precharge-confirm-top" onclick="confirmAndExecuteCharge()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-emerald-200 cursor-pointer">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
+          <span id="btn-precharge-confirm-top-text">✓ Aceptar y Cobrar</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="invoice-modal-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- =========================================================== -->
+      <!-- COLUMNA IZQUIERDA (7 cols): FACTURA OFICIAL A4 (PDF)        -->
+      <!-- =========================================================== -->
+      <div id="panel-factura-pdf" class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-md space-y-6 text-stone-800">
+        
+        <!-- Cabecera de la Factura Oficial A4 -->
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-stone-200 pb-5">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-300 flex items-center justify-center text-white shadow-2xs">
+                <i data-lucide="scissors" class="w-4 h-4"></i>
+              </div>
+              <h4 class="font-black text-lg text-stone-900 font-serif-luxury salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
+            </div>
+            <p class="text-xs text-stone-500 font-mono-code">N.I.F.: <strong class="text-stone-700">B-87654321</strong></p>
+            <p class="text-xs text-stone-500">Calle Velázquez 42, 28001 Madrid (España)</p>
+            <p class="text-xs text-stone-500">Tel: +34 912 345 678 | Email: facturacion@peluquerialosan.es</p>
+            <p class="text-[10px] text-stone-400">Reg. Mercantil de Madrid, Tomo 34.567, Folio 89, Hoja M-621.450</p>
+          </div>
+
+          <div class="text-left sm:text-right bg-stone-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none w-full sm:w-auto border sm:border-0 border-stone-200 space-y-1">
+            <div id="inv-a4-badge" class="inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs">
+              FACTURA OFICIAL VERI*FACTU
+            </div>
+            <div class="pt-1">
+              <span class="text-[11px] text-stone-500 block">Número de Serie:</span>
+              <span class="text-base font-black text-stone-900 font-mono-code" id="inv-a4-number">FS2026-0001</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-stone-500 block">Fecha de Expedición:</span>
+              <span class="text-xs font-bold text-stone-800" id="inv-a4-date">23/10/2026 18:30</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-stone-500 block">Medio de Pago:</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase" id="inv-a4-payment">TARJETA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos del Cliente / Destinatario -->
+        <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">DATOS DEL DESTINATARIO:</span>
+            <strong class="text-sm font-bold text-stone-900 block" id="inv-a4-client-name">Laura Martínez</strong>
+            <span class="text-stone-500 font-mono-code text-[11px]">DNI/NIF: <span id="inv-a4-client-nif" class="font-bold text-stone-700">12345678Z</span></span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">RÉGIMEN FISCAL:</span>
+            <span class="text-stone-600 block">Régimen General del IVA (21%)</span>
+            <span class="text-[11px] text-emerald-700 font-medium">Factura verificada y encadenada en AEAT</span>
+          </div>
+        </div>
+
+        <!-- Tabla de Conceptos Reglamentaria -->
+        <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stone-100/90 text-stone-700 font-bold border-b border-stone-200">
+              <tr>
+                <th class="p-3">Descripción / Servicio</th>
+                <th class="p-3 text-center">Cant.</th>
+                <th class="p-3 text-right">P. Unit.</th>
+                <th class="p-3 text-right">Base Imp.</th>
+                <th class="p-3 text-center">% IVA</th>
+                <th class="p-3 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="inv-a4-table-rows" class="divide-y divide-stone-100 font-mono-code text-xs">
+              <!-- Generado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Desglose de Bases e Impuestos -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50 p-4 rounded-xl border border-stone-200">
+          <div class="text-xs text-stone-500 space-y-1">
+            <p><strong>Base Imponible:</strong> <span id="inv-a4-base" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
+            <p><strong>Cuota IVA (21%):</strong> <span id="inv-a4-vat" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
+            <p class="text-[11px] text-stone-400">Exenta de retención IRPF al tratarse de consumidor final.</p>
+          </div>
+          <div class="text-right sm:border-l sm:border-stone-200 sm:pl-6 w-full sm:w-auto">
+            <span class="text-xs uppercase font-extrabold text-stone-400 block tracking-wider">TOTAL FACTURA (IVA Incluido):</span>
+            <span class="text-2xl font-black text-emerald-700 font-mono-code" id="inv-a4-total">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- Pie y Certificación Veri*Factu -->
+        <div class="pt-2 border-t border-dashed border-stone-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-stone-500">
+          <div class="space-y-1 text-center sm:text-left">
+            <p class="font-bold text-stone-800">Factura expedida mediante software garante conforme a la Ley 11/2021 (Veri*Factu).</p>
+            <p class="font-mono-code break-all text-[9px] text-stone-400" id="inv-a4-hash">Huella Hash SHA-256: ...</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <canvas id="inv-a4-qr-canvas" width="80" height="80" class="border border-stone-200 rounded-lg p-1 bg-white"></canvas>
+            <span class="text-[9px] text-emerald-700 font-bold max-w-[90px] leading-tight">Cotejo Sede Electrónica AEAT</span>
+          </div>
+        </div>
+
+        <!-- Botones de Acción para la Factura PDF -->
+        <div class="pt-2 flex flex-wrap items-center gap-2 justify-end border-t border-stone-100">
+          <button type="button" onclick="downloadInvoicePDF()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-300"></i>
+            <span>Descargar Factura (PDF)</span>
+          </button>
+          <button type="button" onclick="printInvoiceA4()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Imprimir Factura A4</span>
+          </button>
+          <button type="button" onclick="sendInvoiceWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Enviar WhatsApp</span>
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- =========================================================== -->
+      <!-- COLUMNA DERECHA (5 cols): TICKET DIGITAL TÉRMICO             -->
+      <!-- =========================================================== -->
+      <div id="panel-ticket-digital" class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-md space-y-4 font-mono-code text-xs">
+        
+        <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="receipt" class="w-4 h-4 text-emerald-600"></i>
+            <h4 class="font-bold font-serif-luxury text-sm text-stone-900">Ticket Térmico Digital</h4>
+          </div>
+          <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-bold">80 mm</span>
+        </div>
+
+        <!-- Bloque Ticket Estilo Papel Térmico -->
+        <div class="bg-amber-50/30 p-4 rounded-xl border border-dashed border-stone-300 space-y-3">
+          <div class="text-center border-b border-dashed border-stone-300 pb-2.5">
+            <h4 class="font-bold text-xs uppercase font-serif-luxury tracking-wide salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
+            <p class="text-[10px] text-stone-500">NIF: B-87654321</p>
+            <p class="text-[10px] text-stone-500">Calle Velázquez 42, 28001 Madrid</p>
+            <p id="ticket-badge" class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
+              FACTURA SIMPLIFICADA (VERI*FACTU)
+            </p>
+          </div>
+
+          <div class="space-y-1 text-[11px]">
+            <div class="flex justify-between">
+              <span class="text-stone-500">Número:</span>
+              <span class="font-bold text-stone-900" id="ticket-num">FS2026-0002</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500">Fecha:</span>
+              <span id="ticket-date">23/10/2026 18:00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500">Cliente:</span>
+              <span id="ticket-client" class="font-bold">Laura Martínez</span>
+            </div>
+          </div>
+
+          <div class="border-t border-b border-dashed border-stone-300 py-2 space-y-1" id="ticket-items">
+            <!-- Items -->
+          </div>
+
+          <!-- Resguardo Bancario de Pago con Tarjeta / Datáfono -->
+          <div id="ticket-card-slip" class="hidden p-2.5 bg-white rounded-lg border border-dashed border-stone-300 font-mono-code text-[10px] space-y-0.5">
+            <div class="text-center font-bold text-stone-800">*** COPIA OPERACIÓN CON TARJETA ***</div>
+            <div class="text-center text-[9px] text-stone-500">TERMINAL TPV BANCARIO ACREDITADO</div>
+            <div class="flex justify-between pt-1"><span>TARJETA:</span><span id="ticket-card-brand-mask" class="font-bold text-stone-900">VISA **** 4242</span></div>
+            <div class="flex justify-between"><span>AUTORIZACIÓN:</span><span id="ticket-card-auth" class="font-bold text-stone-900">AUTH-849201</span></div>
+            <div class="flex justify-between"><span>TERMINAL:</span><span id="ticket-card-terminal">TPV-LOSAN-01</span></div>
+            <div class="flex justify-between"><span>TITULAR:</span><span id="ticket-card-holder">CLIENTA</span></div>
+          </div>
+
+          <div class="space-y-1 text-right text-[11px]">
+            <div class="flex justify-between">
+              <span class="text-stone-500">Base Imponible:</span>
+              <span id="ticket-base">49.59 €</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500">IVA (21%):</span>
+              <span id="ticket-vat">10.41 €</span>
+            </div>
+            <div class="flex justify-between font-bold text-sm border-t border-stone-200 pt-1 text-stone-900">
+              <span>TOTAL:</span>
+              <span id="ticket-total" class="text-emerald-700">60.00 €</span>
+            </div>
+          </div>
+
+          <div class="text-center pt-1 flex flex-col items-center">
+            <div class="p-2 bg-white border border-stone-200 rounded-xl mb-1.5 shadow-2xs">
+              <canvas id="ticket-qr-canvas" width="110" height="110"></canvas>
+            </div>
+            <p class="text-[8px] text-stone-400 break-all font-mono-code" id="ticket-hash-snippet">
+              SHA: a591a6d40b490f...
+            </p>
+            <span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1 border border-emerald-200">
+              Cotejo en Sede Electrónica AEAT
+            </span>
+          </div>
+        </div>
+
+        <button type="button" onclick="printThermalTicket()" class="w-full bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-sans font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Imprimir Ticket Térmico</span>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Barra Inferior de Estado -->
+  <div class="p-3 sm:px-6 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-600 flex-shrink-0">
+    <div id="modal-footer-status" class="flex items-center gap-1.5">
+      <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600" id="modal-footer-status-icon"></i>
+      <span id="modal-footer-status-text">Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.</span>
+    </div>
+    <div id="modal-footer-actions" class="flex items-center gap-2">
+      <button type="button" onclick="closeTicketModal()" class="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold transition cursor-pointer">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
     </div>
   </div>
 
@@ -9024,13 +9027,20 @@
       // Mostrar vista dual por defecto
       switchInvoiceModalView('dual');
 
-      document.getElementById('ticket-modal').classList.remove('hidden');
+      const modal = document.getElementById('ticket-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+      }
       if (window.lucide) lucide.createIcons();
     }
 
     function closeTicketModal() {
       const modal = document.getElementById('ticket-modal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
     }
 
     function switchInvoiceModalView(viewMode) {
