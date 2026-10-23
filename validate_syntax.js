@@ -44,7 +44,20 @@ const requiredIds = [
   'modal-client-package-card',
   'modal-package-redeem-prompt',
   'modal-package-redeem-success',
-  'c360-packages-container'
+  'c360-packages-container',
+  'aview-stock',
+  'stock-tbody',
+  'modal-product-edit',
+  'modal-prod-id',
+  'modal-prod-sku',
+  'modal-prod-name',
+  'modal-prod-brand',
+  'modal-prod-supplier',
+  'modal-prod-cost',
+  'modal-prod-price',
+  'modal-prod-stock',
+  'modal-product-purchase',
+  'modal-product-history'
 ];
 
 requiredIds.forEach(id => {

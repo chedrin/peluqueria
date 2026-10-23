@@ -385,8 +385,8 @@ const db = {
       isShowcase: true,
       img: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80',
       purchaseHistory: [
-        { id: 'pch-101', date: '2026-09-01', quantity: 12, costPrice: 11.50, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-8812', notes: 'Lote inicial de septiembre' },
-        { id: 'pch-102', date: '2026-10-05', quantity: 10, costPrice: 12.00, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-9941', notes: 'Reposición mensual con subida tarifa 0,50€' }
+        { id: 'pch-101', date: '2026-09-01', quantity: 12, units: 12, costPrice: 11.50, unitCost: 11.50, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-8812', invoiceNumber: 'FAC-MO-8812', notes: 'Lote inicial de septiembre' },
+        { id: 'pch-102', date: '2026-10-05', quantity: 10, units: 10, costPrice: 12.00, unitCost: 12.00, supplier: 'Moroccanoil España S.L.', invoiceRef: 'FAC-MO-9941', invoiceNumber: 'FAC-MO-9941', notes: 'Reposición mensual con subida tarifa 0,50€' }
       ]
     },
     {
@@ -404,8 +404,8 @@ const db = {
       isShowcase: true,
       img: 'https://images.unsplash.com/photo-1608248597359-21626f21295f?auto=format&fit=crop&w=300&q=80',
       purchaseHistory: [
-        { id: 'pch-201', date: '2026-08-20', quantity: 8, costPrice: 14.80, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-3312', notes: 'Campaña verano' },
-        { id: 'pch-202', date: '2026-10-02', quantity: 6, costPrice: 15.50, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-4451', notes: 'Lote nuevo' }
+        { id: 'pch-201', date: '2026-08-20', quantity: 8, units: 8, costPrice: 14.80, unitCost: 14.80, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-3312', invoiceNumber: 'FAC-OL-3312', notes: 'Campaña verano' },
+        { id: 'pch-202', date: '2026-10-02', quantity: 6, units: 6, costPrice: 15.50, unitCost: 15.50, supplier: 'Cosmética Profesional Olaplex S.A.', invoiceRef: 'FAC-OL-4451', invoiceNumber: 'FAC-OL-4451', notes: 'Lote nuevo' }
       ]
     },
     {
@@ -423,7 +423,7 @@ const db = {
       isShowcase: true,
       img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80',
       purchaseHistory: [
-        { id: 'pch-301', date: '2026-09-15', quantity: 10, costPrice: 17.50, supplier: 'L Oreal Luxe España S.A.', invoiceRef: 'FAC-KER-102', notes: 'Pack promocional expositor' }
+        { id: 'pch-301', date: '2026-09-15', quantity: 10, units: 10, costPrice: 17.50, unitCost: 17.50, supplier: 'L Oreal Luxe España S.A.', invoiceRef: 'FAC-KER-102', invoiceNumber: 'FAC-KER-102', notes: 'Pack promocional expositor' }
       ]
     },
     {
@@ -4101,25 +4101,27 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
 
 // F. GESTIÓN COMPLETA DE PRODUCTOS (INVENTARIO, PROVEEDOR, COMPRAS HISTÓRICAS)
 app.post('/api/products', (req, res) => {
-  const { name, brand, supplier, sku, price, costPrice, stock, minStock, isShowcase, img } = req.body;
-  if (!name || !price) {
+  const { name, brand, supplier, sku, price, costPrice, lastCostPrice, stock, minStock, isShowcase, img } = req.body;
+  if (!name || price === undefined) {
     return res.status(400).json({ error: 'Nombre y precio son obligatorios.' });
   }
 
+  const incomingCost = costPrice !== undefined ? Number(costPrice) : (lastCostPrice !== undefined ? Number(lastCostPrice) : (Number(price) * 0.5));
+
   const newPrd = {
     id: 'prd-' + Date.now(),
-    sku: sku || 'SKU-' + Math.floor(1000 + Math.random() * 9000),
+    sku: sku ? sku.trim().toUpperCase() : 'SKU-' + Math.floor(1000 + Math.random() * 9000),
     name: name.trim(),
-    brand: brand ? brand.trim() : 'L Oreal Professionnel',
+    brand: brand ? brand.trim() : 'Cosmética Profesional',
     supplier: supplier ? supplier.trim() : 'Proveedor Central Salón',
     price: Number(price),
-    costPrice: Number(costPrice) || (Number(price) * 0.5),
-    lastCostPrice: Number(costPrice) || (Number(price) * 0.5),
+    costPrice: incomingCost,
+    lastCostPrice: incomingCost,
     stock: Number(stock) || 0,
     minStock: Number(minStock) || 3,
     vatRate: 21.0,
     isShowcase: isShowcase !== undefined ? Boolean(isShowcase) : true,
-    img: img || 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80',
+    img: img ? img.trim() : 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=300&q=80',
     purchaseHistory: []
   };
 
@@ -4133,23 +4135,31 @@ app.post('/api/products', (req, res) => {
 });
 
 app.put('/api/products/:id', (req, res) => {
-  const prd = db.products.find(p => p.id === req.params.id);
+  const prd = db.products.find(p => String(p.id) === String(req.params.id));
   if (!prd) return res.status(404).json({ error: 'Producto no encontrado.' });
 
-  const { name, brand, supplier, sku, price, costPrice, stock, minStock, isShowcase, img } = req.body;
-  if (name) prd.name = name.trim();
-  if (brand) prd.brand = brand.trim();
-  if (supplier) prd.supplier = supplier.trim();
-  if (sku) prd.sku = sku.trim();
+  const { name, brand, supplier, sku, price, costPrice, lastCostPrice, stock, minStock, isShowcase, img } = req.body;
+  if (name !== undefined) prd.name = name.trim();
+  if (brand !== undefined) prd.brand = brand.trim();
+  if (supplier !== undefined) prd.supplier = supplier.trim();
+  if (sku !== undefined) prd.sku = sku.trim().toUpperCase();
   if (price !== undefined) prd.price = Number(price);
-  if (costPrice !== undefined) {
-    prd.lastCostPrice = prd.costPrice;
-    prd.costPrice = Number(costPrice);
+
+  const incomingCost = costPrice !== undefined ? Number(costPrice) : (lastCostPrice !== undefined ? Number(lastCostPrice) : undefined);
+  if (incomingCost !== undefined && !isNaN(incomingCost)) {
+    if (prd.costPrice !== undefined && prd.costPrice !== incomingCost) {
+      prd.lastCostPrice = prd.costPrice;
+    }
+    prd.costPrice = incomingCost;
   }
+  if (lastCostPrice !== undefined && !isNaN(Number(lastCostPrice))) {
+    prd.lastCostPrice = Number(lastCostPrice);
+  }
+
   if (stock !== undefined) prd.stock = Number(stock);
   if (minStock !== undefined) prd.minStock = Number(minStock);
   if (isShowcase !== undefined) prd.isShowcase = Boolean(isShowcase);
-  if (img) prd.img = img.trim();
+  if (img !== undefined) prd.img = img.trim();
 
   res.json({
     success: true,
@@ -4159,7 +4169,7 @@ app.put('/api/products/:id', (req, res) => {
 });
 
 app.delete('/api/products/:id', (req, res) => {
-  const index = db.products.findIndex(p => p.id === req.params.id);
+  const index = db.products.findIndex(p => String(p.id) === String(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Producto no encontrado.' });
 
   const removed = db.products.splice(index, 1);
@@ -4168,7 +4178,7 @@ app.delete('/api/products/:id', (req, res) => {
 
 // Registrar compra / entrada de stock con proveedor e histórico
 app.post('/api/products/:id/purchase', (req, res) => {
-  const prd = db.products.find(p => p.id === req.params.id);
+  const prd = db.products.find(p => String(p.id) === String(req.params.id));
   if (!prd) return res.status(404).json({ error: 'Producto no encontrado.' });
 
   const numQty = Number(req.body.quantity !== undefined ? req.body.quantity : req.body.units);
@@ -4179,17 +4189,20 @@ app.post('/api/products/:id/purchase', (req, res) => {
 
   if (!numQty || numQty <= 0) return res.status(400).json({ error: 'Cantidad debe ser mayor a 0.' });
 
-  prd.lastCostPrice = prd.costPrice;
+  prd.lastCostPrice = prd.costPrice || numCost;
   if (numCost > 0) prd.costPrice = numCost;
   prd.stock += numQty;
 
   const purchaseRecord = {
     id: 'pch-' + Date.now(),
-    date: new Date().toISOString().slice(0, 10),
+    date: req.body.date || new Date().toISOString().slice(0, 10),
     quantity: numQty,
+    units: numQty,
     costPrice: numCost > 0 ? numCost : prd.costPrice,
+    unitCost: numCost > 0 ? numCost : prd.costPrice,
     supplier: supplier || prd.supplier || 'Proveedor Habitual',
     invoiceRef: invoiceRef || `ALB-${Math.floor(1000 + Math.random() * 9000)}`,
+    invoiceNumber: invoiceRef || `ALB-${Math.floor(1000 + Math.random() * 9000)}`,
     notes: notes || 'Entrada ordinaria de almacén'
   };
 
@@ -4198,7 +4211,7 @@ app.post('/api/products/:id/purchase', (req, res) => {
 
   res.json({
     success: true,
-    message: `Entrada de ${numQty} unidades registrada. Stock actual: ${prd.stock} uds. (Precio compra anterior: ${prd.lastCostPrice} €).`,
+    message: `Entrada de ${numQty} unidades registrada. Stock actual: ${prd.stock} uds. (Precio compra: ${purchaseRecord.unitCost.toFixed(2)} €).`,
     product: prd,
     purchase: purchaseRecord
   });

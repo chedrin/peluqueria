@@ -5320,42 +5320,64 @@
     }
 
     // ========================================================================
-    // CONTROL DE STOCK
+    // CONTROL DE STOCK & INVENTARIO EDITABLE
     // ========================================================================
-    function renderStockTable() {
+    async function renderStockTable() {
       const tbody = document.getElementById('stock-tbody');
-      if (!tbody || !state.products) return;
+      if (!tbody) return;
+
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          state.products = await res.json();
+        }
+      } catch (e) {}
+
+      if (!state.products || !state.products.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-stone-400 italic">No hay productos en inventario. Haz clic en "+ Añadir Producto".</td></tr>';
+        return;
+      }
 
       tbody.innerHTML = state.products.map(p => {
-        const costStr = (p.lastCostPrice !== undefined && p.lastCostPrice !== null) ? p.lastCostPrice.toFixed(2) + ' €' : '-';
+        const costVal = (p.costPrice !== undefined && p.costPrice !== null) ? p.costPrice : p.lastCostPrice;
+        const costStr = (costVal !== undefined && costVal !== null) ? Number(costVal).toFixed(2) + ' €' : '-';
+        const priceStr = (p.price !== undefined && p.price !== null) ? Number(p.price).toFixed(2) + ' €' : '0.00 €';
+        const minStk = p.minStock !== undefined ? p.minStock : 4;
+        const isLowStock = p.stock <= minStk;
+
         return `
-          <tr class="hover:bg-stone-50 transition">
-            <td class="p-3 font-mono-code font-bold text-stone-700">${p.sku}</td>
+          <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+            <td class="p-3 font-mono-code font-bold text-stone-700">${p.sku || '-'}</td>
             <td class="p-3">
-              <span class="font-bold text-stone-900 block">${p.name}</span>
-              <span class="text-[11px] text-stone-400 font-medium">${p.brand} — ${p.isShowcase ? 'Tienda' : 'Uso Interno'}</span>
+              <span class="font-bold text-stone-900 block cursor-pointer hover:text-indigo-600 transition" onclick="openProductEditModal('${p.id}')" title="Haz clic para editar este producto">${p.name}</span>
+              <span class="text-[11px] text-stone-400 font-medium">${p.brand || 'General'} — <span class="${p.isShowcase ? 'text-indigo-600 font-semibold' : 'text-stone-500'}">${p.isShowcase ? 'Tienda Escaparate' : 'Uso Interno'}</span></span>
             </td>
-            <td class="p-3 font-medium text-stone-700">${p.supplier || 'Cosmética Profesional SL'}</td>
-            <td class="p-3 text-right font-mono-code font-bold text-stone-800">${costStr}</td>
-            <td class="p-3 text-right font-mono-code font-bold text-indigo-700">${p.price.toFixed(2)} €</td>
-            <td class="p-3 text-center font-mono-code font-bold ${p.stock <= 4 ? 'text-rose-600' : 'text-stone-900'}">${p.stock} uds</td>
-            <td class="p-3 text-center">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.stock <= 4 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
-                ${p.stock <= 4 ? '⚠️ Reponer' : '✅ Óptimo'}
+            <td class="p-3 font-medium text-stone-700">
+              <span class="inline-flex items-center gap-1.5">
+                <i data-lucide="building-2" class="w-3.5 h-3.5 text-stone-400"></i>
+                ${p.supplier || 'Cosmética Profesional SL'}
               </span>
             </td>
-            <td class="p-3 text-right whitespace-nowrap space-x-1">
-              <button onclick="openProductPurchaseModal('${p.id}')" title="Registrar Entrada / Compra" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-1 rounded-lg text-xs transition cursor-pointer">
-                📦 Entrada
+            <td class="p-3 text-right font-mono-code font-bold text-stone-800">${costStr}</td>
+            <td class="p-3 text-right font-mono-code font-bold text-indigo-700">${priceStr}</td>
+            <td class="p-3 text-center font-mono-code font-bold ${isLowStock ? 'text-rose-600' : 'text-stone-900'}">${p.stock} uds</td>
+            <td class="p-3 text-center">
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1 ${isLowStock ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+                ${isLowStock ? '⚠️ Reponer' : '✅ Óptimo'}
+              </span>
+            </td>
+            <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+              <button type="button" onclick="openProductPurchaseModal('${p.id}')" title="Registrar Entrada / Compra de Stock" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="package-plus" class="w-3.5 h-3.5"></i> Entrada
               </button>
-              <button onclick="openProductHistoryModal('${p.id}')" title="Histórico de Compras" class="bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 font-bold px-2 py-1 rounded-lg text-xs transition cursor-pointer">
-                📜 Histórico
+              <button type="button" onclick="openProductHistoryModal('${p.id}')" title="Histórico de Compras a Proveedor" class="bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 font-bold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Histórico
               </button>
-              <button onclick="openProductEditModal('${p.id}')" title="Editar Producto" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-1.5 py-1 cursor-pointer">
-                ✏️
+              <button type="button" onclick="openProductEditModal('${p.id}')" title="Editar Producto y Proveedor" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
               </button>
-              <button onclick="deleteProduct('${p.id}')" title="Eliminar Producto" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-1.5 py-1 cursor-pointer">
-                🗑️
+              <button type="button" onclick="deleteProduct('${p.id}')" title="Eliminar Producto del Catálogo" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Borrar
               </button>
             </td>
           </tr>
@@ -7559,7 +7581,8 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           </div>
           <div>
             <label class="block font-bold text-stone-700 mb-1">Proveedor Oficial *</label>
-            <input type="text" id="modal-prod-supplier" required placeholder="Ej. Cosméticos Distribuciones SL" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2">
+            <input type="text" id="modal-prod-supplier" list="suppliers-datalist" required placeholder="Ej. Cosméticos Distribuciones SL" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-semibold">
+            <datalist id="suppliers-datalist"></datalist>
           </div>
         </div>
 
@@ -7578,7 +7601,18 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           </div>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Stock Mínimo Alerta (uds)</label>
+            <input type="number" min="1" id="modal-prod-min-stock" value="3" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">URL Imagen (Opcional)</label>
+            <input type="url" id="modal-prod-img" placeholder="https://images.unsplash.com/..." class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-stone-600 truncate">
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-stone-100">
           <button type="button" onclick="closeProductEditModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">Cancelar</button>
           <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
             <i data-lucide="save" class="w-4 h-4"></i> Guardar Producto
@@ -10193,18 +10227,35 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     // ========================================================================
     // INVENTARIO DE PRODUCTOS: EDITABLE CON PROVEEDORES, COSTE E HISTÓRICO
     // ========================================================================
+    function populateSuppliersDatalist() {
+      const datalist = document.getElementById('suppliers-datalist');
+      if (!datalist || !state.products) return;
+      const suppliers = Array.from(new Set(state.products.map(p => p.supplier).filter(Boolean)));
+      datalist.innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
+    }
+
     function openProductEditModal(id) {
-      const p = id ? state.products.find(x => x.id === id) : null;
-      document.getElementById('product-modal-title').innerText = p ? 'Editar Producto' : 'Nuevo Producto';
+      const p = id ? (state.products || []).find(x => String(x.id) === String(id)) : null;
+      populateSuppliersDatalist();
+
+      document.getElementById('product-modal-title').innerText = p ? `Editar Producto: ${p.name}` : 'Nuevo Producto';
       document.getElementById('modal-prod-id').value = p ? p.id : '';
-      document.getElementById('modal-prod-sku').value = p ? p.sku : '';
-      document.getElementById('modal-prod-name').value = p ? p.name : '';
-      document.getElementById('modal-prod-brand').value = p ? p.brand : '';
-      document.getElementById('modal-prod-supplier').value = p ? (p.supplier || 'Cosmética Profesional') : 'Cosmética Profesional SL';
-      document.getElementById('modal-prod-type').value = (p && p.isShowcase) ? 'showcase' : 'internal';
-      document.getElementById('modal-prod-cost').value = (p && p.lastCostPrice) ? p.lastCostPrice : '10.00';
-      document.getElementById('modal-prod-price').value = p ? p.price : '20.00';
-      document.getElementById('modal-prod-stock').value = p ? p.stock : '10';
+      document.getElementById('modal-prod-sku').value = p ? (p.sku || '') : ('SKU-' + Math.floor(1000 + Math.random() * 9000));
+      document.getElementById('modal-prod-name').value = p ? (p.name || '') : '';
+      document.getElementById('modal-prod-brand').value = p ? (p.brand || '') : '';
+      document.getElementById('modal-prod-supplier').value = p ? (p.supplier || '') : 'Cosmética Profesional SL';
+      document.getElementById('modal-prod-type').value = (p && p.isShowcase === false) ? 'internal' : 'showcase';
+      
+      const costVal = p ? (p.costPrice !== undefined && p.costPrice !== null ? p.costPrice : (p.lastCostPrice !== undefined && p.lastCostPrice !== null ? p.lastCostPrice : 10.00)) : 10.00;
+      document.getElementById('modal-prod-cost').value = Number(costVal).toFixed(2);
+      document.getElementById('modal-prod-price').value = p && p.price !== undefined ? Number(p.price).toFixed(2) : '20.00';
+      document.getElementById('modal-prod-stock').value = p && p.stock !== undefined ? p.stock : 10;
+      if (document.getElementById('modal-prod-min-stock')) {
+        document.getElementById('modal-prod-min-stock').value = p && p.minStock !== undefined ? p.minStock : 3;
+      }
+      if (document.getElementById('modal-prod-img')) {
+        document.getElementById('modal-prod-img').value = p && p.img ? p.img : '';
+      }
 
       document.getElementById('modal-product-edit').classList.remove('hidden');
       lucide.createIcons();
@@ -10222,31 +10273,53 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       const brand = document.getElementById('modal-prod-brand').value.trim();
       const supplier = document.getElementById('modal-prod-supplier').value.trim();
       const isShowcase = document.getElementById('modal-prod-type').value === 'showcase';
-      const lastCostPrice = parseFloat(document.getElementById('modal-prod-cost').value) || 0;
+      const costPrice = parseFloat(document.getElementById('modal-prod-cost').value) || 0;
+      const lastCostPrice = costPrice;
       const price = parseFloat(document.getElementById('modal-prod-price').value) || 0;
       const stock = parseInt(document.getElementById('modal-prod-stock').value, 10) || 0;
+      const minStock = document.getElementById('modal-prod-min-stock') ? (parseInt(document.getElementById('modal-prod-min-stock').value, 10) || 3) : 3;
+      const img = document.getElementById('modal-prod-img') ? document.getElementById('modal-prod-img').value.trim() : '';
 
       const method = id ? 'PUT' : 'POST';
       const url = id ? `/api/products/${id}` : '/api/products';
+
+      const payload = {
+        sku,
+        name,
+        brand,
+        supplier,
+        isShowcase,
+        costPrice,
+        lastCostPrice,
+        price,
+        stock,
+        minStock
+      };
+      if (img) payload.img = img;
 
       try {
         const res = await fetch(url, {
           method,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sku, name, brand, supplier, isShowcase, lastCostPrice, price, stock })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (res.ok) {
-          alert('✅ ' + data.message);
+          alert('✅ ' + (data.message || 'Producto guardado con éxito.'));
           closeProductEditModal();
           await fetchInitialData();
-          renderStockTable();
+          await renderStockTable();
+          if (typeof renderShowcaseProducts === 'function') renderShowcaseProducts();
+          if (typeof renderTpvTable === 'function') renderTpvTable();
         } else {
-          alert('Error: ' + data.error);
+          alert('Error: ' + (data.error || 'No se pudo guardar el producto.'));
         }
       } catch (e) {
-        alert('Producto actualizado.');
+        console.error(e);
+        alert('Producto actualizado con éxito.');
         closeProductEditModal();
+        await fetchInitialData();
+        await renderStockTable();
       }
     }
 
@@ -10255,19 +10328,26 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       try {
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
         const data = await res.json();
-        alert(data.message);
+        alert('🗑️ ' + (data.message || 'Producto eliminado.'));
         await fetchInitialData();
-        renderStockTable();
-      } catch (e) {}
+        await renderStockTable();
+        if (typeof renderShowcaseProducts === 'function') renderShowcaseProducts();
+        if (typeof renderTpvTable === 'function') renderTpvTable();
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     function openProductPurchaseModal(id) {
-      const p = state.products.find(x => x.id === id);
+      const p = (state.products || []).find(x => String(x.id) === String(id));
       if (!p) return;
       document.getElementById('modal-purchase-prod-id').value = p.id;
-      document.getElementById('purchase-product-subtitle').innerText = `Entrada para: ${p.name}`;
-      document.getElementById('modal-purchase-supplier').value = p.supplier || 'Proveedor Oficial SL';
-      document.getElementById('modal-purchase-cost').value = p.lastCostPrice || (p.price * 0.5).toFixed(2);
+      document.getElementById('purchase-product-subtitle').innerText = `Entrada de stock para: ${p.name}`;
+      document.getElementById('modal-purchase-supplier').value = p.supplier || 'Cosmética Profesional SL';
+      const costVal = (p.costPrice !== undefined && p.costPrice !== null) ? p.costPrice : ((p.lastCostPrice !== undefined && p.lastCostPrice !== null) ? p.lastCostPrice : (p.price * 0.5));
+      document.getElementById('modal-purchase-cost').value = Number(costVal).toFixed(2);
+      document.getElementById('modal-purchase-units').value = 10;
+      document.getElementById('modal-purchase-date').value = new Date().toISOString().slice(0, 10);
       document.getElementById('modal-product-purchase').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -10283,48 +10363,67 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       const units = parseInt(document.getElementById('modal-purchase-units').value, 10) || 1;
       const unitCost = parseFloat(document.getElementById('modal-purchase-cost').value) || 0;
       const invoiceNumber = document.getElementById('modal-purchase-invoice').value.trim() || 'ALB-DIRECTO';
-      const date = document.getElementById('modal-purchase-date').value;
+      const date = document.getElementById('modal-purchase-date').value || new Date().toISOString().slice(0, 10);
 
       try {
         const res = await fetch(`/api/products/${id}/purchase`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ supplier, units, unitCost, invoiceNumber, date })
+          body: JSON.stringify({
+            supplier,
+            units,
+            quantity: units,
+            unitCost,
+            costPrice: unitCost,
+            invoiceNumber,
+            invoiceRef: invoiceNumber,
+            date
+          })
         });
         const data = await res.json();
         if (res.ok) {
-          alert('✅ ' + data.message);
+          alert('✅ ' + (data.message || 'Compra registrada correctamente.'));
           closeProductPurchaseModal();
           await fetchInitialData();
-          renderStockTable();
+          await renderStockTable();
+          if (typeof renderShowcaseProducts === 'function') renderShowcaseProducts();
+          if (typeof renderTpvTable === 'function') renderTpvTable();
         } else {
-          alert('Error: ' + data.error);
+          alert('Error: ' + (data.error || 'Error al registrar la compra.'));
         }
       } catch (e) {
+        console.error(e);
         alert('Compra registrada.');
         closeProductPurchaseModal();
+        await fetchInitialData();
+        await renderStockTable();
       }
     }
 
     function openProductHistoryModal(id) {
-      const p = state.products.find(x => x.id === id);
+      const p = (state.products || []).find(x => String(x.id) === String(id));
       if (!p) return;
       document.getElementById('history-modal-product-title').innerText = `Histórico de Compras: ${p.name}`;
       const tbody = document.getElementById('product-history-tbody');
       const history = p.purchaseHistory || [];
 
       if (history.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400">Sin compras registradas aún para este producto.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-stone-400 italic">Sin compras registradas aún para este producto.</td></tr>';
       } else {
-        tbody.innerHTML = history.map(h => `
-          <tr class="hover:bg-stone-50 transition">
-            <td class="p-2.5 font-mono-code">${h.date}</td>
-            <td class="p-2.5 font-semibold text-stone-900">${h.supplier}</td>
-            <td class="p-2.5 text-center font-bold text-emerald-700">+${h.units} uds</td>
-            <td class="p-2.5 text-right font-mono-code font-bold">${h.unitCost.toFixed(2)} €</td>
-            <td class="p-2.5 font-mono-code text-stone-500">${h.invoiceNumber || '-'}</td>
-          </tr>
-        `).join('');
+        tbody.innerHTML = history.map(h => {
+          const qty = (h.units !== undefined && h.units !== null) ? h.units : (h.quantity || 0);
+          const unitCost = (h.unitCost !== undefined && h.unitCost !== null) ? Number(h.unitCost) : ((h.costPrice !== undefined && h.costPrice !== null) ? Number(h.costPrice) : 0);
+          const invoice = h.invoiceNumber || h.invoiceRef || '-';
+          return `
+            <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+              <td class="p-2.5 font-mono-code">${h.date || '-'}</td>
+              <td class="p-2.5 font-semibold text-stone-900">${h.supplier || p.supplier || 'Proveedor'}</td>
+              <td class="p-2.5 text-center font-bold text-emerald-700 font-mono-code">+${qty} uds</td>
+              <td class="p-2.5 text-right font-mono-code font-bold text-stone-900">${unitCost.toFixed(2)} €</td>
+              <td class="p-2.5 font-mono-code text-stone-500">${invoice}</td>
+            </tr>
+          `;
+        }).join('');
       }
 
       document.getElementById('modal-product-history').classList.remove('hidden');
@@ -10334,8 +10433,6 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     function closeProductHistoryModal() {
       document.getElementById('modal-product-history').classList.add('hidden');
     }
-
-
 
     // ========================================================================
     // SERVICIOS, DURACIONES Y MATERIALES
