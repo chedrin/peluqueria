@@ -1684,16 +1684,20 @@ app.get('/api/availability', (req, res) => {
   });
 });
 
-// 4. Crear Cita
+// 4. Crear Cita (Soporta reservas online y reservas manuales en salón / Walk-in sin cita previa)
 app.post('/api/appointments/book', (req, res) => {
-  const { clientId, clientDni, staffId, serviceIds, startTime, clientComments } = req.body;
+  const { clientId, clientDni, clientName, clientPhone, staffId, serviceIds, startTime, clientComments, isWalkIn } = req.body;
 
-  if ((!clientId && !clientDni) || !serviceIds || !serviceIds.length || !startTime) {
-    return res.status(400).json({ error: 'Faltan parámetros obligatorios.' });
+  if ((!clientId && !clientDni && !clientName) || !serviceIds || !serviceIds.length || !startTime) {
+    return res.status(400).json({ error: 'Faltan parámetros obligatorios (se requiere cliente, servicios y hora).' });
   }
 
   const selectedServices = db.services.filter(s => serviceIds.includes(s.id));
+  if (!selectedServices.length) {
+    return res.status(400).json({ error: 'Debes seleccionar al menos un servicio válido.' });
+  }
   const totalDuration = selectedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
+  const totalPrice = selectedServices.reduce((sum, s) => sum + (s.price || 0), 0);
 
   const start = new Date(startTime);
   const end = new Date(start.getTime() + totalDuration * 60000);
@@ -1701,14 +1705,14 @@ app.post('/api/appointments/book', (req, res) => {
   let targetStaff = null;
   if (staffId && staffId !== 'any') {
     targetStaff = db.staff.find(s => s.id === staffId);
-    if (!targetStaff || !targetStaff.isAvailable) {
-      return res.status(400).json({ error: 'La profesional seleccionada no está disponible.' });
+    if (!targetStaff || targetStaff.isActive === false) {
+      return res.status(400).json({ error: 'La profesional seleccionada no está disponible o se encuentra de baja.' });
     }
     if (hasOverlap(staffId, start, end)) {
       return res.status(409).json({ error: 'Conflicto de agenda: Ese hueco ya está ocupado para esta profesional.' });
     }
   } else {
-    targetStaff = db.staff.find(s => s.isAvailable && !hasOverlap(s.id, start, end));
+    targetStaff = db.staff.find(s => s.isAvailable && s.isActive !== false && !hasOverlap(s.id, start, end));
     if (!targetStaff) {
       return res.status(409).json({ error: 'No hay ninguna profesional disponible en esa franja horaria.' });
     }
@@ -1719,26 +1723,43 @@ app.post('/api/appointments/book', (req, res) => {
     const cleanDni = clientDni.trim().toUpperCase().replace(/[\s-]/g, '');
     client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
   }
-  if (!client && clientId) {
+  if (!client && clientId && clientId !== 'new' && clientId !== 'walkin') {
     client = db.clients.find(c => c.id === clientId);
   }
   if (!client) {
-    client = { id: clientId || 'cli-anon', name: 'Clienta', dni: clientDni || '' };
+    const effectiveName = (clientName && clientName.trim()) ? clientName.trim() : (clientDni ? `Clienta (${clientDni})` : 'Clienta Ocasional');
+    const newCliId = 'cli-' + Date.now();
+    client = {
+      id: newCliId,
+      dni: clientDni ? clientDni.trim().toUpperCase().replace(/[\s-]/g, '') : '',
+      name: effectiveName,
+      phone: clientPhone ? clientPhone.trim() : '',
+      allergies: 'Sin alergias registradas (Walk-in)',
+      generalNotes: isWalkIn ? 'Cliente recibido en salón sin cita previa' : '',
+      loyaltyPoints: 0,
+      stampsCount: 0,
+      activeRewards: []
+    };
+    db.clients.push(client);
+  } else if (clientName && clientName.trim() && (!client.name || client.name === 'Clienta')) {
+    client.name = clientName.trim();
   }
 
   const newAppointment = {
     id: 'apt-' + Date.now(),
     clientId: client.id,
     clientDni: client.dni || '',
-    clientName: client.name,
+    clientName: (clientName && clientName.trim()) ? clientName.trim() : client.name,
     staffId: targetStaff.id,
     staffName: targetStaff.name,
     serviceIds,
     serviceNames: selectedServices.map(s => s.name).join(' + '),
+    totalPrice: totalPrice,
     startTime: start.toISOString(),
     endTime: end.toISOString(),
     status: 'confirmed',
-    clientComments: clientComments || '',
+    isWalkIn: Boolean(isWalkIn),
+    clientComments: clientComments || (isWalkIn ? 'Cliente en salón (Sin cita previa)' : ''),
     reminderSent24h: false,
     reminderSent2h: false,
     createdAt: new Date().toISOString()
@@ -1749,9 +1770,28 @@ app.post('/api/appointments/book', (req, res) => {
   db.appointmentAuditLogs.push({
     id: 'aud-' + Date.now(),
     appointmentId: newAppointment.id,
-    action: 'BOOKED',
+    action: isWalkIn ? 'WALKIN_MANUAL_BOOKING' : 'BOOKED',
     timestamp: new Date().toISOString()
   });
+
+  // Generar notificación interna en salón si es cliente sin cita previa (Walk-in)
+  if (isWalkIn) {
+    if (!db.notifications) db.notifications = [];
+    if (!db.adminNotifications) db.adminNotifications = db.notifications;
+    const timeFormatted = start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    const notifObj = {
+      id: 'notif-' + Date.now(),
+      type: 'WALKIN_ARRIVAL',
+      title: `⚡ Cliente en Salón: ${newAppointment.clientName}`,
+      message: `${newAppointment.clientName} ha llegado al salón sin cita previa y ha sido asignada a ${targetStaff.name} a las ${timeFormatted} (${newAppointment.serviceNames}). Total estimado: ${totalPrice.toFixed(2)} €.`,
+      staffName: targetStaff.name,
+      clientName: newAppointment.clientName,
+      time: timeFormatted,
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    db.notifications.unshift(notifObj);
+  }
 
   res.status(201).json(newAppointment);
 });
@@ -2299,6 +2339,162 @@ app.post('/api/invoices', (req, res) => {
 
 app.get('/api/invoices', (req, res) => {
   res.json(db.invoices);
+});
+
+// 9B. DESCARGA E IMPRESIÓN OFICIAL DE FACTURA A4 / PDF CON FORMATO REGLAMENTARIO
+app.get('/api/invoices/:id/print', (req, res) => {
+  const inv = db.invoices.find(i => i.id === req.params.id || `${i.series}-${String(i.invoiceNumber).padStart(4, '0')}` === req.params.id);
+  if (!inv) {
+    return res.status(404).send('<h2>Factura no encontrada</h2>');
+  }
+
+  const salon = db.salonInfo || {
+    legalName: 'Peluquería & Estilismo Losan S.L.',
+    name: 'Peluquería Losan',
+    cif: 'B-87654321',
+    address: 'Calle Velázquez 42, 28001 Madrid',
+    phone: '+34 912 345 678',
+    email: 'facturacion@peluquerialosan.es'
+  };
+
+  const formattedDate = new Date(inv.issueDate).toLocaleString('es-ES');
+  const invoiceCode = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
+  const rowsHtml = (inv.items || []).map(it => `
+    <tr>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${it.concept}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">${it.quantity}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">${it.unitPrice.toFixed(2)} €</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">${(it.taxBase || (it.totalAmount / 1.21)).toFixed(2)} €</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">21%</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold;">${it.totalAmount.toFixed(2)} €</td>
+    </tr>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Factura ${invoiceCode} — ${salon.name}</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937; margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; }
+    .no-print-bar { background: #111827; color: white; padding: 12px 20px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .btn { background: #059669; color: white; font-weight: bold; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 12px; }
+    .btn-secondary { background: #374151; }
+    .invoice-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 800px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #f3f4f6; padding-bottom: 20px; margin-bottom: 24px; }
+    .title-box { text-align: right; }
+    .badge { background: #ecfdf5; color: #065f46; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; border: 1px solid #a7f3d0; display: inline-block; }
+    .grid-2 { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; flex: 1; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th { background: #f3f4f6; color: #374151; font-size: 12px; text-transform: uppercase; padding: 10px; text-align: left; }
+    .totals { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .totals-table { width: 320px; }
+    .totals-table td { padding: 6px 10px; }
+    .totals-total { font-size: 18px; font-weight: 900; color: #059669; border-top: 2px solid #e5e7eb; padding-top: 8px; }
+    .footer { border-top: 1px dashed #d1d5db; padding-top: 16px; font-size: 10px; color: #6b7280; display: flex; justify-content: space-between; align-items: center; }
+    @media print {
+      .no-print-bar { display: none !important; }
+      body { padding: 0 !important; background: white !important; }
+      .invoice-card { border: none !important; box-shadow: none !important; padding: 0 !important; max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar">
+    <div style="font-weight: bold; font-size: 14px;">📄 Vista Oficial de Factura A4 / PDF — ${invoiceCode}</div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" onclick="window.print()">📥 Imprimir / Guardar como PDF</button>
+      <button class="btn btn-secondary" onclick="window.close()">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="invoice-card">
+    <div class="header">
+      <div>
+        <h2 style="margin: 0 0 6px 0; font-size: 20px; color: #111827;">${salon.legalName || salon.name}</h2>
+        <div style="font-size: 12px; color: #4b5563;">
+          <p style="margin: 2px 0;"><strong>C.I.F. / N.I.F.:</strong> ${salon.cif}</p>
+          <p style="margin: 2px 0;">${salon.address}</p>
+          <p style="margin: 2px 0;">Tel: ${salon.phone} | Email: ${salon.email}</p>
+          <p style="margin: 2px 0; font-size: 11px; color: #9ca3af;">Registro Mercantil de Madrid, Tomo 34.567, Folio 89, Hoja M-621.450</p>
+        </div>
+      </div>
+      <div class="title-box">
+        <span class="badge">FACTURA OFICIAL VERI*FACTU</span>
+        <h3 style="margin: 8px 0 4px 0; font-size: 22px; color: #111827;">${invoiceCode}</h3>
+        <p style="margin: 2px 0; font-size: 12px; color: #4b5563;"><strong>Fecha:</strong> ${formattedDate}</p>
+        <p style="margin: 2px 0; font-size: 12px; color: #059669; font-weight: bold;">Pago: ${(inv.paymentMethod || 'card').toUpperCase()}</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="box">
+        <div style="font-size: 10px; font-weight: bold; color: #9ca3af; text-transform: uppercase; margin-bottom: 6px;">DATOS DEL CLIENTE / RECEPTOR:</div>
+        <div style="font-size: 14px; font-weight: bold; color: #111827;">${inv.clientName || 'Consumidor Final'}</div>
+        <div style="font-size: 12px; color: #4b5563; margin-top: 4px;">DNI / NIF: <strong>${inv.clientNif || 'N/A'}</strong></div>
+      </div>
+      <div class="box">
+        <div style="font-size: 10px; font-weight: bold; color: #9ca3af; text-transform: uppercase; margin-bottom: 6px;">RÉGIMEN FISCAL Y GARANTÍAS:</div>
+        <div style="font-size: 12px; color: #111827;">Régimen General del IVA (21%)</div>
+        <div style="font-size: 11px; color: #059669; font-weight: bold; margin-top: 4px;">Sistema Informático Veri*Factu (Ley 11/2021)</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Concepto / Tratamiento</th>
+          <th style="text-align: center;">Cant.</th>
+          <th style="text-align: right;">P. Unit.</th>
+          <th style="text-align: right;">Base Imp.</th>
+          <th style="text-align: center;">% IVA</th>
+          <th style="text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table class="totals-table">
+        <tr>
+          <td style="color: #6b7280;">Base Imponible:</td>
+          <td style="text-align: right; font-weight: bold;">${inv.taxBase.toFixed(2)} €</td>
+        </tr>
+        <tr>
+          <td style="color: #6b7280;">IVA (21%):</td>
+          <td style="text-align: right; font-weight: bold;">${inv.vatAmount.toFixed(2)} €</td>
+        </tr>
+        <tr class="totals-total">
+          <td>TOTAL FACTURA:</td>
+          <td style="text-align: right;">${inv.totalAmount.toFixed(2)} €</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      <div>
+        <div style="font-weight: bold; color: #374151;">Factura expedida bajo la Ley 11/2021 de Medidas de Prevención y Lucha contra el Fraude Fiscal.</div>
+        <div style="font-family: monospace; font-size: 9px; color: #9ca3af; margin-top: 2px;">Hash SHA-256: ${inv.recordHash}</div>
+      </div>
+      <div style="text-align: right;">
+        <span style="display: inline-block; background: #ecfdf5; color: #065f46; font-weight: bold; padding: 4px 8px; border-radius: 6px; font-size: 9px; border: 1px solid #a7f3d0;">Cotejo Sede Electrónica AEAT</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (window.location.search.includes('autoprint=true') || window.location.search.includes('download=pdf')) {
+      setTimeout(() => { window.print(); }, 400);
+    }
+  </script>
+</body>
+</html>`;
+
+  res.send(html);
 });
 
 // 10. PRODUCTOS / TIENDA ESCAPARATE

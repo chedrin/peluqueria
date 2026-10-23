@@ -1518,7 +1518,15 @@
             </button>
           </div>
 
-          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <!-- Botón Cita Express / Sin Cita Previa (Walk-in) -->
+            <button type="button" onclick="openAdminQuickBookingModal()" id="btn-admin-walkin-booking" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-200 transition cursor-pointer">
+              <i data-lucide="user-plus" class="w-4 h-4 text-emerald-200"></i>
+              <span>+ Cita Express / Sin Cita (Walk-in)</span>
+            </button>
+
+            <span class="text-stone-300 font-bold hidden sm:inline">|</span>
+
             <span class="text-stone-400 font-bold uppercase text-[10px] tracking-wider mr-1">Filtrar:</span>
             <button type="button" onclick="setAgendaFilter('all')" id="btn-filter-agenda-all" class="px-3 py-1.5 rounded-xl font-bold bg-stone-900 text-white shadow-xs transition cursor-pointer">
               Todos los Tramos
@@ -1784,80 +1792,271 @@
           </div>
         </div>
 
-        <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div class="bg-white text-stone-900 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative font-mono-code text-xs border border-stone-200">
-            <button onclick="closeTicketModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700">
-              <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-
-            <div class="text-center border-b border-dashed border-stone-300 pb-3">
-              <h4 class="font-bold text-sm uppercase font-serif-luxury tracking-wide">Peluquería Losan S.L.</h4>
-              <p class="text-[11px] text-stone-500">NIF: B-87654321</p>
-              <p class="text-[11px] text-stone-500">Calle Gran Vía 42, 28013 Madrid</p>
-              <p class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
-                FACTURA SIMPLIFICADA (VERI*FACTU)
-              </p>
-            </div>
-
-            <div class="space-y-1 text-[11px]">
-              <div class="flex justify-between">
-                <span class="text-stone-500">Número:</span>
-                <span class="font-bold text-stone-900" id="ticket-num">FS2026-0002</span>
+        <!-- ========================================================================= -->
+        <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
+        <!-- ========================================================================= -->
+        <div id="ticket-modal" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5">
+          <div class="bg-white text-stone-900 rounded-3xl max-w-5xl w-full shadow-2xl relative border border-stone-200 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
+            
+            <!-- Barra Superior del Modal -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-stone-200 bg-stone-50/80 flex-shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 flex-shrink-0">
+                  <i data-lucide="receipt" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-stone-900 font-serif-luxury text-base sm:text-lg">Comprobante de Cobro & Facturación</h3>
+                    <span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Veri*Factu AEAT
+                    </span>
+                  </div>
+                  <p class="text-xs text-stone-500">Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021</p>
+                </div>
               </div>
-              <div class="flex justify-between">
-                <span class="text-stone-500">Fecha:</span>
-                <span id="ticket-date">23/10/2026 18:00</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-stone-500">Cliente:</span>
-                <span id="ticket-client">Laura Martínez</span>
-              </div>
-            </div>
 
-            <div class="border-t border-b border-dashed border-stone-300 py-2 space-y-1" id="ticket-items">
-              <!-- Items -->
-            </div>
+              <!-- Selector de Vista y Botón Cerrar -->
+              <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                <div class="flex items-center bg-stone-200/70 p-1 rounded-xl text-xs font-bold">
+                  <button type="button" onclick="switchInvoiceModalView('dual')" id="btn-view-dual" class="px-3 py-1.5 rounded-lg transition bg-white text-stone-900 shadow-xs cursor-pointer">
+                    🔀 Ambas Vistas
+                  </button>
+                  <button type="button" onclick="switchInvoiceModalView('pdf')" id="btn-view-pdf" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
+                    📄 Factura PDF (A4)
+                  </button>
+                  <button type="button" onclick="switchInvoiceModalView('ticket')" id="btn-view-ticket" class="px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer">
+                    🧾 Ticket Digital
+                  </button>
+                </div>
 
-            <!-- Resguardo Bancario de Pago con Tarjeta / Datáfono -->
-            <div id="ticket-card-slip" class="hidden p-3 bg-stone-50 rounded-xl border border-dashed border-stone-300 font-mono-code text-[10px] space-y-0.5">
-              <div class="text-center font-bold text-stone-800">*** COPIA OPERACIÓN CON TARJETA ***</div>
-              <div class="text-center text-[9px] text-stone-500">TERMINAL TPV BANCARIO ACREDITADO</div>
-              <div class="flex justify-between pt-1"><span>TARJETA:</span><span id="ticket-card-brand-mask" class="font-bold text-stone-900">VISA **** 4242</span></div>
-              <div class="flex justify-between"><span>AUTORIZACIÓN:</span><span id="ticket-card-auth" class="font-bold text-stone-900">AUTH-849201</span></div>
-              <div class="flex justify-between"><span>TERMINAL:</span><span id="ticket-card-terminal">TPV-LOSAN-01</span></div>
-              <div class="flex justify-between"><span>TITULAR:</span><span id="ticket-card-holder">CLIENTA</span></div>
-            </div>
-
-            <div class="space-y-1 text-right text-[11px]">
-              <div class="flex justify-between">
-                <span class="text-stone-500">Base Imponible:</span>
-                <span id="ticket-base">49.59 €</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-stone-500">IVA (21%):</span>
-                <span id="ticket-vat">10.41 €</span>
-              </div>
-              <div class="flex justify-between font-bold text-sm border-t border-stone-200 pt-1 text-stone-900">
-                <span>TOTAL:</span>
-                <span id="ticket-total">60.00 €</span>
+                <button onclick="closeTicketModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 flex items-center justify-center transition cursor-pointer">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
               </div>
             </div>
 
-            <div class="text-center pt-2 flex flex-col items-center">
-              <div class="p-2 bg-stone-50 border border-stone-200 rounded-xl mb-2">
-                <canvas id="ticket-qr-canvas" width="130" height="130"></canvas>
+            <!-- Cuerpo del Modal: Contenedor con Scroll -->
+            <div class="overflow-y-auto p-4 sm:p-6 bg-stone-100/60 flex-1">
+              <div id="invoice-modal-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- =========================================================== -->
+                <!-- COLUMNA IZQUIERDA (7 cols): FACTURA OFICIAL A4 (PDF)        -->
+                <!-- =========================================================== -->
+                <div id="panel-factura-pdf" class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-md space-y-6 text-stone-800">
+                  
+                  <!-- Cabecera de la Factura Oficial A4 -->
+                  <div class="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-stone-200 pb-5">
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-300 flex items-center justify-center text-white shadow-2xs">
+                          <i data-lucide="scissors" class="w-4 h-4"></i>
+                        </div>
+                        <h4 class="font-black text-lg text-stone-900 font-serif-luxury salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
+                      </div>
+                      <p class="text-xs text-stone-500 font-mono-code">N.I.F.: <strong class="text-stone-700">B-87654321</strong></p>
+                      <p class="text-xs text-stone-500">Calle Velázquez 42, 28001 Madrid (España)</p>
+                      <p class="text-xs text-stone-500">Tel: +34 912 345 678 | Email: facturacion@peluquerialosan.es</p>
+                      <p class="text-[10px] text-stone-400">Reg. Mercantil de Madrid, Tomo 34.567, Folio 89, Hoja M-621.450</p>
+                    </div>
+
+                    <div class="text-left sm:text-right bg-stone-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none w-full sm:w-auto border sm:border-0 border-stone-200 space-y-1">
+                      <div class="inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs">
+                        FACTURA OFICIAL VERI*FACTU
+                      </div>
+                      <div class="pt-1">
+                        <span class="text-[11px] text-stone-500 block">Número de Serie:</span>
+                        <span class="text-base font-black text-stone-900 font-mono-code" id="inv-a4-number">FS2026-0001</span>
+                      </div>
+                      <div>
+                        <span class="text-[11px] text-stone-500 block">Fecha de Expedición:</span>
+                        <span class="text-xs font-bold text-stone-800" id="inv-a4-date">23/10/2026 18:30</span>
+                      </div>
+                      <div>
+                        <span class="text-[11px] text-stone-500 block">Medio de Pago:</span>
+                        <span class="text-xs font-bold text-emerald-700 uppercase" id="inv-a4-payment">TARJETA</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Datos del Cliente / Destinatario -->
+                  <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">DATOS DEL DESTINATARIO:</span>
+                      <strong class="text-sm font-bold text-stone-900 block" id="inv-a4-client-name">Laura Martínez</strong>
+                      <span class="text-stone-500 font-mono-code text-[11px]">DNI/NIF: <span id="inv-a4-client-nif" class="font-bold text-stone-700">12345678Z</span></span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">RÉGIMEN FISCAL:</span>
+                      <span class="text-stone-600 block">Régimen General del IVA (21%)</span>
+                      <span class="text-[11px] text-emerald-700 font-medium">Factura verificada y encadenada en AEAT</span>
+                    </div>
+                  </div>
+
+                  <!-- Tabla de Conceptos Reglamentaria -->
+                  <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
+                    <table class="w-full text-left text-xs">
+                      <thead class="bg-stone-100/90 text-stone-700 font-bold border-b border-stone-200">
+                        <tr>
+                          <th class="p-3">Descripción / Servicio</th>
+                          <th class="p-3 text-center">Cant.</th>
+                          <th class="p-3 text-right">P. Unit.</th>
+                          <th class="p-3 text-right">Base Imp.</th>
+                          <th class="p-3 text-center">% IVA</th>
+                          <th class="p-3 text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="inv-a4-table-rows" class="divide-y divide-stone-100 font-mono-code text-xs">
+                        <!-- Generado dinámicamente -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Desglose de Bases e Impuestos -->
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50 p-4 rounded-xl border border-stone-200">
+                    <div class="text-xs text-stone-500 space-y-1">
+                      <p><strong>Base Imponible:</strong> <span id="inv-a4-base" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
+                      <p><strong>Cuota IVA (21%):</strong> <span id="inv-a4-vat" class="font-mono-code font-bold text-stone-900">0,00 €</span></p>
+                      <p class="text-[11px] text-stone-400">Exenta de retención IRPF al tratarse de consumidor final.</p>
+                    </div>
+                    <div class="text-right sm:border-l sm:border-stone-200 sm:pl-6 w-full sm:w-auto">
+                      <span class="text-xs uppercase font-extrabold text-stone-400 block tracking-wider">TOTAL FACTURA (IVA Incluido):</span>
+                      <span class="text-2xl font-black text-emerald-700 font-mono-code" id="inv-a4-total">0,00 €</span>
+                    </div>
+                  </div>
+
+                  <!-- Pie y Certificación Veri*Factu -->
+                  <div class="pt-2 border-t border-dashed border-stone-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-stone-500">
+                    <div class="space-y-1 text-center sm:text-left">
+                      <p class="font-bold text-stone-800">Factura expedida mediante software garante conforme a la Ley 11/2021 (Veri*Factu).</p>
+                      <p class="font-mono-code break-all text-[9px] text-stone-400" id="inv-a4-hash">Huella Hash SHA-256: ...</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <canvas id="inv-a4-qr-canvas" width="80" height="80" class="border border-stone-200 rounded-lg p-1 bg-white"></canvas>
+                      <span class="text-[9px] text-emerald-700 font-bold max-w-[90px] leading-tight">Cotejo Sede Electrónica AEAT</span>
+                    </div>
+                  </div>
+
+                  <!-- Botones de Acción para la Factura PDF -->
+                  <div class="pt-2 flex flex-wrap items-center gap-2 justify-end border-t border-stone-100">
+                    <button type="button" onclick="downloadInvoicePDF()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+                      <i data-lucide="download" class="w-4 h-4 text-emerald-300"></i>
+                      <span>Descargar Factura (PDF)</span>
+                    </button>
+                    <button type="button" onclick="printInvoiceA4()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+                      <i data-lucide="printer" class="w-4 h-4"></i>
+                      <span>Imprimir Factura A4</span>
+                    </button>
+                    <button type="button" onclick="sendInvoiceWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+                      <i data-lucide="send" class="w-4 h-4"></i>
+                      <span>Enviar WhatsApp</span>
+                    </button>
+                  </div>
+
+                </div>
+
+
+                <!-- =========================================================== -->
+                <!-- COLUMNA DERECHA (5 cols): TICKET DIGITAL TÉRMICO             -->
+                <!-- =========================================================== -->
+                <div id="panel-ticket-digital" class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-md space-y-4 font-mono-code text-xs">
+                  
+                  <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="receipt" class="w-4 h-4 text-emerald-600"></i>
+                      <h4 class="font-bold font-serif-luxury text-sm text-stone-900">Ticket Térmico Digital</h4>
+                    </div>
+                    <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-bold">80 mm</span>
+                  </div>
+
+                  <!-- Bloque Ticket Estilo Papel Térmico -->
+                  <div class="bg-amber-50/30 p-4 rounded-xl border border-dashed border-stone-300 space-y-3">
+                    <div class="text-center border-b border-dashed border-stone-300 pb-2.5">
+                      <h4 class="font-bold text-xs uppercase font-serif-luxury tracking-wide salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
+                      <p class="text-[10px] text-stone-500">NIF: B-87654321</p>
+                      <p class="text-[10px] text-stone-500">Calle Velázquez 42, 28001 Madrid</p>
+                      <p class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
+                        FACTURA SIMPLIFICADA (VERI*FACTU)
+                      </p>
+                    </div>
+
+                    <div class="space-y-1 text-[11px]">
+                      <div class="flex justify-between">
+                        <span class="text-stone-500">Número:</span>
+                        <span class="font-bold text-stone-900" id="ticket-num">FS2026-0002</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-stone-500">Fecha:</span>
+                        <span id="ticket-date">23/10/2026 18:00</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-stone-500">Cliente:</span>
+                        <span id="ticket-client" class="font-bold">Laura Martínez</span>
+                      </div>
+                    </div>
+
+                    <div class="border-t border-b border-dashed border-stone-300 py-2 space-y-1" id="ticket-items">
+                      <!-- Items -->
+                    </div>
+
+                    <!-- Resguardo Bancario de Pago con Tarjeta / Datáfono -->
+                    <div id="ticket-card-slip" class="hidden p-2.5 bg-white rounded-lg border border-dashed border-stone-300 font-mono-code text-[10px] space-y-0.5">
+                      <div class="text-center font-bold text-stone-800">*** COPIA OPERACIÓN CON TARJETA ***</div>
+                      <div class="text-center text-[9px] text-stone-500">TERMINAL TPV BANCARIO ACREDITADO</div>
+                      <div class="flex justify-between pt-1"><span>TARJETA:</span><span id="ticket-card-brand-mask" class="font-bold text-stone-900">VISA **** 4242</span></div>
+                      <div class="flex justify-between"><span>AUTORIZACIÓN:</span><span id="ticket-card-auth" class="font-bold text-stone-900">AUTH-849201</span></div>
+                      <div class="flex justify-between"><span>TERMINAL:</span><span id="ticket-card-terminal">TPV-LOSAN-01</span></div>
+                      <div class="flex justify-between"><span>TITULAR:</span><span id="ticket-card-holder">CLIENTA</span></div>
+                    </div>
+
+                    <div class="space-y-1 text-right text-[11px]">
+                      <div class="flex justify-between">
+                        <span class="text-stone-500">Base Imponible:</span>
+                        <span id="ticket-base">49.59 €</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-stone-500">IVA (21%):</span>
+                        <span id="ticket-vat">10.41 €</span>
+                      </div>
+                      <div class="flex justify-between font-bold text-sm border-t border-stone-200 pt-1 text-stone-900">
+                        <span>TOTAL:</span>
+                        <span id="ticket-total" class="text-emerald-700">60.00 €</span>
+                      </div>
+                    </div>
+
+                    <div class="text-center pt-1 flex flex-col items-center">
+                      <div class="p-2 bg-white border border-stone-200 rounded-xl mb-1.5 shadow-2xs">
+                        <canvas id="ticket-qr-canvas" width="110" height="110"></canvas>
+                      </div>
+                      <p class="text-[8px] text-stone-400 break-all font-mono-code" id="ticket-hash-snippet">
+                        SHA: a591a6d40b490f...
+                      </p>
+                      <span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1 border border-emerald-200">
+                        Cotejo en Sede Electrónica AEAT
+                      </span>
+                    </div>
+                  </div>
+
+                  <button type="button" onclick="printThermalTicket()" class="w-full bg-stone-900 hover:bg-stone-800 active:scale-95 text-white font-sans font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span>Imprimir Ticket Térmico</span>
+                  </button>
+
+                </div>
+
               </div>
-              <p class="text-[9px] text-stone-400 break-all font-mono-code" id="ticket-hash-snippet">
-                SHA: a591a6d40b490f...
-              </p>
-              <span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded mt-1 border border-emerald-200">
-                Cotejo en Sede Electrónica AEAT
+            </div>
+
+            <!-- Barra Inferior de Estado -->
+            <div class="p-3 sm:px-6 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-500 flex-shrink-0">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.
               </span>
+              <button onclick="closeTicketModal()" class="px-5 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold transition cursor-pointer">
+                Cerrar
+              </button>
             </div>
 
-            <button onclick="window.print()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-sans font-semibold py-2.5 rounded-xl text-xs transition">
-              Imprimir Ticket Térmico
-            </button>
           </div>
         </div>
       </div>
@@ -5118,6 +5317,153 @@
 
 
   <!-- ========================================================================= -->
+  <!-- MODAL: RESERVA MANUAL EN SALÓN (SIN CITA PREVIA / WALK-IN)               -->
+  <!-- ========================================================================= -->
+  <div id="modal-admin-quick-booking" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3.5 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Reserva Manual en Salón (Sin Cita / Walk-in)</h3>
+              <span class="text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Presencial
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Asigna inmediatamente un hueco de la agenda para un cliente que llega a la peluquería.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminQuickBookingModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenido del Formulario Escroleable -->
+      <form id="form-admin-quick-booking" onsubmit="event.preventDefault(); submitAdminQuickBooking();" class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-700">
+        
+        <!-- Fila 1: Fecha, Estilista y Hora de Inicio -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Fecha de la Cita *</label>
+            <input type="date" id="aqb-date" required class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-bold font-mono-code text-stone-900 focus:outline-none focus:border-emerald-500 shadow-2xs">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Profesional / Estilista *</label>
+            <select id="aqb-staff" required onchange="onAdminQuickBookingStaffChange()" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-emerald-500 shadow-2xs">
+              <!-- Render dinámico con estilistas activas -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-800 mb-1">Hora de Inicio *</label>
+            <select id="aqb-time" required onchange="recalcAqbSummary()" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-bold font-mono-code text-stone-900 focus:outline-none focus:border-emerald-500 shadow-2xs">
+              <!-- Render con franjas MASTER_AGENDA_SLOTS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 2: Selección / Registro del Cliente -->
+        <div class="space-y-2.5 bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-stone-800 text-xs flex items-center gap-1.5">
+              <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i> Datos del Cliente en Salón
+            </label>
+            <div class="flex items-center gap-2 text-[11px]">
+              <label class="inline-flex items-center gap-1 cursor-pointer">
+                <input type="radio" name="aqb-client-mode" value="registered" checked onchange="toggleAqbClientMode()" class="text-emerald-600 focus:ring-emerald-500 accent-emerald-600">
+                <span class="font-medium text-stone-700">Clienta Registrada</span>
+              </label>
+              <label class="inline-flex items-center gap-1 cursor-pointer">
+                <input type="radio" name="aqb-client-mode" value="walkin" onchange="toggleAqbClientMode()" class="text-emerald-600 focus:ring-emerald-500 accent-emerald-600">
+                <span class="font-medium text-stone-700">Cliente Nuevo / Walk-in</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Selector de Clienta Registrada -->
+          <div id="aqb-registered-client-box">
+            <select id="aqb-client-select" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-medium text-stone-900 focus:outline-none focus:border-emerald-500 shadow-2xs">
+              <option value="">-- Seleccionar Clienta Registrada en Base de Datos --</option>
+            </select>
+          </div>
+
+          <!-- Formulario Rápido para Cliente Nuevo / Sin Ficha -->
+          <div id="aqb-new-client-box" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            <div>
+              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Nombre y Apellidos *</label>
+              <input type="text" id="aqb-client-name" placeholder="Ej: Patricia Soler" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">DNI / NIE (Opcional)</label>
+              <input type="text" id="aqb-client-dni" placeholder="Ej: 53987123T" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-mono-code uppercase text-stone-900 focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-stone-600 mb-0.5">Teléfono Móvil (WhatsApp)</label>
+              <input type="tel" id="aqb-client-phone" placeholder="Ej: 612345678" class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-mono-code text-stone-900 focus:outline-none focus:border-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Fila 3: Selección de Servicios / Tratamientos -->
+        <div class="space-y-2 bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-stone-800 text-xs flex items-center gap-1.5">
+              <i data-lucide="scissors" class="w-4 h-4 text-emerald-600"></i> Selecciona los Servicios a Realizar *
+            </label>
+            <span class="text-[10px] text-stone-500">Puedes marcar varios servicios</span>
+          </div>
+
+          <!-- Contenedor dinámico de servicios del catálogo -->
+          <div id="aqb-services-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+            <!-- Se puebla dinámicamente con state.services -->
+          </div>
+        </div>
+
+        <!-- Fila 4: Observaciones / Notas de Entrada -->
+        <div>
+          <label class="block font-bold text-stone-800 mb-1">Notas / Observaciones del Cliente</label>
+          <input type="text" id="aqb-comments" placeholder="Ej: Cliente recibido en mostrador, tiene prisa, pelo rizado..." class="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-emerald-500 shadow-2xs">
+        </div>
+
+        <!-- Resumen de Horas y Precio Total -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-extrabold text-emerald-800 tracking-wider block">Horario Calculado de la Cita:</span>
+              <span id="aqb-summary-time" class="text-sm font-black text-stone-900 font-mono-code">--:-- a --:-- (0 min)</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-stone-500 font-medium">Total Estimado:</span>
+            <span id="aqb-summary-price" class="text-base font-black text-emerald-700 font-mono-code bg-white px-3 py-1 rounded-xl border border-emerald-300 shadow-2xs">
+              0,00 €
+            </span>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Pie del Modal con Acciones -->
+      <div class="border-t border-stone-100 pt-3.5 flex items-center justify-between flex-shrink-0">
+        <button type="button" onclick="closeAdminQuickBookingModal()" class="px-4 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 transition cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" onclick="submitAdminQuickBooking()" id="btn-submit-aqb" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-emerald-500/20 transition cursor-pointer">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Asignar Cita Inmediata</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
   <!-- MODAL: AVISO LEGAL (LSSI-CE LEY 34/2002)                                  -->
   <!-- ========================================================================= -->
   <div id="modal-legal-notice" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -7626,13 +7972,13 @@
                     <strong class="text-xs font-black text-emerald-900 tracking-wide">HORA LIBRE DISPONIBLE</strong>
                   </div>
                   <span class="text-[10px] text-emerald-700 block font-medium dropzone-hint">
-                    ${isMoveTarget ? '👉 Haz clic para soltar la cita aquí' : 'Hueco libre · Arrastra una cita aquí'}
+                    ${isMoveTarget ? '👉 Haz clic para soltar la cita aquí' : '✨ Clic para reservar cita manual / Sin cita previa (Walk-in)'}
                   </span>
                 </div>
               </div>
 
-              <span class="text-[10px] bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg shadow-2xs group-hover:bg-emerald-700 transition flex items-center gap-1 flex-shrink-0">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Libre
+              <span class="text-[10px] bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg shadow-2xs group-hover:bg-emerald-700 group-hover:scale-105 transition flex items-center gap-1 flex-shrink-0">
+                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> + Reservar
               </span>
             </div>
           `;
@@ -7754,12 +8100,17 @@
     }
 
     async function handleFreeSlotClick(targetStaffId, slotTime) {
-      if (!state.selectedAppointmentToMove) {
-        return; // No hay cita seleccionada para mover por clic
+      if (state.selectedAppointmentToMove) {
+        const aptId = state.selectedAppointmentToMove;
+        state.selectedAppointmentToMove = null;
+        await executeRescheduleAppointment(aptId, targetStaffId, slotTime);
+        return;
       }
-      const aptId = state.selectedAppointmentToMove;
-      state.selectedAppointmentToMove = null;
-      await executeRescheduleAppointment(aptId, targetStaffId, slotTime);
+      openAdminQuickBookingModal({
+        staffId: targetStaffId,
+        time: slotTime,
+        date: state.masterAgendaDate || '2026-10-23'
+      });
     }
 
     async function executeRescheduleAppointment(aptId, targetStaffId, slotTime) {
@@ -8059,21 +8410,93 @@
     }
 
     function showTicketModal(inv, transaction) {
-      document.getElementById('ticket-num').innerText = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
-      document.getElementById('ticket-date').innerText = new Date(inv.issueDate).toLocaleString('es-ES');
-      document.getElementById('ticket-client').innerText = inv.clientName || 'Consumidor Final';
-      document.getElementById('ticket-base').innerText = inv.taxBase.toFixed(2) + ' €';
-      document.getElementById('ticket-vat').innerText = inv.vatAmount.toFixed(2) + ' €';
-      document.getElementById('ticket-total').innerText = inv.totalAmount.toFixed(2) + ' €';
-      document.getElementById('ticket-hash-snippet').innerText = 'HASH SHA-256: ' + inv.recordHash;
+      if (!inv) return;
+      state.lastInvoice = inv;
+      state.lastTransaction = transaction;
+
+      const formattedNumber = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
+      const formattedDate = new Date(inv.issueDate).toLocaleString('es-ES');
+      const clientName = inv.clientName || 'Consumidor Final';
+      const clientNif = inv.clientNif || 'N/A';
+      const paymentMethodStr = (inv.paymentMethod || 'card').toUpperCase();
+
+      // =======================================================================
+      // 1. POBLAR FACTURA OFICIAL A4 (PDF)
+      // =======================================================================
+      const elA4Num = document.getElementById('inv-a4-number');
+      const elA4Date = document.getElementById('inv-a4-date');
+      const elA4Payment = document.getElementById('inv-a4-payment');
+      const elA4Client = document.getElementById('inv-a4-client-name');
+      const elA4Nif = document.getElementById('inv-a4-client-nif');
+      const elA4Base = document.getElementById('inv-a4-base');
+      const elA4Vat = document.getElementById('inv-a4-vat');
+      const elA4Total = document.getElementById('inv-a4-total');
+      const elA4Hash = document.getElementById('inv-a4-hash');
+      const elA4Rows = document.getElementById('inv-a4-table-rows');
+
+      if (elA4Num) elA4Num.innerText = formattedNumber;
+      if (elA4Date) elA4Date.innerText = formattedDate;
+      if (elA4Payment) elA4Payment.innerText = paymentMethodStr;
+      if (elA4Client) elA4Client.innerText = clientName;
+      if (elA4Nif) elA4Nif.innerText = clientNif;
+      if (elA4Base) elA4Base.innerText = inv.taxBase.toFixed(2) + ' €';
+      if (elA4Vat) elA4Vat.innerText = inv.vatAmount.toFixed(2) + ' €';
+      if (elA4Total) elA4Total.innerText = inv.totalAmount.toFixed(2) + ' €';
+      if (elA4Hash) elA4Hash.innerText = 'Huella Hash SHA-256: ' + inv.recordHash;
+
+      if (elA4Rows && inv.items) {
+        elA4Rows.innerHTML = inv.items.map(it => {
+          const base = it.taxBase !== undefined ? it.taxBase : (it.totalAmount / 1.21);
+          return `
+            <tr class="hover:bg-stone-50 transition">
+              <td class="p-3 font-sans font-semibold text-stone-900">${it.concept}</td>
+              <td class="p-3 text-center">${it.quantity}</td>
+              <td class="p-3 text-right">${it.unitPrice.toFixed(2)} €</td>
+              <td class="p-3 text-right">${base.toFixed(2)} €</td>
+              <td class="p-3 text-center">21%</td>
+              <td class="p-3 text-right font-bold text-stone-900">${it.totalAmount.toFixed(2)} €</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const qrCanvasA4 = document.getElementById('inv-a4-qr-canvas');
+      if (qrCanvasA4 && window.QRious) {
+        new QRious({
+          element: qrCanvasA4,
+          value: inv.qrUrl,
+          size: 80
+        });
+      }
+
+      // =======================================================================
+      // 2. POBLAR TICKET DIGITAL TÉRMICO
+      // =======================================================================
+      const elTicketNum = document.getElementById('ticket-num');
+      const elTicketDate = document.getElementById('ticket-date');
+      const elTicketClient = document.getElementById('ticket-client');
+      const elTicketBase = document.getElementById('ticket-base');
+      const elTicketVat = document.getElementById('ticket-vat');
+      const elTicketTotal = document.getElementById('ticket-total');
+      const elTicketHash = document.getElementById('ticket-hash-snippet');
+
+      if (elTicketNum) elTicketNum.innerText = formattedNumber;
+      if (elTicketDate) elTicketDate.innerText = formattedDate;
+      if (elTicketClient) elTicketClient.innerText = clientName;
+      if (elTicketBase) elTicketBase.innerText = inv.taxBase.toFixed(2) + ' €';
+      if (elTicketVat) elTicketVat.innerText = inv.vatAmount.toFixed(2) + ' €';
+      if (elTicketTotal) elTicketTotal.innerText = inv.totalAmount.toFixed(2) + ' €';
+      if (elTicketHash) elTicketHash.innerText = 'HASH SHA-256: ' + inv.recordHash;
 
       const itemsContainer = document.getElementById('ticket-items');
-      itemsContainer.innerHTML = inv.items.map(i => `
-        <div class="flex justify-between">
-          <span>${i.quantity}x ${i.concept}</span>
-          <span>${i.totalAmount.toFixed(2)} €</span>
-        </div>
-      `).join('');
+      if (itemsContainer && inv.items) {
+        itemsContainer.innerHTML = inv.items.map(i => `
+          <div class="flex justify-between">
+            <span>${i.quantity}x ${i.concept}</span>
+            <span class="font-bold">${i.totalAmount.toFixed(2)} €</span>
+          </div>
+        `).join('');
+      }
 
       // Desglose de tarjeta si aplica
       const cardSlip = document.getElementById('ticket-card-slip');
@@ -8084,7 +8507,7 @@
             cardMask: '**** **** **** 4242',
             authCode: 'AUTH-849201',
             terminalId: 'TPV-LOSAN-01',
-            cardHolder: inv.clientName || 'CLIENTA'
+            cardHolder: clientName
           };
           const brandEl = document.getElementById('ticket-card-brand-mask');
           const authEl = document.getElementById('ticket-card-auth');
@@ -8094,25 +8517,115 @@
           if (brandEl) brandEl.innerText = `${t.cardBrand || 'VISA'} ${t.cardMask || '**** 4242'}`;
           if (authEl) authEl.innerText = t.authCode || 'AUTH-849201';
           if (termEl) termEl.innerText = t.terminalId || 'TPV-LOSAN-01';
-          if (holdEl) holdEl.innerText = (t.cardHolder || inv.clientName || 'CLIENTA').toUpperCase();
+          if (holdEl) holdEl.innerText = (t.cardHolder || clientName).toUpperCase();
           cardSlip.classList.remove('hidden');
         } else {
           cardSlip.classList.add('hidden');
         }
       }
 
-      new QRious({
-        element: document.getElementById('ticket-qr-canvas'),
-        value: inv.qrUrl,
-        size: 130
-      });
+      const qrCanvasTicket = document.getElementById('ticket-qr-canvas');
+      if (qrCanvasTicket && window.QRious) {
+        new QRious({
+          element: qrCanvasTicket,
+          value: inv.qrUrl,
+          size: 110
+        });
+      }
+
+      // Mostrar vista dual por defecto
+      switchInvoiceModalView('dual');
 
       document.getElementById('ticket-modal').classList.remove('hidden');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function closeTicketModal() {
-      document.getElementById('ticket-modal').classList.add('hidden');
+      const modal = document.getElementById('ticket-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchInvoiceModalView(viewMode) {
+      const panelPdf = document.getElementById('panel-factura-pdf');
+      const panelTicket = document.getElementById('panel-ticket-digital');
+      const btnDual = document.getElementById('btn-view-dual');
+      const btnPdf = document.getElementById('btn-view-pdf');
+      const btnTicket = document.getElementById('btn-view-ticket');
+
+      const setBtnActive = (activeBtn, isAct) => {
+        if (!activeBtn) return;
+        if (isAct) {
+          activeBtn.className = 'px-3 py-1.5 rounded-lg transition bg-white text-stone-900 shadow-xs cursor-pointer';
+        } else {
+          activeBtn.className = 'px-3 py-1.5 rounded-lg transition text-stone-600 hover:text-stone-900 cursor-pointer';
+        }
+      };
+
+      if (viewMode === 'dual') {
+        if (panelPdf) {
+          panelPdf.classList.remove('hidden');
+          panelPdf.className = 'lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-md space-y-6 text-stone-800';
+        }
+        if (panelTicket) {
+          panelTicket.classList.remove('hidden');
+          panelTicket.className = 'lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-md space-y-4 font-mono-code text-xs';
+        }
+        setBtnActive(btnDual, true);
+        setBtnActive(btnPdf, false);
+        setBtnActive(btnTicket, false);
+      } else if (viewMode === 'pdf') {
+        if (panelPdf) {
+          panelPdf.classList.remove('hidden');
+          panelPdf.className = 'lg:col-span-12 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-md space-y-6 text-stone-800 max-w-4xl mx-auto w-full';
+        }
+        if (panelTicket) panelTicket.classList.add('hidden');
+        setBtnActive(btnDual, false);
+        setBtnActive(btnPdf, true);
+        setBtnActive(btnTicket, false);
+      } else if (viewMode === 'ticket') {
+        if (panelPdf) panelPdf.classList.add('hidden');
+        if (panelTicket) {
+          panelTicket.classList.remove('hidden');
+          panelTicket.className = 'lg:col-span-12 bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-md space-y-4 font-mono-code text-xs max-w-md mx-auto w-full';
+        }
+        setBtnActive(btnDual, false);
+        setBtnActive(btnPdf, false);
+        setBtnActive(btnTicket, true);
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function downloadInvoicePDF() {
+      const inv = state.lastInvoice;
+      if (!inv) {
+        alert('No hay ninguna factura activa para descargar.');
+        return;
+      }
+      const url = `/api/invoices/${inv.id}/print?download=pdf`;
+      window.open(url, '_blank');
+      showLegalToast('Abriendo vista de Factura Oficial A4. Pulsa Guardar como PDF en tu navegador.');
+    }
+
+    function printInvoiceA4() {
+      const inv = state.lastInvoice;
+      if (!inv) {
+        alert('No hay ninguna factura activa.');
+        return;
+      }
+      const url = `/api/invoices/${inv.id}/print?autoprint=true`;
+      window.open(url, '_blank');
+    }
+
+    function printThermalTicket() {
+      window.print();
+    }
+
+    function sendInvoiceWhatsApp() {
+      const inv = state.lastInvoice;
+      if (!inv) return;
+      const num = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
+      const text = encodeURIComponent(`Hola ${inv.clientName || ''}, aquí tienes tu factura oficial ${num} de Peluquería Losan por importe de ${inv.totalAmount.toFixed(2)} €. ¡Muchas gracias por tu visita!`);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
     }
 
     // ========================================================================
@@ -13959,6 +14472,229 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     function closePrivacyModal() {
       const modal = document.getElementById('modal-privacy-policy');
       if (modal) modal.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // RESERVA MANUAL EN SALÓN (SIN CITA PREVIA / WALK-IN)
+    // =========================================================================
+
+    function openAdminQuickBookingModal(prefillData) {
+      const modal = document.getElementById('modal-admin-quick-booking');
+      if (!modal) return;
+
+      const activeDate = prefillData?.date || state.masterAgendaDate || '2026-10-23';
+      const dateInput = document.getElementById('aqb-date');
+      if (dateInput) dateInput.value = activeDate;
+
+      // 1. Estilistas activas
+      const staffSelect = document.getElementById('aqb-staff');
+      if (staffSelect) {
+        const activeStaffList = (state.staff || []).filter(s => s.isActive !== false);
+        staffSelect.innerHTML = activeStaffList.map(s => 
+          `<option value="${s.id}">${s.name} (${s.specialty || 'Estilista'})</option>`
+        ).join('');
+        if (prefillData?.staffId) staffSelect.value = prefillData.staffId;
+      }
+
+      // 2. Horas MASTER_AGENDA_SLOTS
+      const timeSelect = document.getElementById('aqb-time');
+      if (timeSelect) {
+        timeSelect.innerHTML = MASTER_AGENDA_SLOTS.map(t => `<option value="${t}">${t}</option>`).join('');
+        if (prefillData?.time) timeSelect.value = prefillData.time;
+      }
+
+      // 3. Clientas registradas
+      const clientSelect = document.getElementById('aqb-client-select');
+      if (clientSelect) {
+        const sortedClients = [...(state.clients || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        clientSelect.innerHTML = '<option value="">-- Seleccionar Clienta Registrada --</option>' +
+          sortedClients.map(c => `<option value="${c.id}">${c.name} (DNI: ${c.dni || 'Sin DNI'})</option>`).join('');
+      }
+
+      // 4. Servicios disponibles
+      const servicesContainer = document.getElementById('aqb-services-list');
+      if (servicesContainer) {
+        servicesContainer.innerHTML = (state.services || []).map((srv, idx) => `
+          <label class="flex items-center justify-between p-2 rounded-xl bg-white border border-stone-200 hover:border-emerald-400 cursor-pointer transition text-xs shadow-2xs group">
+            <div class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" name="aqb-service-checkbox" value="${srv.id}" data-duration="${srv.durationMinutes}" data-price="${srv.price}" ${idx === 0 ? 'checked' : ''} onchange="recalcAqbSummary()" class="rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600">
+              <span class="font-bold text-stone-900 group-hover:text-emerald-800 truncate">${srv.name}</span>
+            </div>
+            <div class="text-right flex-shrink-0 font-mono-code text-[11px]">
+              <span class="text-stone-400">(${srv.durationMinutes}m)</span>
+              <span class="font-bold text-stone-900 ml-1">${srv.price.toFixed(2)} €</span>
+            </div>
+          </label>
+        `).join('');
+      }
+
+      // 5. Limpiar campos de cliente walk-in
+      const nameInput = document.getElementById('aqb-client-name');
+      const dniInput = document.getElementById('aqb-client-dni');
+      const phoneInput = document.getElementById('aqb-client-phone');
+      const commentsInput = document.getElementById('aqb-comments');
+      if (nameInput) nameInput.value = '';
+      if (dniInput) dniInput.value = '';
+      if (phoneInput) phoneInput.value = '';
+      if (commentsInput) commentsInput.value = 'Cliente recibido en mostrador (Sin cita previa)';
+
+      // Restablecer modo
+      const registeredRadio = document.querySelector('input[name="aqb-client-mode"][value="registered"]');
+      if (registeredRadio) registeredRadio.checked = true;
+      toggleAqbClientMode();
+
+      recalcAqbSummary();
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeAdminQuickBookingModal() {
+      const modal = document.getElementById('modal-admin-quick-booking');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleAqbClientMode() {
+      const mode = document.querySelector('input[name="aqb-client-mode"]:checked')?.value || 'registered';
+      const regBox = document.getElementById('aqb-registered-client-box');
+      const newBox = document.getElementById('aqb-new-client-box');
+      if (mode === 'registered') {
+        if (regBox) regBox.classList.remove('hidden');
+        if (newBox) newBox.classList.add('hidden');
+      } else {
+        if (regBox) regBox.classList.add('hidden');
+        if (newBox) newBox.classList.remove('hidden');
+      }
+    }
+
+    function onAdminQuickBookingStaffChange() {
+      recalcAqbSummary();
+    }
+
+    function recalcAqbSummary() {
+      const checkedBoxes = document.querySelectorAll('input[name="aqb-service-checkbox"]:checked');
+      let totalMinutes = 0;
+      let totalPrice = 0;
+
+      checkedBoxes.forEach(cb => {
+        totalMinutes += Number(cb.dataset.duration || 30);
+        totalPrice += Number(cb.dataset.price || 0);
+      });
+
+      const startTimeStr = document.getElementById('aqb-time')?.value || '10:00';
+      const [sh, sm] = startTimeStr.split(':').map(Number);
+      const startMinTotal = sh * 60 + sm;
+      const endMinTotal = startMinTotal + Math.max(15, totalMinutes);
+
+      const endH = Math.floor(endMinTotal / 60);
+      const endM = endMinTotal % 60;
+      const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+      const summaryTime = document.getElementById('aqb-summary-time');
+      const summaryPrice = document.getElementById('aqb-summary-price');
+
+      if (summaryTime) {
+        summaryTime.innerText = `${startTimeStr} a ${endTimeStr} (${totalMinutes} min)`;
+      }
+      if (summaryPrice) {
+        summaryPrice.innerText = totalPrice.toFixed(2) + ' €';
+      }
+    }
+
+    async function submitAdminQuickBooking() {
+      const submitBtn = document.getElementById('btn-submit-aqb');
+      const date = document.getElementById('aqb-date')?.value;
+      const staffId = document.getElementById('aqb-staff')?.value;
+      const time = document.getElementById('aqb-time')?.value;
+
+      if (!date || !staffId || !time) {
+        alert('Por favor selecciona fecha, profesional y hora de inicio.');
+        return;
+      }
+
+      const checkedBoxes = Array.from(document.querySelectorAll('input[name="aqb-service-checkbox"]:checked'));
+      if (!checkedBoxes.length) {
+        alert('Debes seleccionar al menos un servicio para la cita.');
+        return;
+      }
+      const serviceIds = checkedBoxes.map(cb => cb.value);
+
+      const mode = document.querySelector('input[name="aqb-client-mode"]:checked')?.value || 'registered';
+      let clientId = null;
+      let clientName = null;
+      let clientDni = null;
+      let clientPhone = null;
+
+      if (mode === 'registered') {
+        const clientSelect = document.getElementById('aqb-client-select');
+        clientId = clientSelect?.value;
+        if (!clientId) {
+          alert('Por favor selecciona una clienta registrada de la lista, o cambia a la opción "Cliente Nuevo / Walk-in".');
+          return;
+        }
+        const clientObj = (state.clients || []).find(c => c.id === clientId);
+        clientName = clientObj ? clientObj.name : 'Clienta Salón';
+        clientDni = clientObj ? clientObj.dni : '';
+      } else {
+        clientName = document.getElementById('aqb-client-name')?.value?.trim();
+        clientDni = document.getElementById('aqb-client-dni')?.value?.trim();
+        clientPhone = document.getElementById('aqb-client-phone')?.value?.trim();
+
+        if (!clientName) {
+          alert('Por favor introduce el nombre del cliente que ha llegado al salón.');
+          return;
+        }
+      }
+
+      const clientComments = document.getElementById('aqb-comments')?.value?.trim() || 'Cliente en salón (Sin cita previa)';
+      const startISO = new Date(`${date}T${time}:00`).toISOString();
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Asignando...';
+          if (window.lucide) lucide.createIcons();
+        }
+
+        const res = await fetch('/api/appointments/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId,
+            clientName,
+            clientDni,
+            clientPhone,
+            staffId,
+            serviceIds,
+            startTime: startISO,
+            clientComments,
+            isWalkIn: true
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          closeAdminQuickBookingModal();
+          showLegalToast(`✅ Cita confirmada en salón: ${data.clientName} con ${data.staffName} a las ${time}`);
+          if (typeof confetti === 'function') {
+            confetti({ particleCount: 60, spread: 70, origin: { y: 0.5 } });
+          }
+          await fetchInitialData();
+          renderMasterAgenda();
+          renderWorkerAgenda();
+          pollAdminNotifications();
+        } else {
+          alert('No se pudo reservar la hora: ' + (data.error || 'Conflicto de horario.'));
+        }
+      } catch (err) {
+        alert('Error de conexión al guardar la cita.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Asignar Cita Inmediata';
+          if (window.lucide) lucide.createIcons();
+        }
+      }
     }
 
 
