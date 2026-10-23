@@ -703,12 +703,35 @@ const db = {
       clientId: 'cli-1',
       clientDni: '12345678Z',
       clientName: 'Laura Martínez',
+      clientPhone: '34655555555',
+      clientEmail: 'laura.martinez@email.com',
       totalSessions: 5,
       usedSessions: 2,
       remainingSessions: 3,
+      regularPrice: 90.00,
+      packagePrice: 72.00,
+      discountPercent: 20,
+      discountAmount: 18.00,
       purchaseDate: '2026-09-10',
       expiresAt: '2027-03-10',
-      status: 'active'
+      status: 'active',
+      notes: 'Incluye lavado dermo-protector y brushing profesional',
+      redemptionHistory: [
+        {
+          sessionNumber: 1,
+          date: '2026-09-18',
+          time: '11:45',
+          staffName: 'Raquel Santos',
+          notes: 'Peinado con ondas suaves y sérum argán'
+        },
+        {
+          sessionNumber: 2,
+          date: '2026-10-04',
+          time: '17:15',
+          staffName: 'Elena Gómez',
+          notes: 'Brushing alisado espejo'
+        }
+      ]
     },
     {
       id: 'cpkg-2',
@@ -717,12 +740,65 @@ const db = {
       clientId: 'cli-7',
       clientDni: '98732165S',
       clientName: 'Clara Sanz',
+      clientPhone: '34622334455',
+      clientEmail: 'clara.sanz@email.com',
       totalSessions: 4,
       usedSessions: 1,
       remainingSessions: 3,
+      regularPrice: 140.00,
+      packagePrice: 110.00,
+      discountPercent: 21,
+      discountAmount: 30.00,
       purchaseDate: '2026-10-02',
       expiresAt: '2027-10-02',
-      status: 'active'
+      status: 'active',
+      notes: 'Tratamiento intensivo con campana ozonizada',
+      redemptionHistory: [
+        {
+          sessionNumber: 1,
+          date: '2026-10-03',
+          time: '16:00',
+          staffName: 'Carmen Vidal',
+          notes: '1ª Sesión Keratina intensiva + ozono'
+        }
+      ]
+    },
+    {
+      id: 'cpkg-3',
+      packageId: 'custom-pkg-cortes',
+      packageName: 'Bono 6 Cortes de Pelo & Estilismo',
+      clientId: 'cli-2',
+      clientDni: '87654321X',
+      clientName: 'Sofía Morales',
+      clientPhone: '34666666666',
+      clientEmail: 'sofia.morales@email.com',
+      totalSessions: 6,
+      usedSessions: 2,
+      remainingSessions: 4,
+      regularPrice: 132.00,
+      packagePrice: 99.00,
+      discountPercent: 25,
+      discountAmount: 33.00,
+      purchaseDate: '2026-09-20',
+      expiresAt: '2027-03-20',
+      status: 'active',
+      notes: 'Bono a medida: 6 cortes de diseño con 25% dto. especial fidelidad',
+      redemptionHistory: [
+        {
+          sessionNumber: 1,
+          date: '2026-09-25',
+          time: '11:00',
+          staffName: 'Elena Gómez',
+          notes: 'Corte capeado para dar volumen'
+        },
+        {
+          sessionNumber: 2,
+          date: '2026-10-15',
+          time: '16:30',
+          staffName: 'Raquel Santos',
+          notes: 'Repaso de puntas y texturizado'
+        }
+      ]
     }
   ],
 
@@ -2401,14 +2477,119 @@ app.get('/api/packages', (req, res) => {
   res.json(db.packages);
 });
 
+// Obtener todos los bonos asignados a clientas (para administración)
+app.get('/api/packages/client-packages', (req, res) => {
+  const enriched = db.clientPackages.map(cpkg => {
+    const client = db.clients.find(c => c.id === cpkg.clientId || c.dni === cpkg.clientDni) || {};
+    return {
+      ...cpkg,
+      clientPhone: cpkg.clientPhone || client.phone || '',
+      clientEmail: cpkg.clientEmail || client.email || (client.name ? client.name.toLowerCase().replace(/\s+/g, '.') + '@email.com' : '')
+    };
+  });
+  res.json(enriched);
+});
+
 app.get('/api/packages/client/:idOrDni', (req, res) => {
   const query = req.params.idOrDni.trim().toUpperCase().replace(/[\s-]/g, '');
   const activePackages = db.clientPackages.filter(p => 
     p.clientId === req.params.idOrDni || 
     (p.clientDni && p.clientDni.toUpperCase() === query)
-  );
+  ).map(cpkg => {
+    const client = db.clients.find(c => c.id === cpkg.clientId || c.dni === cpkg.clientDni) || {};
+    return {
+      ...cpkg,
+      clientPhone: cpkg.clientPhone || client.phone || '',
+      clientEmail: cpkg.clientEmail || client.email || (client.name ? client.name.toLowerCase().replace(/\s+/g, '.') + '@email.com' : '')
+    };
+  });
 
   res.json(activePackages);
+});
+
+// Asignar / configurar un bono a medida para una clienta (ej: Bono de 6 cortes con descuento)
+app.post('/api/packages/assign-custom', (req, res) => {
+  const { clientId, clientDni, packageName, serviceId, totalSessions, regularPrice, discountPercent, discountAmount, packagePrice, validDays, notes } = req.body;
+  
+  if (!packageName || !packageName.trim()) {
+    return res.status(400).json({ error: 'El nombre del bono es obligatorio (ej. Bono de 6 Cortes).' });
+  }
+
+  const numSessions = parseInt(totalSessions, 10);
+  if (!numSessions || numSessions <= 0) {
+    return res.status(400).json({ error: 'El número total de sesiones debe ser como mínimo 1.' });
+  }
+
+  let client = null;
+  if (clientId) {
+    client = db.clients.find(c => c.id === clientId);
+  }
+  if (!client && clientDni) {
+    const cleanDni = clientDni.trim().toUpperCase().replace(/[\s-]/g, '');
+    client = db.clients.find(c => c.dni && c.dni.toUpperCase() === cleanDni);
+  }
+  if (!client) {
+    return res.status(404).json({ error: 'Clienta no encontrada para asociar el bono.' });
+  }
+
+  const numRegularPrice = Number(regularPrice) || (numSessions * 22.00);
+  let numPackagePrice = Number(packagePrice);
+  let numDiscountPercent = Number(discountPercent) || 0;
+  let numDiscountAmount = Number(discountAmount) || 0;
+
+  if (isNaN(numPackagePrice) || numPackagePrice <= 0) {
+    if (numDiscountPercent > 0) {
+      numDiscountAmount = (numRegularPrice * numDiscountPercent) / 100;
+      numPackagePrice = numRegularPrice - numDiscountAmount;
+    } else if (numDiscountAmount > 0) {
+      numPackagePrice = numRegularPrice - numDiscountAmount;
+      numDiscountPercent = Math.round((numDiscountAmount / numRegularPrice) * 100);
+    } else {
+      numPackagePrice = numRegularPrice;
+    }
+  } else if (numRegularPrice > 0 && numPackagePrice < numRegularPrice) {
+    numDiscountAmount = +(numRegularPrice - numPackagePrice).toFixed(2);
+    numDiscountPercent = Math.round((numDiscountAmount / numRegularPrice) * 100);
+  }
+
+  const days = parseInt(validDays, 10) || 180;
+  const expiresDate = new Date();
+  expiresDate.setDate(expiresDate.getDate() + days);
+
+  const newClientPkg = {
+    id: 'cpkg-' + Date.now(),
+    packageId: 'custom-pkg-' + Date.now(),
+    packageName: packageName.trim(),
+    serviceId: serviceId || null,
+    clientId: client.id,
+    clientDni: client.dni || '',
+    clientName: client.name,
+    clientPhone: client.phone || '',
+    clientEmail: client.email || (client.name.toLowerCase().replace(/\s+/g, '.') + '@email.com'),
+    totalSessions: numSessions,
+    usedSessions: 0,
+    remainingSessions: numSessions,
+    regularPrice: +numRegularPrice.toFixed(2),
+    packagePrice: +numPackagePrice.toFixed(2),
+    discountPercent: numDiscountPercent,
+    discountAmount: +numDiscountAmount.toFixed(2),
+    purchaseDate: new Date().toISOString().slice(0, 10),
+    expiresAt: expiresDate.toISOString().slice(0, 10),
+    status: 'active',
+    notes: notes ? notes.trim() : '',
+    redemptionHistory: []
+  };
+
+  db.clientPackages.unshift(newClientPkg);
+
+  // Sumar puntos de fidelidad correspondientes al precio abonado
+  client.loyaltyPoints = (client.loyaltyPoints || 0) + Math.floor(newClientPkg.packagePrice);
+
+  res.status(201).json({
+    success: true,
+    message: `¡${newClientPkg.packageName} configurado y asignado a ${client.name} con éxito!`,
+    clientPackage: newClientPkg
+  });
 });
 
 app.post('/api/packages/purchase', (req, res) => {
@@ -2431,6 +2612,11 @@ app.post('/api/packages/purchase', (req, res) => {
   const expiresDate = new Date();
   expiresDate.setDate(expiresDate.getDate() + (pkg.validDays || 180));
 
+  const regularPrice = pkg.regularPrice || (pkg.price * 1.25);
+  const packagePrice = pkg.price;
+  const discountPercent = pkg.discountPercent || Math.round((1 - packagePrice / regularPrice) * 100);
+  const discountAmount = +(regularPrice - packagePrice).toFixed(2);
+
   const newClientPkg = {
     id: 'cpkg-' + Date.now(),
     packageId: pkg.id,
@@ -2438,18 +2624,26 @@ app.post('/api/packages/purchase', (req, res) => {
     clientId: client.id,
     clientDni: client.dni || '',
     clientName: client.name,
+    clientPhone: client.phone || '',
+    clientEmail: client.email || (client.name.toLowerCase().replace(/\s+/g, '.') + '@email.com'),
     totalSessions: pkg.totalSessions,
     usedSessions: 0,
     remainingSessions: pkg.totalSessions,
+    regularPrice: +regularPrice.toFixed(2),
+    packagePrice: +packagePrice.toFixed(2),
+    discountPercent,
+    discountAmount,
     purchaseDate: new Date().toISOString().slice(0, 10),
     expiresAt: expiresDate.toISOString().slice(0, 10),
-    status: 'active'
+    status: 'active',
+    notes: pkg.description || '',
+    redemptionHistory: []
   };
 
-  db.clientPackages.push(newClientPkg);
+  db.clientPackages.unshift(newClientPkg);
 
   // Conceder puntos de fidelización por la compra del bono (1 punto por euro)
-  client.loyaltyPoints += Math.floor(pkg.price);
+  client.loyaltyPoints = (client.loyaltyPoints || 0) + Math.floor(pkg.price);
 
   res.status(201).json({
     success: true,
@@ -2459,12 +2653,12 @@ app.post('/api/packages/purchase', (req, res) => {
 });
 
 app.post('/api/packages/redeem', (req, res) => {
-  const { clientPackageId } = req.body;
+  const { clientPackageId, staffName, notes } = req.body;
   const cpkg = db.clientPackages.find(p => p.id === clientPackageId);
   if (!cpkg) return res.status(404).json({ error: 'Bono no encontrado.' });
 
   if (cpkg.remainingSessions <= 0) {
-    return res.status(400).json({ error: 'No quedan sesiones disponibles en este bono.' });
+    return res.status(400).json({ error: 'No quedan sesiones disponibles en este bono (todas las sesiones han sido consumidas).' });
   }
 
   cpkg.usedSessions += 1;
@@ -2473,11 +2667,109 @@ app.post('/api/packages/redeem', (req, res) => {
     cpkg.status = 'consumed';
   }
 
+  const client = db.clients.find(c => c.id === cpkg.clientId || (c.dni && c.dni === cpkg.clientDni)) || {};
+  const phone = cpkg.clientPhone || client.phone || '';
+  const email = cpkg.clientEmail || client.email || (client.name ? client.name.toLowerCase().replace(/\s+/g, '.') + '@email.com' : '');
+
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+  const redemptionEntry = {
+    sessionNumber: cpkg.usedSessions,
+    date: dateStr,
+    time: timeStr,
+    staffName: staffName || 'Estilista Losan',
+    notes: notes || 'Sesión realizada en salón'
+  };
+
+  if (!Array.isArray(cpkg.redemptionHistory)) {
+    cpkg.redemptionHistory = [];
+  }
+  cpkg.redemptionHistory.push(redemptionEntry);
+
+  // Generar textos automáticos para WhatsApp y Email
+  const discountStr = cpkg.discountPercent ? `${cpkg.discountPercent}% (${cpkg.discountAmount || 0} € de ahorro)` : 'Tarifa especial bono';
+  
+  const whatsappText = `✨ *PELUQUERÍA LOSAN - ACTUALIZACIÓN DE TU BONO* ✨\n\n` +
+    `¡Hola ${cpkg.clientName}! Acabas de disfrutar de una sesión de tu bono:\n` +
+    `💇 *${cpkg.packageName}*\n` +
+    `✂️ Sesión realizada por: *${redemptionEntry.staffName}*\n` +
+    `📅 Fecha: ${dateStr} a las ${timeStr}\n\n` +
+    `📊 *ESTADO ACTUALIZADO DE TU BONO:*\n` +
+    `✅ *Sesiones consumidas:* ${cpkg.usedSessions} de ${cpkg.totalSessions}\n` +
+    `⏳ *Sesiones restantes disponibles:* ${cpkg.remainingSessions}\n` +
+    `🎁 *Descuento de tu bono:* ${discountStr}\n` +
+    `📅 *Válido hasta:* ${cpkg.expiresAt || 'Indefinido'}\n\n` +
+    `¡Muchas gracias por confiar en nosotros! Esperamos verte muy pronto en tu próxima sesión. 💕\n` +
+    `📍 Peluquería Losan · Citas: 912 345 678`;
+
+  const cleanDigits = phone.replace(/[^0-9]/g, '');
+  const whatsappUrl = cleanDigits ? `https://wa.me/${cleanDigits}?text=${encodeURIComponent(whatsappText)}` : '';
+
+  const emailSubject = `Balance de tu ${cpkg.packageName} - Peluquería Losan`;
+  const emailBody = `Estimada ${cpkg.clientName},\n\nLe confirmamos que ha disfrutado de 1 sesión en Peluquería Losan.\n\n` +
+    `Detalles del servicio:\n` +
+    `- Bono: ${cpkg.packageName}\n` +
+    `- Sesión consumida: Nº ${cpkg.usedSessions} de ${cpkg.totalSessions}\n` +
+    `- Atendida por: ${redemptionEntry.staffName}\n` +
+    `- Fecha y hora: ${dateStr} ${timeStr}\n\n` +
+    `Resumen actualizado de su saldo:\n` +
+    `✔ Sesiones consumidas: ${cpkg.usedSessions}\n` +
+    `⏳ Sesiones pendientes: ${cpkg.remainingSessions}\n` +
+    `📅 Válido hasta: ${cpkg.expiresAt}\n\n` +
+    `¡Gracias por su visita y fidelidad!\n\nAtentamente,\nEquipo de Peluquería Losan`;
+
   res.json({
     success: true,
-    message: `Sesión canjeada. Te quedan ${cpkg.remainingSessions} de ${cpkg.totalSessions} sesiones.`,
-    clientPackage: cpkg
+    message: `Sesión canjeada con éxito. Te quedan ${cpkg.remainingSessions} de ${cpkg.totalSessions} sesiones disponibles.`,
+    clientPackage: cpkg,
+    redemption: redemptionEntry,
+    clientPhone: phone,
+    clientEmail: email,
+    whatsappUrl,
+    whatsappText,
+    emailSubject,
+    emailBody
   });
+});
+
+// Enviar email con la información del bono
+app.post('/api/packages/client/:id/send-email', (req, res) => {
+  const { clientPackageId, email, subject, body } = req.body;
+  const cpkg = db.clientPackages.find(p => p.id === clientPackageId);
+  if (!cpkg) return res.status(404).json({ error: 'Bono no encontrado.' });
+
+  const client = db.clients.find(c => c.id === cpkg.clientId || c.dni === cpkg.clientDni) || {};
+  const targetEmail = email || cpkg.clientEmail || client.email || `${cpkg.clientName.toLowerCase().replace(/\s+/g, '.')}@email.com`;
+
+  // Registrar auditoría del envío
+  if (!db.appointmentAuditLogs) db.appointmentAuditLogs = [];
+  db.appointmentAuditLogs.push({
+    id: 'log-email-' + Date.now(),
+    type: 'EMAIL_PACKAGE_STATEMENT',
+    clientPackageId: cpkg.id,
+    clientName: cpkg.clientName,
+    recipientEmail: targetEmail,
+    timestamp: new Date().toISOString(),
+    remainingSessions: cpkg.remainingSessions,
+    totalSessions: cpkg.totalSessions
+  });
+
+  res.json({
+    success: true,
+    message: `Email enviado correctamente a ${targetEmail} con el balance de su bono (${cpkg.remainingSessions} sesiones restantes).`,
+    recipientEmail: targetEmail,
+    sentAt: new Date().toISOString()
+  });
+});
+
+// Eliminar un bono asignado a una clienta
+app.delete('/api/packages/client-packages/:id', (req, res) => {
+  const idx = db.clientPackages.findIndex(p => p.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Bono de clienta no encontrado.' });
+  const removed = db.clientPackages.splice(idx, 1);
+  res.json({ success: true, message: `Bono "${removed[0].packageName}" de ${removed[0].clientName} eliminado.` });
 });
 
 // ============================================================================

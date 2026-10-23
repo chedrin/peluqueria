@@ -1,8 +1,10 @@
 const fs = require('fs');
 const html = fs.readFileSync('public/index.html', 'utf8');
 
-// Extract script contents
-const scriptRegex = /<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/gi;
+console.log('HTML size:', html.length, 'bytes');
+
+// Check script blocks for syntax errors
+const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
 let match;
 let scriptIdx = 0;
 let errors = 0;
@@ -10,19 +12,39 @@ let errors = 0;
 while ((match = scriptRegex.exec(html)) !== null) {
   scriptIdx++;
   const scriptContent = match[1];
-  console.log(`Checking inline script #${scriptIdx} (length: ${scriptContent.length} chars)...`);
+  if (!scriptContent.trim()) continue;
   try {
     new Function(scriptContent);
-    console.log(`✅ Script #${scriptIdx} syntax is 100% valid JavaScript!`);
+    console.log(`Script block #${scriptIdx} syntax OK (${scriptContent.length} chars)`);
   } catch (err) {
-    console.error(`❌ Syntax error in script #${scriptIdx}:`, err.message);
+    console.error(`Syntax Error in script block #${scriptIdx}:`, err.message);
     errors++;
   }
 }
 
+// Check key modal IDs
+const requiredIds = [
+  'aview-packages',
+  'admin-client-packages-tbody',
+  'modal-custom-package-assign',
+  'modal-client-package-card',
+  'modal-package-redeem-prompt',
+  'modal-package-redeem-success',
+  'c360-packages-container'
+];
+
+requiredIds.forEach(id => {
+  if (html.includes(`id="${id}"`)) {
+    console.log(`✅ ID "${id}" present in DOM`);
+  } else {
+    console.error(`❌ ID "${id}" MISSING in DOM`);
+    errors++;
+  }
+});
+
 if (errors === 0) {
-  console.log('🎉 ALL INLINE SCRIPTS ARE 100% VALID JAVASCRIPT!');
+  console.log('\n🎉 ALL SYNTAX AND DOM VALIDATIONS PASSED!');
 } else {
-  console.error(`Found ${errors} script error(s)`);
+  console.error(`\n❌ FAILED with ${errors} errors.`);
   process.exit(1);
 }
