@@ -677,7 +677,7 @@ VALUES (
 
 -- 6.2 Perfiles y Usuarios
 INSERT INTO profiles (id, username, email, password_hash, dni, phone, role, first_name, last_name, is_active) VALUES
-('a0000000-0000-0000-0000-000000000001', 'admin', 'admin@peluquerialosan.es', 'admin1234', '50123456M', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
+('a0000000-0000-0000-0000-000000000001', 'admin', 'admin@peluquerialosan.es', 'admin123', '50123456M', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
 ('a0000000-0000-0000-0000-000000000002', 'elena', 'elena@peluquerialosan.es', 'elena1234', '54321678E', '+34 622 222 222', 'staff', 'Elena', 'Gómez', true),
 ('a0000000-0000-0000-0000-000000000003', 'raquel', 'raquel@peluquerialosan.es', 'raquel1234', '71234567R', '+34 633 333 333', 'staff', 'Raquel', 'Santos', true),
 ('a0000000-0000-0000-0000-000000000004', 'carmen', 'carmen@peluquerialosan.es', 'carmen1234', '38912456C', '+34 644 444 444', 'staff', 'Carmen', 'Vidal', true),

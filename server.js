@@ -36,7 +36,7 @@ const db = {
       id: 'usr-admin-1',
       username: 'admin',
       email: 'admin@peluquerialosan.es',
-      password: 'admin1234',
+      password: 'admin123',
       role: 'admin',
       firstName: 'Marisa',
       lastName: 'Garrido',
@@ -3095,15 +3095,83 @@ app.get('/api/auth/admin/verify', (req, res) => {
   res.json({ valid: false });
 });
 
-// Listado de usuarios administrativos en base de datos
+// Cambiar contraseña de un usuario (Estilista o Administrador) en la BD
+app.put('/api/auth/users/:id/password', (req, res) => {
+  const user = db.users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado en la base de datos.' });
+
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.trim().length < 4) {
+    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 4 caracteres.' });
+  }
+
+  user.password = newPassword.trim();
+  user.lastPasswordChange = new Date().toISOString();
+
+  console.log(`[AUTH] Clave actualizada para usuario: ${user.username} (${user.displayName})`);
+
+  res.json({
+    success: true,
+    message: `¡Contraseña actualizada con éxito en la base de datos para ${user.displayName || user.username}!`,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      displayName: user.displayName,
+      lastPasswordChange: user.lastPasswordChange
+    }
+  });
+});
+
+// Crear nuevo usuario (Estilista o Administrador) en la BD
+app.post('/api/auth/users', (req, res) => {
+  const { username, email, password, role, firstName, lastName, phone, staffId } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Nombre de usuario y contraseña requeridos.' });
+  }
+
+  const cleanUser = username.trim().toLowerCase();
+  const exists = db.users.some(u => u.username && u.username.toLowerCase() === cleanUser);
+  if (exists) {
+    return res.status(400).json({ error: 'Ese nombre de usuario ya existe en la base de datos.' });
+  }
+
+  const newUser = {
+    id: 'usr-' + (role === 'admin' ? 'admin-' : 'staff-') + Date.now(),
+    username: cleanUser,
+    email: email ? email.trim() : `${cleanUser}@peluquerialosan.es`,
+    password: password.trim(),
+    role: role || 'staff',
+    staffId: staffId || null,
+    firstName: firstName ? firstName.trim() : cleanUser,
+    lastName: lastName ? lastName.trim() : '',
+    displayName: `${firstName ? firstName.trim() : cleanUser} ${lastName ? lastName.trim() : ''}`.trim(),
+    phone: phone ? phone.trim() : '',
+    isActive: true,
+    lastPasswordChange: new Date().toISOString()
+  };
+
+  db.users.push(newUser);
+
+  res.status(201).json({
+    success: true,
+    message: `Usuario ${newUser.displayName} creado correctamente en la base de datos.`,
+    user: newUser
+  });
+});
+
+// Listado de usuarios administrativos y estilistas en base de datos
 app.get('/api/auth/users', (req, res) => {
-  const safeUsers = db.users.map(u => ({
+  const safeUsers = db.users.filter(u => u.role === 'admin' || u.role === 'staff').map(u => ({
     id: u.id,
     username: u.username || '',
     email: u.email || '',
     role: u.role,
     displayName: u.displayName || `${u.firstName} ${u.lastName}`,
-    phone: u.phone,
+    phone: u.phone || '',
+    staffId: u.staffId || null,
+    lastPasswordChange: u.lastPasswordChange || 'Configurada en BD',
     isActive: u.isActive !== false
   }));
   res.json(safeUsers);
