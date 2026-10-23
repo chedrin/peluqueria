@@ -3023,12 +3023,61 @@ app.get('/api/analytics/kpis', (req, res) => {
 // 18. MÓDULO DE CONTROL HORARIO, FICHAJES PWA Y EXPORTACIÓN A EXCEL
 // ============================================================================
 
+function ensureTodayTimeRecords(todayStr) {
+  const hasElena = db.timeRecords.some(r => r.staffId === 'stf-1' && r.date === todayStr);
+  if (!hasElena) {
+    db.timeRecords.unshift({
+      id: 'tr-elena-' + todayStr,
+      staffId: 'stf-1',
+      staffDni: '54321678E',
+      staffName: 'Elena Gómez',
+      chair: 'Sillón 1 (Color)',
+      date: todayStr,
+      clockIn: `${todayStr}T09:28:15.000Z`,
+      clockOut: null,
+      breaks: [{ start: `${todayStr}T14:00:00.000Z`, end: `${todayStr}T14:30:00.000Z`, durationMinutes: 30, reason: 'Pausa Almuerzo' }],
+      breakMinutes: 30,
+      effectiveMinutes: 320,
+      effectiveHours: 5.33,
+      overtimeHours: 0,
+      status: 'WORKING',
+      device: 'PWA Móvil (Android / Chrome)',
+      notes: 'Jornada activa hoy. Coloración y mechas balayage.'
+    });
+  }
+
+  const hasRaquel = db.timeRecords.some(r => r.staffId === 'stf-2' && r.date === todayStr);
+  if (!hasRaquel) {
+    db.timeRecords.unshift({
+      id: 'tr-raquel-' + todayStr,
+      staffId: 'stf-2',
+      staffDni: '71234567R',
+      staffName: 'Raquel Santos',
+      chair: 'Sillón 2 (Cortes)',
+      date: todayStr,
+      clockIn: `${todayStr}T09:15:30.000Z`,
+      clockOut: null,
+      breaks: [],
+      currentBreakStart: `${todayStr}T13:45:00.000Z`,
+      currentBreakReason: 'Pausa Comida',
+      breakMinutes: 0,
+      effectiveMinutes: 270,
+      effectiveHours: 4.50,
+      overtimeHours: 0,
+      status: 'ON_BREAK',
+      device: 'PWA Móvil (iOS / Safari)',
+      notes: 'En descanso de almuerzo actualmente.'
+    });
+  }
+}
+
 // A. Obtener estado de fichaje actual de una estilista para hoy
 app.get('/api/time-tracking/status/:staffId', (req, res) => {
   const staff = db.staff.find(s => s.id === req.params.staffId);
   if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
 
   const todayStr = new Date().toISOString().slice(0, 10);
+  ensureTodayTimeRecords(todayStr);
   const record = db.timeRecords.find(r => r.staffId === staff.id && r.date === todayStr);
 
   if (!record) {
@@ -3075,7 +3124,15 @@ app.post('/api/time-tracking/clock-in', (req, res) => {
       return res.status(400).json({ error: 'Actualmente estás en pausa. Debes reanudar la jornada.', record });
     }
     if (record.status === 'COMPLETED') {
-      return res.status(400).json({ error: 'Ya has completado y cerrado tu jornada de hoy.', record });
+      // Reanudar jornada para turno partido o sesión extraordinaria
+      record.status = 'WORKING';
+      record.clockOut = null;
+      if (notes) record.notes = (record.notes ? record.notes + ' | ' : '') + notes;
+      return res.json({
+        success: true,
+        message: `¡Jornada reanudada para ${staff.name}! Fichaje de entrada registrado.`,
+        record
+      });
     }
   }
 
@@ -3231,6 +3288,7 @@ app.post('/api/time-tracking/clock-out', (req, res) => {
 // E. Resumen en tiempo real del personal para el Dashboard de Administración
 app.get('/api/time-tracking/summary-today', (req, res) => {
   const todayStr = new Date().toISOString().slice(0, 10);
+  ensureTodayTimeRecords(todayStr);
   const activeStaff = db.staff.filter(s => s.isActive !== false);
 
   const staffStatusList = activeStaff.map(s => {
@@ -3289,6 +3347,8 @@ app.get('/api/time-tracking/summary-today', (req, res) => {
 
 // F. Listado histórico de fichajes con filtros (Administración)
 app.get('/api/time-tracking/records', (req, res) => {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  ensureTodayTimeRecords(todayStr);
   const { staffId, date, startDate, endDate, month, status } = req.query;
   let records = [...db.timeRecords];
 
