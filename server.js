@@ -874,6 +874,69 @@ const db = {
   // --------------------------------------------------------------------------
   // HORARIOS Y TRAMOS BLOQUEADOS POR ESTILISTA (CONFIGURABLE DESDE ADMIN)
   // --------------------------------------------------------------------------
+  staffSchedules: {
+    'stf-1': {
+      slots: [
+        { time: '09:00', isActive: true }, { time: '09:30', isActive: true },
+        { time: '10:00', isActive: true }, { time: '10:30', isActive: true },
+        { time: '11:00', isActive: true }, { time: '11:30', isActive: true },
+        { time: '12:00', isActive: true }, { time: '12:30', isActive: true },
+        { time: '13:00', isActive: true }, { time: '13:30', isActive: true },
+        { time: '14:00', isActive: true }, { time: '16:00', isActive: true },
+        { time: '16:30', isActive: true }, { time: '17:00', isActive: true },
+        { time: '17:30', isActive: true }, { time: '18:00', isActive: true },
+        { time: '18:30', isActive: true }, { time: '19:00', isActive: true },
+        { time: '19:30', isActive: true }
+      ],
+      restDays: ['Domingo', 'Lunes'],
+      vacationDates: ['2026-08-10', '2026-08-11', '2026-08-12'],
+      extraDays: [{ date: '2026-10-24', reason: 'Guardia Sábado de Bodas', shift: '09:00 - 15:00' }],
+      overtimeRecords: [
+        { id: 'ot-101', date: '2026-10-20', hours: 1.5, reason: 'Alisado Keratina extendido clienta Marta', approved: true }
+      ],
+      shiftType: 'COMPLETO'
+    },
+    'stf-2': {
+      slots: [
+        { time: '09:00', isActive: true }, { time: '09:30', isActive: true },
+        { time: '10:00', isActive: true }, { time: '10:30', isActive: true },
+        { time: '11:00', isActive: true }, { time: '11:30', isActive: true },
+        { time: '12:00', isActive: true }, { time: '12:30', isActive: true },
+        { time: '13:00', isActive: true }, { time: '13:30', isActive: true },
+        { time: '14:00', isActive: false }, { time: '16:00', isActive: false },
+        { time: '16:30', isActive: true }, { time: '17:00', isActive: true },
+        { time: '17:30', isActive: true }, { time: '18:00', isActive: true },
+        { time: '18:30', isActive: true }, { time: '19:00', isActive: true },
+        { time: '19:30', isActive: true }
+      ],
+      restDays: ['Domingo'],
+      vacationDates: ['2026-07-15', '2026-07-16'],
+      extraDays: [],
+      overtimeRecords: [
+        { id: 'ot-102', date: '2026-10-21', hours: 1.0, reason: 'Servicio de mechas balayage doble turno', approved: true }
+      ],
+      shiftType: 'PERSONALIZADO'
+    },
+    'stf-3': {
+      slots: [
+        { time: '09:00', isActive: true }, { time: '09:30', isActive: true },
+        { time: '10:00', isActive: true }, { time: '10:30', isActive: true },
+        { time: '11:00', isActive: true }, { time: '11:30', isActive: true },
+        { time: '12:00', isActive: true }, { time: '12:30', isActive: true },
+        { time: '13:00', isActive: true }, { time: '13:30', isActive: true },
+        { time: '14:00', isActive: true }, { time: '16:00', isActive: true },
+        { time: '16:30', isActive: true }, { time: '17:00', isActive: true },
+        { time: '17:30', isActive: true }, { time: '18:00', isActive: true },
+        { time: '18:30', isActive: true }, { time: '19:00', isActive: true },
+        { time: '19:30', isActive: true }
+      ],
+      restDays: ['Sábado', 'Domingo'],
+      vacationDates: [],
+      extraDays: [],
+      overtimeRecords: [],
+      shiftType: 'COMPLETO'
+    }
+  },
   staffScheduleOverrides: {
     'stf-1': { disabledSlots: ['14:00', '14:30'] },
     'stf-2': { disabledSlots: ['13:30', '14:00'] },
@@ -2934,7 +2997,7 @@ app.get('/api/time-tracking/summary-today', (req, res) => {
 
 // F. Listado histórico de fichajes con filtros (Administración)
 app.get('/api/time-tracking/records', (req, res) => {
-  const { staffId, date, month, status } = req.query;
+  const { staffId, date, startDate, endDate, month, status } = req.query;
   let records = [...db.timeRecords];
 
   if (staffId && staffId !== 'all') {
@@ -2942,8 +3005,13 @@ app.get('/api/time-tracking/records', (req, res) => {
   }
   if (date) {
     records = records.filter(r => r.date === date);
-  }
-  if (month) {
+  } else if (startDate && endDate) {
+    records = records.filter(r => r.date >= startDate && r.date <= endDate);
+  } else if (startDate) {
+    records = records.filter(r => r.date >= startDate);
+  } else if (endDate) {
+    records = records.filter(r => r.date <= endDate);
+  } else if (month) {
     records = records.filter(r => r.date.startsWith(month));
   }
   if (status && status !== 'all') {
@@ -2953,8 +3021,13 @@ app.get('/api/time-tracking/records', (req, res) => {
   // Ordenar cronológicamente descendente (más recientes primero)
   records.sort((a, b) => new Date(b.date + ' ' + (b.clockIn || '00:00')) - new Date(a.date + ' ' + (a.clockIn || '00:00')));
 
+  const totalEffectiveHours = records.reduce((acc, r) => acc + (r.effectiveHours || 0), 0);
+  const totalOvertimeHours = records.reduce((acc, r) => acc + (r.overtimeHours || 0), 0);
+
   res.json({
     count: records.length,
+    totalEffectiveHours: Number(totalEffectiveHours.toFixed(2)),
+    totalOvertimeHours: Number(totalOvertimeHours.toFixed(2)),
     records
   });
 });
@@ -3411,6 +3484,101 @@ app.put('/api/notifications/:id/read', (req, res) => {
 });
 
 // B. HORARIOS DE ESTILISTAS: ACTIVAR O DESACTIVAR TRAMOS HORARIOS
+
+// ============================================================================
+// GESTIÓN COMPLETA DE HORARIOS DEL EQUIPO (TURNOS, DESCANSOS, DÍAS EXTRA, HORAS EXTRAS)
+// ============================================================================
+
+app.get('/api/staff/:id/schedule', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  if (!db.staffSchedules) db.staffSchedules = {};
+  if (!db.staffSchedules[staff.id]) {
+    db.staffSchedules[staff.id] = {
+      slots: [
+        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+        '13:00', '13:30', '14:00', '16:00', '16:30', '17:00', '17:30', '18:00',
+        '18:30', '19:00', '19:30'
+      ].map(time => ({ time, isActive: true })),
+      restDays: ['Domingo'],
+      vacationDates: [],
+      extraDays: [],
+      overtimeRecords: [],
+      shiftType: 'COMPLETO'
+    };
+  }
+
+  const sch = db.staffSchedules[staff.id];
+  res.json({
+    staffId: staff.id,
+    staffName: staff.name,
+    specialty: staff.specialty,
+    chair: staff.chair,
+    schedule: sch
+  });
+});
+
+app.put('/api/staff/:id/schedule', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const { slots, restDays, vacationDates, extraDays, shiftType } = req.body;
+  if (!db.staffSchedules) db.staffSchedules = {};
+  if (!db.staffSchedules[staff.id]) {
+    db.staffSchedules[staff.id] = { overtimeRecords: [] };
+  }
+
+  if (Array.isArray(slots)) db.staffSchedules[staff.id].slots = slots;
+  if (Array.isArray(restDays)) db.staffSchedules[staff.id].restDays = restDays;
+  if (Array.isArray(vacationDates)) db.staffSchedules[staff.id].vacationDates = vacationDates;
+  if (Array.isArray(extraDays)) db.staffSchedules[staff.id].extraDays = extraDays;
+  if (shiftType) db.staffSchedules[staff.id].shiftType = shiftType;
+
+  // Sincronizar con staffScheduleOverrides para compatibilidad con disponibilidad
+  if (!db.staffScheduleOverrides) db.staffScheduleOverrides = {};
+  const disabled = (db.staffSchedules[staff.id].slots || [])
+    .filter(s => !s.isActive)
+    .map(s => s.time);
+  db.staffScheduleOverrides[staff.id] = { disabledSlots: disabled };
+
+  res.json({
+    success: true,
+    message: `Horario laboral actualizado para ${staff.name}.`,
+    schedule: db.staffSchedules[staff.id]
+  });
+});
+
+app.post('/api/staff/:id/overtime', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const { date, hours, reason } = req.body;
+  if (!date || !hours) return res.status(400).json({ error: 'Fecha y número de horas extras son requeridos.' });
+
+  if (!db.staffSchedules) db.staffSchedules = {};
+  if (!db.staffSchedules[staff.id]) db.staffSchedules[staff.id] = { overtimeRecords: [] };
+  if (!db.staffSchedules[staff.id].overtimeRecords) db.staffSchedules[staff.id].overtimeRecords = [];
+
+  const record = {
+    id: 'ot-' + Date.now(),
+    date,
+    hours: Number(hours),
+    reason: (reason || 'Prolongación de servicio').trim(),
+    approved: true,
+    createdAt: new Date().toISOString()
+  };
+
+  db.staffSchedules[staff.id].overtimeRecords.unshift(record);
+
+  res.status(201).json({
+    success: true,
+    message: `Registro de ${hours}h extras añadido para ${staff.name}.`,
+    record,
+    overtimeRecords: db.staffSchedules[staff.id].overtimeRecords
+  });
+});
+
 app.get('/api/staff/:id/schedule-slots', (req, res) => {
   const staff = db.staff.find(s => s.id === req.params.id);
   if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
@@ -3587,14 +3755,55 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
     });
   }
 
+  const prevStaffId = apt.staffId;
+  const prevStaffName = apt.staffName || 'Estilista Salón';
+  const prevTimeStr = new Date(apt.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  const newTimeStr = new Date(startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+
   apt.staffId = staff.id;
   apt.staffName = staff.name;
   apt.startTime = startTime;
   apt.endTime = endTime;
 
+  // Notificar a ambas estilistas (la que deja a la clienta y la que la recibe)
+  if (prevStaffId && prevStaffId !== staff.id) {
+    db.notifications.unshift({
+      id: 'notif-reassign-loss-' + Date.now(),
+      type: 'reassignment_loss',
+      targetStaffId: prevStaffId,
+      title: 'Cita Reubicada a Otra Estilista',
+      message: `La cita de ${apt.clientName} (${prevTimeStr}) ha sido reasignada a ${staff.name}.`,
+      appointmentId: apt.id,
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+
+    db.notifications.unshift({
+      id: 'notif-reassign-gain-' + Date.now(),
+      type: 'reassignment_gain',
+      targetStaffId: staff.id,
+      title: 'Nueva Cita Asignada',
+      message: `Nueva clienta asignada: ${apt.clientName} a las ${newTimeStr} (${apt.serviceNames || 'Tratamiento'}).`,
+      appointmentId: apt.id,
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+  } else {
+    db.notifications.unshift({
+      id: 'notif-reassign-time-' + Date.now(),
+      type: 'reassignment_time',
+      targetStaffId: staff.id,
+      title: 'Horario de Cita Actualizado',
+      message: `La cita de ${apt.clientName} se ha movido a las ${newTimeStr}.`,
+      appointmentId: apt.id,
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+  }
+
   res.json({
     success: true,
-    message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${new Date(startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}).`,
+    message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${newTimeStr}). Se ha notificado a las estilistas involucradas.`,
     appointment: apt
   });
 });
@@ -3837,36 +4046,130 @@ app.get('/api/clients/:id/loyalty-details', (req, res) => {
   });
 });
 
+// ACTUALIZAR FICHA 360 DE CLIENTA (DATOS PERSONALES, CAPILARES, PREFERENCIAS, VIP)
+app.put('/api/clients/:id', (req, res) => {
+  const client = db.clients.find(c => c.id === req.params.id);
+  if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
+
+  const {
+    name,
+    dni,
+    phone,
+    email,
+    birthDate,
+    allergies,
+    generalNotes,
+    hairType,
+    scalpType,
+    technicalFormulas,
+    preferredStylist,
+    beveragePreference,
+    stampsCount,
+    loyaltyPoints
+  } = req.body;
+
+  if (name !== undefined) client.name = String(name).trim();
+  if (dni !== undefined) client.dni = String(dni).trim().toUpperCase();
+  if (phone !== undefined) client.phone = String(phone).trim();
+  if (email !== undefined) client.email = String(email).trim();
+  if (birthDate !== undefined) client.birthDate = birthDate;
+  if (allergies !== undefined) client.allergies = String(allergies).trim();
+  if (generalNotes !== undefined) client.generalNotes = String(generalNotes).trim();
+  if (hairType !== undefined) client.hairType = String(hairType).trim();
+  if (scalpType !== undefined) client.scalpType = String(scalpType).trim();
+  if (technicalFormulas !== undefined) client.technicalFormulas = String(technicalFormulas).trim();
+  if (preferredStylist !== undefined) client.preferredStylist = String(preferredStylist).trim();
+  if (beveragePreference !== undefined) client.beveragePreference = String(beveragePreference).trim();
+  if (stampsCount !== undefined) {
+    client.stampsCount = Number(stampsCount);
+    client.loyaltyStamps = Number(stampsCount);
+  }
+  if (loyaltyPoints !== undefined) client.loyaltyPoints = Number(loyaltyPoints);
+
+  res.json({
+    success: true,
+    message: `Ficha 360 de ${client.name} actualizada correctamente.`,
+    client
+  });
+});
+
 app.post('/api/clients/:id/adjust-loyalty', (req, res) => {
   const client = db.clients.find(c => c.id === req.params.id);
   if (!client) return res.status(404).json({ error: 'Clienta no encontrada.' });
 
-  const { deltaStamps, deltaPoints, rewardUnlocked, note } = req.body;
-  if (deltaStamps) {
-    client.stampsCount = Math.max(0, Math.min(8, (client.stampsCount || 0) + Number(deltaStamps)));
-  }
-  if (deltaPoints) {
-    client.loyaltyPoints = Math.max(0, (client.loyaltyPoints || 0) + Number(deltaPoints));
-  }
-  if (rewardUnlocked) {
-    if (!client.activeRewards) client.activeRewards = [];
-    client.activeRewards.push({ reward: rewardUnlocked, unlockedAt: new Date().toISOString() });
+  const { action, deltaStamps, deltaPoints, rewardUnlocked, note, staffName } = req.body;
+  const targetStamps = db.loyaltyConfig?.totalStamps || 8;
+  let effectiveDeltaStamps = Number(deltaStamps) || 0;
+  let effectiveDeltaPoints = Number(deltaPoints) || 0;
+
+  if (action === 'add_stamp') effectiveDeltaStamps = 1;
+  else if (action === 'remove_stamp') effectiveDeltaStamps = -1;
+  else if (action === 'redeem_reward') {
+    if (client.activeRewards && client.activeRewards.length > 0) {
+      const rew = client.activeRewards.find(r => !r.redeemed);
+      if (rew) rew.redeemed = true;
+    }
   }
 
-  // Registrar auditoría
+  const prevStamps = client.stampsCount !== undefined ? client.stampsCount : (client.loyaltyStamps || 0);
+  let newStamps = Math.max(0, prevStamps + effectiveDeltaStamps);
+  let unlockedRewardDesc = null;
+
+  if (newStamps >= targetStamps) {
+    unlockedRewardDesc = db.loyaltyConfig?.rewardDescription || 'Tratamiento Hidratante o Corte Gratis';
+    client.completedCardsCount = (client.completedCardsCount || 0) + 1;
+    newStamps = 0; // Reinicio para nueva tarjeta
+    if (!client.activeRewards) client.activeRewards = [];
+    client.activeRewards.push({
+      id: 'rew-' + Date.now(),
+      reward: unlockedRewardDesc,
+      unlockedAt: new Date().toISOString(),
+      redeemed: false
+    });
+  }
+
+  client.stampsCount = newStamps;
+  client.loyaltyStamps = newStamps;
+
+  if (effectiveDeltaPoints) {
+    client.loyaltyPoints = Math.max(0, (client.loyaltyPoints || 0) + effectiveDeltaPoints);
+  }
+
+  // Registrar en stampHistory para histórico oficial y Excel
+  if (effectiveDeltaStamps > 0) {
+    db.stampHistory.unshift({
+      id: 'stamp-' + Date.now(),
+      clientId: client.id,
+      clientDni: client.dni || '',
+      clientName: client.name,
+      stampNumber: newStamps === 0 ? targetStamps : newStamps,
+      totalStampsTarget: targetStamps,
+      timestamp: new Date().toISOString(),
+      method: 'TPV_MANUAL_STAMP',
+      staffName: staffName || 'Administración TPV',
+      rewardUnlocked: unlockedRewardDesc
+    });
+  }
+
+  // Registrar auditoría de transacción
   db.loyaltyTransactions.push({
     id: 'loy-adj-' + Date.now(),
     clientId: client.id,
-    delta: Number(deltaPoints) || 0,
-    newBalance: client.loyaltyPoints,
-    reason: `ADMIN_ADJUSTMENT: ${note || 'Ajuste manual de fidelización por Gerencia'}`,
+    delta: effectiveDeltaPoints,
+    newBalance: client.loyaltyPoints || 0,
+    reason: `SELLADO_MANUAL: ${note || action || 'Ajuste manual de sellos por Gerencia'}`,
     date: new Date().toISOString()
   });
 
   res.json({
     success: true,
-    message: `Ficha de fidelización VIP actualizada para ${client.name}. Sellos: ${client.stampsCount}/8, Puntos: ${client.loyaltyPoints} pts.`,
-    client
+    message: unlockedRewardDesc 
+      ? `¡Enhorabuena! ${client.name} ha completado su tarjeta de sellos. Recompensa desbloqueada: ${unlockedRewardDesc}.`
+      : `Ficha de fidelización VIP actualizada para ${client.name}. Sellos: ${client.stampsCount}/${targetStamps}, Puntos: ${client.loyaltyPoints || 0} pts.`,
+    client,
+    totalStampsTarget: targetStamps,
+    stampsCount: client.stampsCount,
+    stampHistory: db.stampHistory.filter(s => s.clientId === client.id)
   });
 });
 

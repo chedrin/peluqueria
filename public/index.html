@@ -2383,11 +2383,23 @@
                 <option value="stf-3">Carmen Vidal</option>
               </select>
 
-              <div class="flex items-center gap-1.5 bg-stone-50 px-2.5 py-1 rounded-xl border border-stone-200 text-xs mr-1">
-              <span class="text-stone-500">Desde:</span>
-              <input type="date" id="filter-timetrack-start" value="2026-10-01" class="bg-white border border-stone-200 px-1.5 py-0.5 rounded text-stone-700 text-xs font-mono-code" />
-              <span class="text-stone-400">Hasta:</span>
-              <input type="date" id="filter-timetrack-end" value="2026-10-31" class="bg-white border border-stone-200 px-1.5 py-0.5 rounded text-stone-700 text-xs font-mono-code" />
+              <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1.5 bg-stone-50 px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs">
+                <span class="text-stone-500 font-medium">Periodo:</span>
+                <input type="date" id="filter-timetrack-start" value="2026-10-01" class="bg-white border border-stone-200 px-2 py-0.5 rounded-lg text-stone-800 text-xs font-mono-code font-bold" />
+                <span class="text-stone-400 font-bold">→</span>
+                <input type="date" id="filter-timetrack-end" value="2026-10-31" class="bg-white border border-stone-200 px-2 py-0.5 rounded-lg text-stone-800 text-xs font-mono-code font-bold" />
+              </div>
+              <div class="flex items-center gap-1 text-[11px]">
+                <button type="button" onclick="setTimeFilterPreset('today')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-2 py-1 rounded-lg transition cursor-pointer">Hoy</button>
+                <button type="button" onclick="setTimeFilterPreset('yesterday')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-2 py-1 rounded-lg transition cursor-pointer">Ayer</button>
+                <button type="button" onclick="setTimeFilterPreset('this_week')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-2 py-1 rounded-lg transition cursor-pointer">Esta Semana</button>
+                <button type="button" onclick="setTimeFilterPreset('this_month')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg transition cursor-pointer">Este Mes</button>
+                <button type="button" onclick="setTimeFilterPreset('all')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-2 py-1 rounded-lg transition cursor-pointer">Todo</button>
+              </div>
+              <button type="button" onclick="renderAdminTimeTracking()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-2xs">
+                <i data-lucide="search" class="w-3.5 h-3.5"></i> Consultar
+              </button>
             </div>
             <select id="filter-timetrack-month" onchange="renderAdminTimeTracking()" class="bg-stone-50 border border-stone-300 text-stone-900 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none">
                 <option value="2026-10">Octubre 2026 (Mes Actual)</option>
@@ -6534,7 +6546,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     function renderAdminLoyaltyManagement() {
       loadLoyaltyConfig();
       renderAdminStampHistory();
-      populateAdminStampClientSelect();
+      populateAllLoyaltyClientSelects();
       renderSalonOfficialQr();
     }
 
@@ -6588,37 +6600,59 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       }
     }
 
+    function populateAllLoyaltyClientSelects() {
+      const selectStamp = document.getElementById('admin-stamp-client-select');
+      const selectVip = document.getElementById('select-vip-client');
+      const selectFilter = document.getElementById('filter-loyalty-client');
+
+      if (!state.clients || !state.clients.length) return;
+
+      const optionsHtml = state.clients.map(c => `
+        <option value="${c.id}">${c.name} (${c.dni || 'Sin DNI'}) — ${c.stampsCount || 0}/8 sellos</option>
+      `).join('');
+
+      if (selectStamp) selectStamp.innerHTML = optionsHtml;
+      if (selectVip) selectVip.innerHTML = optionsHtml;
+      if (selectFilter) {
+        selectFilter.innerHTML = '<option value="all">Todas las Clientas</option>' + state.clients.map(c => `
+          <option value="${c.id}">${c.name} (${c.dni || 'DNI'})</option>
+        `).join('');
+      }
+    }
+
     async function adminManualStampClient() {
       const select = document.getElementById('admin-stamp-client-select');
-      if (!select || !select.value) return;
-
+      if (!select || !select.value) {
+        alert('Por favor selecciona una clienta.');
+        return;
+      }
       const clientId = select.value;
-      const client = state.clients.find(c => c.id === clientId);
 
       try {
-        const res = await fetch('/api/loyalty/stamp', {
+        const res = await fetch(`/api/clients/${clientId}/adjust-loyalty`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            clientId: clientId,
-            clientDni: client ? client.dni : '',
-            method: 'TPV_MANUAL_STAMP',
-            staffName: 'Administración TPV'
+            action: 'add_stamp',
+            staffName: 'Administración TPV',
+            note: 'Sellado manual desde el panel de fidelización'
           })
         });
 
         const data = await res.json();
         if (res.ok) {
-          shootConfetti(select);
-          alert(data.message);
+          if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 70 });
+          alert('✅ ' + data.message);
           await fetchInitialData();
+          populateAllLoyaltyClientSelects();
           renderAdminStampHistory();
-          populateAdminStampClientSelect();
+          loadVipClientDetails();
+          renderAdminCrmTable();
         } else {
           alert('Error: ' + data.error);
         }
       } catch (e) {
-        alert('Error al sellar visita.');
+        alert('Error al sellar tarjeta de fidelización.');
       }
     }
 
@@ -6783,57 +6817,227 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
   <!-- ========================================================================= -->
   <!-- MODAL: GESTIÓN DE HORARIOS Y FRANJAS ACTIVAS / DESACTIVADAS POR ESTILISTA -->
   <!-- ========================================================================= -->
-  <div id="modal-staff-schedule" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white border border-stone-200 rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+  <div id="modal-staff-schedule" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+      <!-- Cabecera -->
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
-            <i data-lucide="clock" class="w-5 h-5 text-purple-600"></i>
+          <div class="w-11 h-11 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shadow-sm">
+            <i data-lucide="clock" class="w-6 h-6 text-purple-600"></i>
           </div>
           <div>
-            <h4 class="text-base font-bold text-stone-900 font-serif-luxury" id="schedule-modal-title">Horarios de Estilista</h4>
-            <span class="text-[11px] text-stone-500">Activa o desactiva horas para bloquear huecos de citas en tiempo real</span>
+            <div class="flex items-center gap-2">
+              <h4 class="text-lg font-bold text-stone-900 font-serif-luxury" id="schedule-modal-title">Horarios de Estilista</h4>
+              <span class="text-xs bg-purple-50 text-purple-700 font-bold px-2.5 py-0.5 rounded-full border border-purple-200" id="schedule-modal-chair-badge">Sillón Asignado</span>
+            </div>
+            <span class="text-xs text-stone-500">Configura turnos, días de descanso, días extra y horas extraordinarias</span>
           </div>
         </div>
-        <button onclick="closeStaffScheduleModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+        <button onclick="closeStaffScheduleModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <input type="hidden" id="schedule-modal-staff-id" value="">
 
-      <!-- Acciones Rápidas -->
-      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs">
-        <span class="text-stone-600 font-semibold">Configuración rápida:</span>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="setAllScheduleSlots(true)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">
-            ✅ Activar Todas
-          </button>
-          <button type="button" onclick="setShiftScheduleSlots('morning', false)" class="bg-stone-200 hover:bg-stone-300 text-stone-800 font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">
-            Desactivar Mañanas
-          </button>
-          <button type="button" onclick="setShiftScheduleSlots('afternoon', false)" class="bg-stone-200 hover:bg-stone-300 text-stone-800 font-semibold px-2.5 py-1 rounded-lg transition cursor-pointer">
-            Desactivar Tardes
-          </button>
+      <!-- Pestañas de Navegación del Horario -->
+      <div class="flex border-b border-stone-200 gap-2 overflow-x-auto text-xs font-semibold">
+        <button type="button" onclick="switchScheduleTab('slots')" id="sch-tabbtn-slots" class="sch-tab-btn pb-2 px-3 border-b-2 border-indigo-600 text-indigo-700 font-bold whitespace-nowrap">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i> Franjas Horarias (30 min)
+        </button>
+        <button type="button" onclick="switchScheduleTab('rest')" id="sch-tabbtn-rest" class="sch-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="coffee" class="w-3.5 h-3.5 inline mr-1"></i> Días de Descanso & Vacaciones
+        </button>
+        <button type="button" onclick="switchScheduleTab('extra')" id="sch-tabbtn-extra" class="sch-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="calendar-plus" class="w-3.5 h-3.5 inline mr-1"></i> Días Extra / Refuerzo
+        </button>
+        <button type="button" onclick="switchScheduleTab('overtime')" id="sch-tabbtn-overtime" class="sch-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="timer" class="w-3.5 h-3.5 inline mr-1"></i> Horas Extras
+        </button>
+      </div>
+
+      <!-- Pestaña 1: Franjas Horarias (Slots de 30 min) -->
+      <div id="sch-tab-slots" class="sch-tab-pane space-y-4">
+        <!-- Turnos Rápidos -->
+        <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs">
+          <span class="text-stone-600 font-semibold">Turnos rápidos:</span>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="applyPresetShift('COMPLETO')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">
+              Jornada Completa (09:00 - 20:00)
+            </button>
+            <button type="button" onclick="applyPresetShift('MANANA')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">
+              Solo Mañanas (09:00 - 14:00)
+            </button>
+            <button type="button" onclick="applyPresetShift('TARDE')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">
+              Solo Tardes (16:00 - 20:00)
+            </button>
+            <button type="button" onclick="setAllScheduleSlots(true)" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2.5 py-1 rounded-lg transition cursor-pointer">
+              ✅ Todo Activo
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i> Disponibilidad por Horas (Haz clic para alternar)</span>
+            <span class="text-[10px] text-stone-400 lowercase font-normal">Verde = Citas permitidas | Gris = Franja bloqueada</span>
+          </h5>
+          <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2" id="schedule-slots-grid">
+            <!-- Render dinámico de slots -->
+          </div>
         </div>
       </div>
 
-      <!-- Cuadrícula de Franjas de 30 min -->
-      <div>
-        <h5 class="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-4 h-4 text-purple-600"></i> Franjas Horarias Disponibles (Pulsa para Activar / Desactivar):
-        </h5>
-        <div id="schedule-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 text-xs">
-          <!-- Renderizado dinámico -->
+      <!-- Pestaña 2: Días de Descanso Semanal & Vacaciones -->
+      <div id="sch-tab-rest" class="sch-tab-pane hidden space-y-5">
+        <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+          <h5 class="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i> Días de Descanso Semanal Fijo
+          </h5>
+          <p class="text-xs text-stone-500">Marca los días de la semana en los que la estilista no trabaja de forma habitual.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs font-bold text-stone-700">
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Lunes" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Lunes
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Martes" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Martes
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Miercoles" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Miércoles
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Jueves" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Jueves
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Viernes" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Viernes
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Sabado" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Sábado
+            </label>
+            <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 cursor-pointer">
+              <input type="checkbox" id="rest-day-Domingo" class="rest-day-checkbox accent-indigo-600 w-4 h-4 rounded"> Domingo
+            </label>
+          </div>
+        </div>
+
+        <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="palmtree" class="w-4 h-4 text-emerald-600"></i> Días de Vacaciones & Festivos Concretos
+            </h5>
+            <span class="text-[11px] text-stone-400" id="vacation-dates-count">0 días</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="date" id="input-new-vacation-date" class="bg-white border border-stone-200 px-3 py-2 rounded-xl text-xs font-mono-code text-stone-800">
+            <button type="button" onclick="addVacationDate()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Añadir Fecha
+            </button>
+          </div>
+          <div id="vacation-dates-chips" class="flex flex-wrap gap-1.5 pt-2">
+            <!-- Chips de fechas de vacaciones -->
+          </div>
         </div>
       </div>
 
-      <div class="pt-3 border-t border-stone-100 flex items-center justify-between">
-        <span class="text-[11px] text-stone-400">Las franjas desactivadas aparecerán como no seleccionables en el portal de clientas.</span>
+      <!-- Pestaña 3: Días Extra / Refuerzo -->
+      <div id="sch-tab-extra" class="sch-tab-pane hidden space-y-4">
+        <div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-200 space-y-3">
+          <h5 class="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i> Programar Día Extra de Refuerzo / Guardia
+          </h5>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Fecha</label>
+              <input type="date" id="input-extra-day-date" class="w-full bg-white border border-stone-200 rounded-xl p-2 font-mono-code text-stone-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Turno / Horario</label>
+              <input type="text" id="input-extra-day-shift" placeholder="Ej: 09:00 - 15:00" class="w-full bg-white border border-stone-200 rounded-xl p-2 text-stone-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Motivo / Evento</label>
+              <input type="text" id="input-extra-day-reason" placeholder="Ej: Refuerzo bodas / sábado especial" class="w-full bg-white border border-stone-200 rounded-xl p-2 text-stone-800">
+            </div>
+          </div>
+          <button type="button" onclick="addStaffExtraDay()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Registrar Día Extra
+          </button>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-2">Días Extra Programados</h5>
+          <div class="border border-stone-200 rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-50 text-stone-500 uppercase tracking-wider font-semibold border-b border-stone-200">
+                <tr>
+                  <th class="p-2.5">Fecha</th>
+                  <th class="p-2.5">Turno</th>
+                  <th class="p-2.5">Motivo</th>
+                  <th class="p-2.5 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="staff-extra-days-tbody" class="divide-y divide-stone-100">
+                <!-- Se rellena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 4: Horas Extras -->
+      <div id="sch-tab-overtime" class="sch-tab-pane hidden space-y-4">
+        <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200 space-y-3">
+          <h5 class="text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="timer" class="w-4 h-4 text-amber-600"></i> Registrar Horas Extras Realizadas
+          </h5>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Fecha</label>
+              <input type="date" id="input-overtime-date" class="w-full bg-white border border-stone-200 rounded-xl p-2 font-mono-code text-stone-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Horas Extras</label>
+              <input type="number" step="0.5" min="0.5" max="10" id="input-overtime-hours" placeholder="Ej: 1.5" class="w-full bg-white border border-stone-200 rounded-xl p-2 font-mono-code text-stone-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-stone-700 mb-1">Motivo / Servicio Extendido</label>
+              <input type="text" id="input-overtime-reason" placeholder="Ej: Mechas Balayage clienta Marta" class="w-full bg-white border border-stone-200 rounded-xl p-2 text-stone-800">
+            </div>
+          </div>
+          <button type="button" onclick="addStaffOvertimeRecord()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Registrar Horas Extras
+          </button>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-2">Histórico de Horas Extras de la Estilista</h5>
+          <div class="border border-stone-200 rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-50 text-stone-500 uppercase tracking-wider font-semibold border-b border-stone-200">
+                <tr>
+                  <th class="p-2.5">Fecha</th>
+                  <th class="p-2.5 text-center">Horas</th>
+                  <th class="p-2.5">Motivo</th>
+                  <th class="p-2.5 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="staff-overtime-tbody" class="divide-y divide-stone-100">
+                <!-- Se rellena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie con Botones de Acción -->
+      <div class="flex items-center justify-between border-t border-stone-100 pt-3">
+        <span class="text-[11px] text-stone-400">Sincronizado con la agenda y reservas online</span>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="closeStaffScheduleModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">Cerrar</button>
-          <button type="button" onclick="saveStaffScheduleSlots()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
-            <i data-lucide="save" class="w-4 h-4"></i> Guardar en BD
+          <button type="button" onclick="closeStaffScheduleModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 transition cursor-pointer">
+            Cerrar
+          </button>
+          <button type="button" onclick="saveStaffScheduleModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition shadow-md shadow-indigo-200 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i> Guardar Horario y Configuración
           </button>
         </div>
       </div>
@@ -7508,6 +7712,203 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+
+  <!-- ===================================================================== -->
+  <!-- MODAL FICHA 360 DE CLIENTA (TOTALMENTE EDITABLE) -->
+  <!-- ===================================================================== -->
+  <div id="modal-client-360" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
+            <i data-lucide="user-cog" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="text-lg font-bold text-stone-900 font-serif-luxury" id="c360-title-name">Ficha 360 de Clienta</h4>
+              <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full border border-amber-200" id="c360-badge-vip">Socia VIP</span>
+            </div>
+            <p class="text-xs text-stone-500" id="c360-subtitle-dni">DNI: - | Ficha técnica y preferencias de salón</p>
+          </div>
+        </div>
+        <button onclick="closeClient360Modal()" class="text-stone-400 hover:text-stone-700 cursor-pointer p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="c360-client-id" value="">
+
+      <!-- Pestañas de la Ficha 360 -->
+      <div class="flex border-b border-stone-200 gap-2 overflow-x-auto text-xs font-semibold">
+        <button type="button" onclick="switchC360Tab('personal')" id="c360-tabbtn-personal" class="c360-tab-btn pb-2 px-3 border-b-2 border-indigo-600 text-indigo-700 font-bold whitespace-nowrap">
+          <i data-lucide="user" class="w-3.5 h-3.5 inline mr-1"></i> Datos Personales
+        </button>
+        <button type="button" onclick="switchC360Tab('hair')" id="c360-tabbtn-hair" class="c360-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 inline mr-1"></i> Diagnóstico Capilar & Fórmulas
+        </button>
+        <button type="button" onclick="switchC360Tab('prefs')" id="c360-tabbtn-prefs" class="c360-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="heart" class="w-3.5 h-3.5 inline mr-1"></i> Preferencias Salón
+        </button>
+        <button type="button" onclick="switchC360Tab('loyalty')" id="c360-tabbtn-loyalty" class="c360-tab-btn pb-2 px-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 whitespace-nowrap">
+          <i data-lucide="award" class="w-3.5 h-3.5 inline mr-1"></i> Fidelización & Visitas
+        </button>
+      </div>
+
+      <!-- Tab 1: Datos Personales -->
+      <div id="c360-tab-personal" class="c360-tab-pane space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Nombre Completo *</label>
+            <input type="text" id="c360-name" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-semibold" required>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">DNI / NIE *</label>
+            <input type="text" id="c360-dni" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 font-mono-code font-bold uppercase focus:bg-white focus:border-indigo-500" required>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Teléfono Móvil (WhatsApp)</label>
+            <input type="text" id="c360-phone" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 font-mono-code focus:bg-white focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Email</label>
+            <input type="email" id="c360-email" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Fecha de Nacimiento / Cumpleaños</label>
+            <input type="date" id="c360-birthdate" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 font-mono-code focus:bg-white focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Consentimiento de Comunicaciones</label>
+            <select id="c360-consent" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-medium">
+              <option value="true">✅ Acepta avisos WhatsApp y promociones VIP</option>
+              <option value="false">🚫 Solo avisos estrictos de citas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Diagnóstico Capilar & Fórmulas -->
+      <div id="c360-tab-hair" class="c360-tab-pane hidden space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Tipo de Cabello</label>
+            <select id="c360-hairtype" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-medium">
+              <option value="Liso fino">Liso fino (tiende a apelmazarse)</option>
+              <option value="Liso grueso">Liso grueso y denso</option>
+              <option value="Ondulado 2A-2C">Ondulado natural (2A - 2C)</option>
+              <option value="Rizado 3A-3C">Rizado con volumen (3A - 3C)</option>
+              <option value="Afro 4A-4C">Afro / Muy rizado (4A - 4C)</option>
+              <option value="Decolorado / Poroso">Decolorado / Alta porosidad</option>
+              <option value="Teñido con mechas">Teñido con mechas balayage</option>
+              <option value="Tratado químicamente (Alisado)">Tratado químicamente con alisado / keratina</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Sensibilidad Cuero Cabelludo</label>
+            <select id="c360-scalptype" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-medium">
+              <option value="Normal">Normal y equilibrado</option>
+              <option value="Sensible reactivo">Sensible / Reactivo (picores con amoníaco)</option>
+              <option value="Muy sensible / Atópico">Muy sensible / Piel atópica</option>
+              <option value="Graso con tendencia seborreica">Graso / Tendencia seborreica</option>
+              <option value="Seco con descamación">Seco / Descamación</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-rose-700 mb-1">⚠️ Alergias, Intolerancias y Precauciones</label>
+            <textarea id="c360-allergies" rows="2" class="w-full bg-rose-50/50 border border-rose-200 rounded-xl p-2.5 text-rose-900 focus:bg-white focus:border-rose-500 font-medium placeholder-rose-300" placeholder="Ej: Alergia a PPD, usar exclusivamente coloración orgánica sin amoniaco..."></textarea>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-stone-700 mb-1">🧪 Fórmulas Técnicas Recomendadas & Historial de Color</label>
+            <textarea id="c360-technical" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 font-mono-code focus:bg-white focus:border-indigo-500 placeholder-stone-400" placeholder="Ej: Base raíz 6.1 (30g) + 7.0 (15g) con oxidante 20vol (45g) 35min. Matiz puntas 9.5-1 con 10vol 10min."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Preferencias Salón -->
+      <div id="c360-tab-prefs" class="c360-tab-pane hidden space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Estilista Habitual Preferida</label>
+            <select id="c360-stylist" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-medium">
+              <option value="Sin preferencia">Sin preferencia fija</option>
+              <option value="Elena Gómez">Elena Gómez (Especialista Color)</option>
+              <option value="Raquel Santos">Raquel Santos (Tratamientos & Ondas)</option>
+              <option value="Carmen Vidal">Carmen Vidal (Corte & Styling)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Bebida / Café Favorito</label>
+            <input type="text" id="c360-beverage" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 font-medium" placeholder="Ej: Café con leche de avena sin azúcar, Té verde...">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-stone-700 mb-1">Notas Internas & Estilo de Trato</label>
+            <textarea id="c360-notes" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 text-stone-900 focus:bg-white focus:border-indigo-500 placeholder-stone-400" placeholder="Ej: Le gusta leer revistas durante el tinte. Muy puntual. Le encanta el peinado con ondas al agua."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Fidelización & Visitas -->
+      <div id="c360-tab-loyalty" class="c360-tab-pane hidden space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
+          <div>
+            <span class="text-[11px] font-bold text-amber-900 block mb-1">Sellos Actuales</span>
+            <div class="flex items-center gap-2">
+              <input type="number" id="c360-stamps" min="0" max="8" class="w-16 bg-white border border-amber-300 rounded-xl p-2 text-stone-900 font-black text-center text-sm font-mono-code">
+              <span class="text-xs text-amber-800 font-semibold">/ 8 sellos</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold text-amber-900 block mb-1">Puntos VIP Acumulados</span>
+            <div class="flex items-center gap-2">
+              <input type="number" id="c360-points" min="0" class="w-20 bg-white border border-amber-300 rounded-xl p-2 text-stone-900 font-black text-center text-sm font-mono-code">
+              <span class="text-xs text-amber-800 font-semibold">pts</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold text-amber-900 block mb-1">Tarjetas Completadas</span>
+            <div class="text-xl font-black text-amber-900 font-mono-code pt-1.5" id="c360-completed-cards">0</div>
+          </div>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-bold text-stone-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-indigo-600"></i> Historial Reciente de Visitas & Servicios
+          </h5>
+          <div class="border border-stone-200 rounded-2xl overflow-hidden max-h-48 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stone-50 text-stone-500 uppercase tracking-wider font-semibold border-b border-stone-200">
+                <tr>
+                  <th class="p-2.5">Fecha</th>
+                  <th class="p-2.5">Servicio</th>
+                  <th class="p-2.5">Estilista</th>
+                  <th class="p-2.5 text-right">Importe</th>
+                  <th class="p-2.5 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="c360-history-tbody" class="divide-y divide-stone-100">
+                <!-- Se rellena dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie con Botones de Acción -->
+      <div class="flex items-center justify-between border-t border-stone-100 pt-3">
+        <span class="text-[11px] text-stone-400 italic">Los cambios se guardan en la base de datos de salón</span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeClient360Modal()" class="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveClient360Modal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition shadow-md shadow-indigo-200 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i> Guardar Ficha 360
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -8408,9 +8809,20 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
                 </div>
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer whitespace-nowrap">
-                  <i data-lucide="credit-card" class="w-4 h-4"></i> Cobrar en TPV
-                </button>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'cash')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                    <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Metálico
+                  </button>
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'bizum')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Bizum
+                  </button>
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'card')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                    <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Tarjeta
+                  </button>
+                  <button type="button" onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-1.5 px-2 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap" title="Cobro personalizado en TPV">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
                 <button onclick="dismissNotification('${n.id}')" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg">
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
@@ -8466,6 +8878,171 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         await dismissNotification(n.id);
       }
       pollAdminNotifications();
+    }
+
+    
+    // ========================================================================
+    // COBRO RÁPIDO DESDE AVISOS DE CAJA (METÁLICO, BIZUM, TARJETA)
+    // ========================================================================
+    function quickPayCashierNotice(appointmentId, notificationId, method) {
+      if (notificationId) dismissNotification(notificationId);
+
+      const apt = state.appointments.find(a => a.id === appointmentId);
+      const clientName = apt ? apt.clientName : 'Clienta Salón';
+      const concept = apt ? apt.serviceNames : 'Tratamiento Peluquería';
+      const defaultPrice = (apt && apt.totalPrice) ? apt.totalPrice : 45.00;
+      const staffId = apt ? apt.staffId : 'stf-1';
+      const clientId = apt ? apt.clientId : 'cli-1';
+
+      openChargeModal({
+        appointmentId,
+        clientId,
+        clientName,
+        concept,
+        defaultPrice,
+        staffId,
+        initialMethod: method
+      });
+
+      if (typeof selectChargePaymentMethod === 'function') {
+        selectChargePaymentMethod(method);
+      }
+    }
+
+    // ========================================================================
+    // GESTIÓN DE FICHA 360 DE CLIENTA (TOTALMENTE EDITABLE)
+    // ========================================================================
+    function openClient360Modal(clientId) {
+      const client = state.clients.find(c => c.id === clientId);
+      if (!client) {
+        alert('Clienta no encontrada.');
+        return;
+      }
+
+      document.getElementById('c360-client-id').value = client.id;
+      document.getElementById('c360-title-name').innerText = `Ficha 360 de ${client.name}`;
+      document.getElementById('c360-subtitle-dni').innerText = `DNI: ${client.dni || 'Sin DNI'} | Tel: ${client.phone || '-'} | Salón Losan`;
+
+      const vipBadge = document.getElementById('c360-badge-vip');
+      if (vipBadge) {
+        vipBadge.innerText = (client.stampsCount >= 6 || (client.loyaltyPoints || 0) >= 100) ? '🌟 Socia VIP Oro' : 'Socia Club Salón';
+      }
+
+      // Tab 1: Datos Personales
+      document.getElementById('c360-name').value = client.name || '';
+      document.getElementById('c360-dni').value = client.dni || '';
+      document.getElementById('c360-phone').value = client.phone || '';
+      document.getElementById('c360-email').value = client.email || '';
+      document.getElementById('c360-birthdate').value = client.birthDate || '1992-05-14';
+      if (document.getElementById('c360-consent')) {
+        document.getElementById('c360-consent').value = (client.marketingConsent !== false) ? 'true' : 'false';
+      }
+
+      // Tab 2: Diagnóstico Capilar
+      document.getElementById('c360-hairtype').value = client.hairType || 'Ondulado 2A-2C';
+      document.getElementById('c360-scalptype').value = client.scalpType || 'Normal';
+      document.getElementById('c360-allergies').value = client.allergies || 'Sin alergias conocidas';
+      document.getElementById('c360-technical').value = client.technicalFormulas || client.generalNotes || 'Coloración suave. Tratamiento con ácido hialurónico.';
+
+      // Tab 3: Preferencias
+      document.getElementById('c360-stylist').value = client.preferredStylist || 'Elena Gómez';
+      document.getElementById('c360-beverage').value = client.beveragePreference || 'Café con leche sin azúcar';
+      document.getElementById('c360-notes').value = client.generalNotes || '';
+
+      // Tab 4: Fidelización
+      document.getElementById('c360-stamps').value = client.stampsCount !== undefined ? client.stampsCount : (client.loyaltyStamps || 0);
+      document.getElementById('c360-points').value = client.loyaltyPoints !== undefined ? client.loyaltyPoints : 0;
+      document.getElementById('c360-completed-cards').innerText = client.completedCardsCount || 0;
+
+      // Historial de Citas
+      const clientApts = state.appointments.filter(a => a.clientId === client.id || a.clientName === client.name);
+      const historyTbody = document.getElementById('c360-history-tbody');
+      if (historyTbody) {
+        if (!clientApts.length) {
+          historyTbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-stone-400 italic">No hay citas registradas para esta clienta</td></tr>';
+        } else {
+          historyTbody.innerHTML = clientApts.map(a => `
+            <tr class="hover:bg-stone-50">
+              <td class="p-2.5 font-mono-code font-bold text-stone-900">${new Date(a.startTime).toLocaleDateString('es-ES')}</td>
+              <td class="p-2.5 font-semibold text-stone-800">${a.serviceNames}</td>
+              <td class="p-2.5 text-stone-600">${a.staffName || 'Elena Gómez'}</td>
+              <td class="p-2.5 font-mono-code font-bold text-stone-900 text-right">${a.totalPrice ? a.totalPrice + ' €' : '45.00 €'}</td>
+              <td class="p-2.5 text-center">
+                <span class="inline-block bg-stone-100 text-stone-700 px-2 py-0.5 rounded text-[10px] font-semibold">${a.status}</span>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      switchC360Tab('personal');
+      document.getElementById('modal-client-360').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function switchC360Tab(tabKey) {
+      document.querySelectorAll('.c360-tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'text-indigo-700', 'font-bold');
+        btn.classList.add('border-transparent', 'text-stone-500');
+      });
+      document.querySelectorAll('.c360-tab-pane').forEach(p => p.classList.add('hidden'));
+
+      const activeBtn = document.getElementById('c360-tabbtn-' + tabKey);
+      const activePane = document.getElementById('c360-tab-' + tabKey);
+      if (activeBtn) {
+        activeBtn.classList.add('border-indigo-600', 'text-indigo-700', 'font-bold');
+        activeBtn.classList.remove('border-transparent', 'text-stone-500');
+      }
+      if (activePane) activePane.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeClient360Modal() {
+      document.getElementById('modal-client-360').classList.add('hidden');
+    }
+
+    async function saveClient360Modal() {
+      const clientId = document.getElementById('c360-client-id').value;
+      if (!clientId) return;
+
+      const payload = {
+        name: document.getElementById('c360-name').value.trim(),
+        dni: document.getElementById('c360-dni').value.trim().toUpperCase(),
+        phone: document.getElementById('c360-phone').value.trim(),
+        email: document.getElementById('c360-email').value.trim(),
+        birthDate: document.getElementById('c360-birthdate').value,
+        hairType: document.getElementById('c360-hairtype').value,
+        scalpType: document.getElementById('c360-scalptype').value,
+        allergies: document.getElementById('c360-allergies').value.trim(),
+        technicalFormulas: document.getElementById('c360-technical').value.trim(),
+        preferredStylist: document.getElementById('c360-stylist').value,
+        beveragePreference: document.getElementById('c360-beverage').value.trim(),
+        generalNotes: document.getElementById('c360-notes').value.trim(),
+        stampsCount: Number(document.getElementById('c360-stamps').value),
+        loyaltyPoints: Number(document.getElementById('c360-points').value)
+      };
+
+      try {
+        const res = await fetch(`/api/clients/${clientId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 35 });
+          alert('✅ Ficha 360 actualizada correctamente en la base de datos.');
+          closeClient360Modal();
+          await fetchInitialData();
+          renderAdminCrmTable();
+          populateAllLoyaltyClientSelects();
+          loadVipClientDetails();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Error al guardar Ficha 360.');
+      }
     }
 
     function loadAppointmentIntoPos(aptId, notifId) {
@@ -9244,19 +9821,27 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
 
     async function adjustVipClientLoyalty(action) {
       const select = document.getElementById('select-vip-client');
-      const clientId = select ? select.value : 'cli-1';
+      const clientId = select && select.value ? select.value : (state.clients && state.clients[0] ? state.clients[0].id : 'cli-1');
       try {
         const res = await fetch(`/api/clients/${clientId}/adjust-loyalty`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action })
+          body: JSON.stringify({ action, staffName: 'Gerencia Salón' })
         });
         const data = await res.json();
-        if (typeof confetti === 'function') confetti({ particleCount: 40 });
-        alert('✅ ' + data.message);
-        loadVipClientDetails();
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 45, spread: 65 });
+          alert('✅ ' + data.message);
+          await fetchInitialData();
+          populateAllLoyaltyClientSelects();
+          loadVipClientDetails();
+          renderAdminStampHistory();
+          renderAdminCrmTable();
+        } else {
+          alert('Error: ' + data.error);
+        }
       } catch (e) {
-        alert('Ajuste procesado.');
+        alert('Error al ajustar fidelización.');
       }
     }
 
