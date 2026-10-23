@@ -1,5 +1,5 @@
-// Service Worker para Peluquería Losan — Portal Estilistas PWA
-const CACHE_NAME = 'losan-stylist-pwa-v1';
+// Service Worker para Peluquería — Portal Estilistas PWA
+const CACHE_NAME = 'pelu-stylist-pwa-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

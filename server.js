@@ -18,14 +18,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const db = {
   salonInfo: {
-    name: 'Peluquería Losan',
-    commercialName: 'Peluquería & Estilismo Losan',
-    legalName: 'Peluquería & Estilismo Losan S.L.',
+    name: 'Peluquería',
+    commercialName: 'Peluquería & Estilismo',
+    legalName: 'Peluquería & Estilismo S.L.',
     cif: 'B-87654321',
     tagline: 'Salón Boutique & Cuidado Capilar de Vanguardia',
     phone: '+34 912 345 678',
     whatsapp: '+34 611 223 344',
-    email: 'contacto@peluquerialosan.es',
+    email: 'contacto@peluqueria.es',
     address: 'Calle Velázquez 42, 28001 Madrid',
     schedule: 'Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00',
     vatRateDefault: 21,
@@ -35,7 +35,7 @@ const db = {
     {
       id: 'usr-admin-1',
       username: 'admin',
-      email: 'admin@peluquerialosan.es',
+      email: 'admin@peluqueria.es',
       password: 'admin123',
       role: 'admin',
       firstName: 'Marisa',
@@ -47,7 +47,7 @@ const db = {
     {
       id: 'usr-staff-1',
       username: 'elena',
-      email: 'elena@peluquerialosan.es',
+      email: 'elena@peluqueria.es',
       password: 'elena1234',
       role: 'staff',
       staffId: 'stf-1',
@@ -60,7 +60,7 @@ const db = {
     {
       id: 'usr-staff-2',
       username: 'raquel',
-      email: 'raquel@peluquerialosan.es',
+      email: 'raquel@peluqueria.es',
       password: 'raquel1234',
       role: 'staff',
       staffId: 'stf-2',
@@ -73,7 +73,7 @@ const db = {
     {
       id: 'usr-staff-3',
       username: 'carmen',
-      email: 'carmen@peluquerialosan.es',
+      email: 'carmen@peluqueria.es',
       password: 'carmen1234',
       role: 'staff',
       staffId: 'stf-3',
@@ -115,7 +115,7 @@ const db = {
       isActive: true,
       status: 'active',
       phone: '+34 622 222 222',
-      email: 'elena@peluquerialosan.es',
+      email: 'elena@peluqueria.es',
       leaveReason: '',
       notes: 'Especialista en Balayage y Colorimetría avanzada',
       scheduleConfig: {
@@ -139,7 +139,7 @@ const db = {
       isActive: true,
       status: 'active',
       phone: '+34 633 333 333',
-      email: 'raquel@peluquerialosan.es',
+      email: 'raquel@peluqueria.es',
       leaveReason: '',
       notes: 'Corte de diseño, peinados y recogidos',
       scheduleConfig: {
@@ -163,7 +163,7 @@ const db = {
       isActive: true,
       status: 'active',
       phone: '+34 644 444 444',
-      email: 'carmen@peluquerialosan.es',
+      email: 'carmen@peluqueria.es',
       leaveReason: '',
       notes: 'Tratamientos capilares, keratina e hidratación profunda',
       scheduleConfig: {
@@ -611,7 +611,7 @@ const db = {
   loyaltyConfig: {
     totalStamps: 8,
     rewardDescription: 'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
-    salonQrSecret: 'LOSAN-STAMP-QR-2026',
+    salonQrSecret: 'PELU-STAMP-QR-2026',
     updatedAt: new Date().toISOString()
   },
   stampHistory: [
@@ -809,21 +809,21 @@ const db = {
   giftCards: [
     {
       id: 'gc-1',
-      code: 'REGALO-50-LOSAN',
+      code: 'REGALO-50',
       initialBalance: 50.00,
       remainingBalance: 50.00,
       buyerName: 'Carlos Gómez',
       buyerEmail: 'carlos@example.com',
       recipientName: 'Laura Martínez',
       recipientDni: '12345678Z',
-      message: '¡Feliz cumpleaños Laura! Disfruta de una tarde de relax en Losan.',
+      message: '¡Feliz cumpleaños Laura! Disfruta de una tarde de relax en la peluquería.',
       createdAt: '2026-10-15T12:00:00.000Z',
       expiresAt: '2027-10-15',
       status: 'active'
     },
     {
       id: 'gc-2',
-      code: 'VIP-100-LOSAN',
+      code: 'VIP-100',
       initialBalance: 100.00,
       remainingBalance: 75.00,
       buyerName: 'Javier Sanz',
@@ -1273,7 +1273,7 @@ const db = {
 // MOTOR FISCAL ESPAÑOL (VERI*FACTU & LEY ANTIFRAUDE 11/2021)
 // ============================================================================
 const COMPANY_NIF = 'B-87654321';
-const COMPANY_NAME = 'Peluquería & Estilismo Losan S.L.';
+const COMPANY_NAME = 'Peluquería & Estilismo S.L.';
 
 function calculateNextInvoiceHash(series, nextNumber, issueDateISO, totalTaxBase, totalVatAmount, totalAmount, previousHash) {
   const rawPayload = [
@@ -1982,7 +1982,7 @@ app.post('/api/clients/auth', (req, res) => {
   res.status(201).json({
     success: true,
     isNew: true,
-    message: `¡Bienvenida a Peluquería Losan, ${newClient.name}! Tu ficha técnica ha sido creada con tu DNI ${cleanDni} y has recibido 20 puntos de bienvenida.`,
+    message: `¡Bienvenida a Peluquería, ${newClient.name}! Tu ficha técnica ha sido creada con tu DNI ${cleanDni} y has recibido 20 puntos de bienvenida.`,
     client: newClient,
     appointments: [],
     technicalRecords: []
@@ -2182,7 +2182,7 @@ app.post('/api/loyalty/stamp', (req, res) => {
     totalStampsTarget: targetStamps,
     timestamp: new Date().toISOString(),
     method: method,
-    staffName: staffName || 'Equipo Losan',
+    staffName: staffName || 'Equipo del Salón',
     rewardUnlocked: cardCompleted ? rewardUnlocked : null
   };
 
@@ -2363,12 +2363,12 @@ app.get('/api/invoices/:id/print', (req, res) => {
   }
 
   const salon = db.salonInfo || {
-    legalName: 'Peluquería & Estilismo Losan S.L.',
-    name: 'Peluquería Losan',
+    legalName: 'Peluquería & Estilismo S.L.',
+    name: 'Peluquería',
     cif: 'B-87654321',
     address: 'Calle Velázquez 42, 28001 Madrid',
     phone: '+34 912 345 678',
-    email: 'facturacion@peluquerialosan.es'
+    email: 'facturacion@peluqueria.es'
   };
 
   const formattedDate = new Date(inv.issueDate).toLocaleString('es-ES');
@@ -2599,7 +2599,7 @@ app.post('/api/ai/chat', (req, res) => {
       `✨ **Servicios**: Corte y Estilismo + Coloración Completa\n\n` +
       `Hemos programado tus recordatorios por WhatsApp para 24h y 2h antes de la cita. ¡Queda vinculada directamente a tu expediente técnico de clienta!`;
   } else {
-    reply = `¡Hola, ${client.name}! Soy tu asistente personal de citas de Peluquería Losan. Puedes pedirme ver los servicios, consultar huecos libres con Elena, Raquel o Carmen, o decirme qué necesitas y te buscaré la mejor opción. ¿En qué te ayudo hoy?`;
+    reply = `¡Hola, ${client.name}! Soy tu asistente personal de citas de Peluquería. Puedes pedirme ver los servicios, consultar huecos libres con Elena, Raquel o Carmen, o decirme qué necesitas y te buscaré la mejor opción. ¿En qué te ayudo hoy?`;
   }
 
   res.json({ reply, toolCalled });
@@ -2889,7 +2889,7 @@ app.post('/api/packages/redeem', (req, res) => {
     sessionNumber: cpkg.usedSessions,
     date: dateStr,
     time: timeStr,
-    staffName: staffName || 'Estilista Losan',
+    staffName: staffName || 'Estilista',
     notes: notes || 'Sesión realizada en salón'
   };
 
@@ -2901,7 +2901,7 @@ app.post('/api/packages/redeem', (req, res) => {
   // Generar textos automáticos para WhatsApp y Email
   const discountStr = cpkg.discountPercent ? `${cpkg.discountPercent}% (${cpkg.discountAmount || 0} € de ahorro)` : 'Tarifa especial bono';
   
-  const whatsappText = `✨ *PELUQUERÍA LOSAN - ACTUALIZACIÓN DE TU BONO* ✨\n\n` +
+  const whatsappText = `✨ *PELUQUERÍA - ACTUALIZACIÓN DE TU BONO* ✨\n\n` +
     `¡Hola ${cpkg.clientName}! Acabas de disfrutar de una sesión de tu bono:\n` +
     `💇 *${cpkg.packageName}*\n` +
     `✂️ Sesión realizada por: *${redemptionEntry.staffName}*\n` +
@@ -2912,13 +2912,13 @@ app.post('/api/packages/redeem', (req, res) => {
     `🎁 *Descuento de tu bono:* ${discountStr}\n` +
     `📅 *Válido hasta:* ${cpkg.expiresAt || 'Indefinido'}\n\n` +
     `¡Muchas gracias por confiar en nosotros! Esperamos verte muy pronto en tu próxima sesión. 💕\n` +
-    `📍 Peluquería Losan · Citas: 912 345 678`;
+    `📍 Peluquería · Citas: 912 345 678`;
 
   const cleanDigits = phone.replace(/[^0-9]/g, '');
   const whatsappUrl = cleanDigits ? `https://wa.me/${cleanDigits}?text=${encodeURIComponent(whatsappText)}` : '';
 
-  const emailSubject = `Balance de tu ${cpkg.packageName} - Peluquería Losan`;
-  const emailBody = `Estimada ${cpkg.clientName},\n\nLe confirmamos que ha disfrutado de 1 sesión en Peluquería Losan.\n\n` +
+  const emailSubject = `Balance de tu ${cpkg.packageName} - Peluquería`;
+  const emailBody = `Estimada ${cpkg.clientName},\n\nLe confirmamos que ha disfrutado de 1 sesión en Peluquería.\n\n` +
     `Detalles del servicio:\n` +
     `- Bono: ${cpkg.packageName}\n` +
     `- Sesión consumida: Nº ${cpkg.usedSessions} de ${cpkg.totalSessions}\n` +
@@ -2928,7 +2928,7 @@ app.post('/api/packages/redeem', (req, res) => {
     `✔ Sesiones consumidas: ${cpkg.usedSessions}\n` +
     `⏳ Sesiones pendientes: ${cpkg.remainingSessions}\n` +
     `📅 Válido hasta: ${cpkg.expiresAt}\n\n` +
-    `¡Gracias por su visita y fidelidad!\n\nAtentamente,\nEquipo de Peluquería Losan`;
+    `¡Gracias por su visita y fidelidad!\n\nAtentamente,\nEquipo de Peluquería`;
 
   res.json({
     success: true,
@@ -3026,7 +3026,7 @@ app.post('/api/gift-cards/buy', (req, res) => {
     buyerEmail: buyerEmail || '',
     recipientName: recipientName || 'Destinataria Especial',
     recipientDni: recipientDni ? recipientDni.trim().toUpperCase() : '',
-    message: message || 'Disfruta de tu experiencia de belleza en Peluquería Losan.',
+    message: message || 'Disfruta de tu experiencia de belleza en Peluquería.',
     createdAt: new Date().toISOString(),
     expiresAt: expiresDate.toISOString().slice(0, 10),
     status: 'active'
@@ -3869,7 +3869,7 @@ app.get('/api/time-tracking/export-excel', (req, res) => {
   const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_Losan_${periodLabel}.xlsx"`);
+  res.setHeader('Content-Disposition', `attachment; filename="Registro_Jornada_Laboral_${periodLabel}.xlsx"`);
   res.send(excelBuffer);
 });
 
@@ -3974,7 +3974,7 @@ app.post('/api/auth/users', (req, res) => {
   const newUser = {
     id: 'usr-' + (role === 'admin' ? 'admin-' : 'staff-') + Date.now(),
     username: cleanUser,
-    email: email ? email.trim() : `${cleanUser}@peluquerialosan.es`,
+    email: email ? email.trim() : `${cleanUser}@peluqueria.es`,
     password: password.trim(),
     role: role || 'staff',
     staffId: staffId || null,
@@ -4355,7 +4355,7 @@ app.get('/api/loyalty/export-excel', (req, res) => {
 
   const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename="Historico_Sellos_Fidelizacion_Losan.xlsx"');
+  res.setHeader('Content-Disposition', 'attachment; filename="Historico_Sellos_Fidelizacion.xlsx"');
   res.send(buffer);
 });
 
@@ -4623,7 +4623,7 @@ app.post('/api/packages', (req, res) => {
     id: 'pkg-' + Date.now(),
     name: name ? name.trim() : 'Nuevo Bono de Belleza',
     category: category || 'peinado',
-    description: description || 'Bono multisesión Losan',
+    description: description || 'Bono multisesión',
     totalSessions: Number(totalSessions) || 5,
     price: Number(price) || 75.00,
     regularPrice: Number(regularPrice) || 90.00,
@@ -4843,7 +4843,7 @@ if (!db.cardTransactions) {
       cardBrand: 'VISA',
       cardMask: '**** **** **** 4242',
       authCode: 'AUTH-849201',
-      terminalId: 'TPV-LOSAN-01',
+      terminalId: 'TPV-PELU-01',
       status: 'APPROVED',
       invoiceId: 'inv-101'
     },
@@ -4859,7 +4859,7 @@ if (!db.cardTransactions) {
       cardBrand: 'MASTERCARD',
       cardMask: '**** **** **** 8812',
       authCode: 'AUTH-710394',
-      terminalId: 'TPV-LOSAN-01',
+      terminalId: 'TPV-PELU-01',
       status: 'APPROVED',
       invoiceId: 'inv-102'
     }
@@ -4960,7 +4960,7 @@ app.post('/api/payments/charge', (req, res) => {
     const last4 = rawNum.slice(-4) || '4242';
     const brand = cardDetails.brand || (rawNum.startsWith('4') ? 'VISA' : (rawNum.startsWith('5') ? 'MASTERCARD' : 'TARJETA BANCARIA'));
     const authCode = cardDetails.authCode || 'AUTH-' + Math.floor(100000 + Math.random() * 900000);
-    const terminalId = cardDetails.terminalId || 'TPV-LOSAN-01';
+    const terminalId = cardDetails.terminalId || 'TPV-PELU-01';
 
     const now = new Date();
     transactionRecord = {

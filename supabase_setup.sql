@@ -66,20 +66,20 @@ END $;
 -- 2.1 Datos y Configuración General de la Peluquería (Título y Datos Fiscales)
 CREATE TABLE IF NOT EXISTS salon_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(150) NOT NULL DEFAULT 'Peluquería Losan',
-    commercial_name VARCHAR(150) NOT NULL DEFAULT 'Peluquería & Estilismo Losan',
-    legal_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo Losan S.L.',
+    name VARCHAR(150) NOT NULL DEFAULT 'Peluquería',
+    commercial_name VARCHAR(150) NOT NULL DEFAULT 'Peluquería & Estilismo',
+    legal_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo S.L.',
     cif VARCHAR(20) NOT NULL DEFAULT 'B-87654321',
     tagline VARCHAR(255) DEFAULT 'Salón Boutique & Cuidado Capilar de Vanguardia',
     phone VARCHAR(30) DEFAULT '+34 912 345 678',
     whatsapp VARCHAR(30) DEFAULT '+34 611 223 344',
-    email VARCHAR(100) DEFAULT 'contacto@peluquerialosan.es',
+    email VARCHAR(100) DEFAULT 'contacto@peluqueria.es',
     address TEXT DEFAULT 'Calle Velázquez 42, 28001 Madrid',
     schedule_text TEXT DEFAULT 'Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00',
     default_vat_rate NUMERIC(5,2) DEFAULT 21.00,
     loyalty_stamps_required INT DEFAULT 8,
     loyalty_stamp_reward TEXT DEFAULT 'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
-    salon_qr_secret VARCHAR(100) DEFAULT 'LOSAN-STAMP-QR-2026',
+    salon_qr_secret VARCHAR(100) DEFAULT 'PELU-STAMP-QR-2026',
     currency VARCHAR(10) DEFAULT 'EUR',
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS stamp_history (
     stamped_at TIMESTAMPTZ DEFAULT NOW(),
     method VARCHAR(50) NOT NULL DEFAULT 'QR_SALON_SCAN', -- 'QR_SALON_SCAN' o 'TPV_MANUAL_STAMP'
     staff_id UUID REFERENCES staff(id) ON DELETE SET NULL,
-    staff_name VARCHAR(100) DEFAULT 'Equipo Losan',
+    staff_name VARCHAR(100) DEFAULT 'Equipo del Salón',
     reward_unlocked TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -663,33 +663,33 @@ CREATE POLICY "Admin full access gift cards" ON gift_cards FOR ALL USING (true);
 -- 6.1 Datos de la Peluquería
 INSERT INTO salon_settings (name, commercial_name, legal_name, cif, tagline, phone, whatsapp, email, address, schedule_text)
 VALUES (
-    'Peluquería Losan',
-    'Peluquería & Estilismo Losan',
-    'Peluquería & Estilismo Losan S.L.',
+    'Peluquería',
+    'Peluquería & Estilismo',
+    'Peluquería & Estilismo S.L.',
     'B-87654321',
     'Salón Boutique & Cuidado Capilar de Vanguardia',
     '+34 912 345 678',
     '+34 611 223 344',
-    'contacto@peluquerialosan.es',
+    'contacto@peluqueria.es',
     'Calle Velázquez 42, 28001 Madrid',
     'Lunes a Viernes: 09:30 - 19:30 | Sábados: 09:00 - 14:00'
 ) ON CONFLICT DO NOTHING;
 
 -- 6.2 Perfiles y Usuarios
 INSERT INTO profiles (id, username, email, password_hash, dni, phone, role, first_name, last_name, is_active) VALUES
-('a0000000-0000-0000-0000-000000000001', 'admin', 'admin@peluquerialosan.es', 'admin123', '50123456M', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
-('a0000000-0000-0000-0000-000000000002', 'elena', 'elena@peluquerialosan.es', 'elena1234', '54321678E', '+34 622 222 222', 'staff', 'Elena', 'Gómez', true),
-('a0000000-0000-0000-0000-000000000003', 'raquel', 'raquel@peluquerialosan.es', 'raquel1234', '71234567R', '+34 633 333 333', 'staff', 'Raquel', 'Santos', true),
-('a0000000-0000-0000-0000-000000000004', 'carmen', 'carmen@peluquerialosan.es', 'carmen1234', '38912456C', '+34 644 444 444', 'staff', 'Carmen', 'Vidal', true),
+('a0000000-0000-0000-0000-000000000001', 'admin', 'admin@peluqueria.es', 'admin123', '50123456M', '+34 611 111 111', 'admin', 'Marisa', 'Garrido (Gerente)', true),
+('a0000000-0000-0000-0000-000000000002', 'elena', 'elena@peluqueria.es', 'elena1234', '54321678E', '+34 622 222 222', 'staff', 'Elena', 'Gómez', true),
+('a0000000-0000-0000-0000-000000000003', 'raquel', 'raquel@peluqueria.es', 'raquel1234', '71234567R', '+34 633 333 333', 'staff', 'Raquel', 'Santos', true),
+('a0000000-0000-0000-0000-000000000004', 'carmen', 'carmen@peluqueria.es', 'carmen1234', '38912456C', '+34 644 444 444', 'staff', 'Carmen', 'Vidal', true),
 ('a0000000-0000-0000-0000-000000000005', null, 'laura@gmail.com', null, '12345678Z', '+34 655 555 555', 'client', 'Laura', 'Martínez', true),
 ('a0000000-0000-0000-0000-000000000006', null, 'sofia@gmail.com', null, '87654321X', '+34 666 666 666', 'client', 'Sofía', 'Morales', true)
 ON CONFLICT (phone) DO NOTHING;
 
 -- 6.3 Plantilla de Estilistas (Altas Activas)
 INSERT INTO staff (id, profile_id, name, specialty, chair, phone, email, display_color, is_active, status, notes) VALUES
-('b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'Elena Gómez', 'Colorimetría & Balayage', 'Sillón 1 (Color)', '+34 622 222 222', 'elena@peluquerialosan.es', '#8B5CF6', true, 'active', 'Especialista Máster en Balayage y Colorimetría avanzada'),
-('b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'Raquel Santos', 'Cortes & Estilismo', 'Sillón 2 (Cortes)', '+34 633 333 333', 'raquel@peluquerialosan.es', '#EC4899', true, 'active', 'Corte de diseño, peinados y recogidos de novia'),
-('b0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000004', 'Carmen Vidal', 'Tratamientos & Salud Capilar', 'Sillón 3 (Tratamientos)', '+34 644 444 444', 'carmen@peluquerialosan.es', '#10B981', true, 'active', 'Tratamientos capilares, keratina e hidratación profunda')
+('b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'Elena Gómez', 'Colorimetría & Balayage', 'Sillón 1 (Color)', '+34 622 222 222', 'elena@peluqueria.es', '#8B5CF6', true, 'active', 'Especialista Máster en Balayage y Colorimetría avanzada'),
+('b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', 'Raquel Santos', 'Cortes & Estilismo', 'Sillón 2 (Cortes)', '+34 633 333 333', 'raquel@peluqueria.es', '#EC4899', true, 'active', 'Corte de diseño, peinados y recogidos de novia'),
+('b0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000004', 'Carmen Vidal', 'Tratamientos & Salud Capilar', 'Sillón 3 (Tratamientos)', '+34 644 444 444', 'carmen@peluqueria.es', '#10B981', true, 'active', 'Tratamientos capilares, keratina e hidratación profunda')
 ON CONFLICT DO NOTHING;
 
 -- 6.4 Clientas con DNI / NIE Fundamental
@@ -753,7 +753,7 @@ ON CONFLICT DO NOTHING;
 -- 6.11 Tarjetas Regalo y Bonos
 INSERT INTO gift_cards (code, purchased_by_client_id, recipient_name, initial_balance, current_balance, expires_at)
 VALUES (
-    'REGALO-LOSAN-50',
+    'REGALO-50',
     'c0000000-0000-0000-0000-000000000001',
     'Marta Sánchez',
     50.00,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- 💈 PELUQUERÍA LOSAN - ESQUEMA DE BASE DE DATOS COMPLETO PARA SUPABASE (POSTGRESQL)
+-- 💈 PELUQUERÍA - ESQUEMA DE BASE DE DATOS COMPLETO PARA SUPABASE (POSTGRESQL)
 -- ============================================================================
 -- Este script crea todas las tablas, relaciones, índices, triggers de actualización,
 -- configuración de Row Level Security (RLS) y datos iniciales para Supabase.
@@ -52,14 +52,14 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.salon_info (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(150) NOT NULL DEFAULT 'Peluquería Losan',
-  commercial_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo Losan',
-  legal_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo Losan S.L.',
+  name VARCHAR(150) NOT NULL DEFAULT 'Peluquería',
+  commercial_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo',
+  legal_name VARCHAR(200) NOT NULL DEFAULT 'Peluquería & Estilismo S.L.',
   cif VARCHAR(50) NOT NULL DEFAULT 'B-87654321',
   tagline VARCHAR(255) DEFAULT 'Salón Boutique & Cuidado Capilar de Vanguardia',
   phone VARCHAR(50) DEFAULT '+34 912 345 678',
   whatsapp VARCHAR(50) DEFAULT '+34 611 223 344',
-  email VARCHAR(150) DEFAULT 'contacto@peluquerialosan.es',
+  email VARCHAR(150) DEFAULT 'contacto@peluqueria.es',
   address VARCHAR(255) DEFAULT 'Calle Alcalá 124, 28009 Madrid',
   schedule VARCHAR(255) DEFAULT 'Lunes a Viernes: 09:30 - 20:00 | Sábados: 09:00 - 15:00',
   vat_rate_default NUMERIC(5,2) DEFAULT 21.00,
@@ -440,7 +440,7 @@ CREATE TABLE IF NOT EXISTS public.loyalty_config (
   id INT PRIMARY KEY DEFAULT 1,
   total_stamps INT NOT NULL DEFAULT 8,
   reward_description TEXT NOT NULL DEFAULT 'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
-  salon_qr_secret VARCHAR(100) NOT NULL DEFAULT 'LOSAN-STAMP-QR-2026',
+  salon_qr_secret VARCHAR(100) NOT NULL DEFAULT 'PELU-STAMP-QR-2026',
   points_per_euro NUMERIC(5,2) DEFAULT 1.00,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -696,13 +696,13 @@ CREATE POLICY "Fichas técnicas" ON public.technical_records FOR ALL USING (true
 INSERT INTO public.salon_info (id, name, commercial_name, legal_name, cif, phone, whatsapp, email, address)
 VALUES (
   'a0000000-0000-0000-0000-000000000001',
-  'Peluquería Losan',
-  'Peluquería & Estilismo Losan',
-  'Peluquería & Estilismo Losan S.L.',
+  'Peluquería',
+  'Peluquería & Estilismo',
+  'Peluquería & Estilismo S.L.',
   'B-87654321',
   '+34 912 345 678',
   '+34 611 223 344',
-  'contacto@peluquerialosan.es',
+  'contacto@peluqueria.es',
   'Calle Alcalá 124, 28009 Madrid'
 ) ON CONFLICT DO NOTHING;
 
@@ -712,16 +712,16 @@ VALUES (
   1,
   8,
   'Tratamiento de Hidratación Profunda Olaplex o Corte Gratis',
-  'LOSAN-STAMP-QR-2026'
+  'PELU-STAMP-QR-2026'
 ) ON CONFLICT (id) DO NOTHING;
 
 -- C. Usuarios Requeridos (Admin y Estilistas)
 INSERT INTO public.users (id, username, email, password_hash, role, first_name, last_name, display_name, phone, is_active)
 VALUES
-  ('usr-admin-1', 'admin', 'admin@peluquerialosan.es', 'admin123', 'admin', 'Marisa', 'Garrido', 'Marisa Garrido (Gerente)', '34611111111', TRUE),
-  ('usr-staff-1', 'elena', 'elena@peluquerialosan.es', 'elena1234', 'staff', 'Elena', 'Gómez', 'Elena Gómez (Colorimetría)', '34622222222', TRUE),
-  ('usr-staff-2', 'raquel', 'raquel@peluquerialosan.es', 'raquel1234', 'staff', 'Raquel', 'Santos', 'Raquel Santos (Cortes & Estilismo)', '34633333333', TRUE),
-  ('usr-staff-3', 'carmen', 'carmen@peluquerialosan.es', 'carmen1234', 'staff', 'Carmen', 'Vidal', 'Carmen Vidal (Tratamientos)', '34644444444', TRUE),
+  ('usr-admin-1', 'admin', 'admin@peluqueria.es', 'admin123', 'admin', 'Marisa', 'Garrido', 'Marisa Garrido (Gerente)', '34611111111', TRUE),
+  ('usr-staff-1', 'elena', 'elena@peluqueria.es', 'elena1234', 'staff', 'Elena', 'Gómez', 'Elena Gómez (Colorimetría)', '34622222222', TRUE),
+  ('usr-staff-2', 'raquel', 'raquel@peluqueria.es', 'raquel1234', 'staff', 'Raquel', 'Santos', 'Raquel Santos (Cortes & Estilismo)', '34633333333', TRUE),
+  ('usr-staff-3', 'carmen', 'carmen@peluqueria.es', 'carmen1234', 'staff', 'Carmen', 'Vidal', 'Carmen Vidal (Tratamientos)', '34644444444', TRUE),
   ('usr-client-1', 'laura', 'laura.martinez@email.com', 'client123', 'client', 'Laura', 'Martínez', 'Laura Martínez', '34655555555', TRUE)
 ON CONFLICT (id) DO UPDATE SET
   username = EXCLUDED.username,
@@ -730,9 +730,9 @@ ON CONFLICT (id) DO UPDATE SET
 -- D. Estilistas Profesionales
 INSERT INTO public.staff (id, user_id, name, dni, phone, email, display_color, specialty, chair, is_available, is_active, status)
 VALUES
-  ('stf-1', 'usr-staff-1', 'Elena Gómez', '54321678E', '+34 622 222 222', 'elena@peluquerialosan.es', '#8B5CF6', 'Colorimetría & Balayage', 'Sillón 1 (Color)', TRUE, TRUE, 'active'),
-  ('stf-2', 'usr-staff-2', 'Raquel Santos', '43218765R', '+34 633 333 333', 'raquel@peluquerialosan.es', '#EC4899', 'Corte de Precisión & Styling', 'Sillón 2 (Corte)', TRUE, TRUE, 'active'),
-  ('stf-3', 'usr-staff-3', 'Carmen Vidal', '32165498C', '+34 644 444 444', 'carmen@peluquerialosan.es', '#10B981', 'Tratamientos Capilares & Brushing', 'Sillón 3 (Spa Capilar)', TRUE, TRUE, 'active')
+  ('stf-1', 'usr-staff-1', 'Elena Gómez', '54321678E', '+34 622 222 222', 'elena@peluqueria.es', '#8B5CF6', 'Colorimetría & Balayage', 'Sillón 1 (Color)', TRUE, TRUE, 'active'),
+  ('stf-2', 'usr-staff-2', 'Raquel Santos', '43218765R', '+34 633 333 333', 'raquel@peluqueria.es', '#EC4899', 'Corte de Precisión & Styling', 'Sillón 2 (Corte)', TRUE, TRUE, 'active'),
+  ('stf-3', 'usr-staff-3', 'Carmen Vidal', '32165498C', '+34 644 444 444', 'carmen@peluqueria.es', '#10B981', 'Tratamientos Capilares & Brushing', 'Sillón 3 (Spa Capilar)', TRUE, TRUE, 'active')
 ON CONFLICT (id) DO NOTHING;
 
 -- E. Horarios Base de Estilistas

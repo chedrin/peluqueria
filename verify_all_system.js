@@ -14,7 +14,7 @@ async function testApi(path, options = {}) {
 }
 
 async function runFullVerification() {
-  console.log('=== VERIFICACIÓN INTEGRAL DE SISTEMA PELUQUERÍA LOSAN ===\n');
+  console.log('=== VERIFICACIÓN INTEGRAL DE SISTEMA PELUQUERÍA ===\n');
 
   // 1. GESTIÓN DE CLAVES Y USUARIOS EN BD
   const users = await testApi('/api/auth/users');

@@ -78,7 +78,7 @@ async function runTests() {
     specialty: 'Master Colorimetría & Balayage',
     chair: 'Sillón 1 (Color VIP)',
     phone: '612 999 888',
-    email: 'elena.vega@losan.es',
+    email: 'elena.vega@peluqueria.es',
     displayColor: '#7c3aed'
   });
   console.log('✅ PUT /api/staff/:id:', editStaffRes.status === 200 ? 'UPDATED' : 'FAIL', editStaffRes.data.staff?.name);

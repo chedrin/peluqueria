@@ -1,4 +1,4 @@
-# 💇‍♀️ Peluquería & Estilismo Losan — Plataforma Integral de Gestión
+# 💇‍♀️ Peluquería & Estilismo — Plataforma Integral de Gestión
 
 > Aplicación web integral para la gestión de salones de peluquería y belleza, con control de acceso basado en roles (**RBAC**), agente de citas con **IA conversacional & Tool Calling**, protocolo de **contingencia por baja médica**, y motor de **facturación inalterable Veri*Factu** conforme a la **Ley Antifraude Española 11/2021** y **RD 1007/2023**.
 

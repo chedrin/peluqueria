@@ -1,7 +1,7 @@
 {
-  "name": "Peluquería Losan — App Oficial (Citas, Fidelización & Gestión)",
-  "short_name": "Peluquería Losan",
-  "description": "App oficial de Peluquería & Estilismo Losan. Reserva citas online con asesoría IA, acumula sellos en tu tarjeta digital, y acceso a administración y control horario.",
+  "name": "Peluquería — App Oficial (Citas, Fidelización & Gestión)",
+  "short_name": "Peluquería",
+  "description": "App oficial de Peluquería & Estilismo. Reserva citas online con asesoría IA, acumula sellos en tu tarjeta digital, y acceso a administración y control horario.",
   "start_url": "/#clientes",
   "scope": "/",
   "display": "standalone",
