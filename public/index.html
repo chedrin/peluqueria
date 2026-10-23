@@ -7230,67 +7230,89 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
   <!-- ========================================================================= -->
   <!-- MODAL: CREAR / EDITAR SERVICIO (DURACIÓN, MATERIALES, PRECIO) -->
   <!-- ========================================================================= -->
-  <div id="modal-service-edit" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white border border-stone-200 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+  <div id="modal-service-edit" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl relative max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-stone-100 pb-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
-            <i data-lucide="scissors" class="w-5 h-5 text-purple-600"></i>
+          <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center shadow-xs">
+            <i data-lucide="sparkles" class="w-6 h-6 text-indigo-600"></i>
           </div>
           <div>
-            <h4 class="text-base font-bold text-stone-900 font-serif-luxury" id="service-modal-title">Configurar Servicio</h4>
-            <span class="text-[11px] text-stone-500">Duración en minutos, agrupación de huecos y consumibles</span>
+            <h4 class="text-lg font-bold text-stone-900 font-serif-luxury" id="service-modal-title">Editar Servicio</h4>
+            <span class="text-xs text-stone-500">Configuración completa de catálogo, duración en agenda y consumibles</span>
           </div>
         </div>
-        <button onclick="closeServiceEditModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+        <button type="button" onclick="closeServiceEditModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <form onsubmit="submitServiceEdit(event)" class="space-y-3 text-xs">
+      <form onsubmit="submitServiceEdit(event)" class="space-y-4 text-xs">
         <input type="hidden" id="modal-srv-id" value="">
 
         <div>
-          <label class="block font-bold text-stone-700 mb-1">Nombre del Servicio *</label>
-          <input type="text" id="modal-srv-name" required placeholder="Ej. Color Completo + Matiz Gloss" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-bold text-stone-900">
+          <label class="block font-bold text-stone-800 mb-1">Nombre del Servicio / Tratamiento *</label>
+          <input type="text" id="modal-srv-name" required placeholder="Ej. Mechas Balayage & Matiz Gloss" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3.5 py-2.5 font-bold text-stone-900 text-sm focus:bg-white focus:border-indigo-500">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-bold text-stone-700 mb-1">Categoría *</label>
-            <select id="modal-srv-category" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-semibold">
-              <option value="Color">Coloración & Mechas</option>
-              <option value="Corte">Corte & Peinado</option>
-              <option value="Tratamiento">Tratamiento & Spa Capilar</option>
-              <option value="Especial">Novias & Eventos</option>
+            <label class="block font-bold text-stone-700 mb-1">Categoría de Servicio *</label>
+            <select id="modal-srv-category" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 font-semibold text-stone-900 focus:bg-white focus:border-indigo-500">
+              <option value="coloracion">🎨 Coloración & Mechas</option>
+              <option value="corte">✂️ Corte & Estilismo</option>
+              <option value="peinado">💨 Peinado & Brushing</option>
+              <option value="tratamiento">✨ Tratamiento & Spa Capilar</option>
+              <option value="especial">👰 Novias & Eventos VIP</option>
             </select>
           </div>
           <div>
-            <label class="block font-bold text-stone-700 mb-1">Duración Estimada (Minutos) *</label>
-            <select id="modal-srv-duration" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-purple-800">
-              <option value="30">30 min (1 cita de 30m)</option>
-              <option value="45">45 min (1 cita extendida)</option>
-              <option value="60">60 min (2 citas de 30m)</option>
-              <option value="90">90 min (3 citas de 30m agrupadas)</option>
-              <option value="120">120 min (4 citas agrupadas)</option>
-              <option value="150">150 min (5 citas agrupadas)</option>
-            </select>
+            <label class="block font-bold text-stone-700 mb-1">Precio PVP con IVA (€) *</label>
+            <div class="relative">
+              <input type="number" step="0.5" min="0" id="modal-srv-price" required placeholder="45.00" class="w-full bg-stone-50 border border-stone-300 rounded-xl pl-3 pr-8 py-2.5 font-mono-code font-bold text-stone-900 text-sm focus:bg-white focus:border-indigo-500">
+              <span class="absolute right-3 top-2.5 text-stone-400 font-bold">€</span>
+            </div>
           </div>
         </div>
 
-        <div>
-          <label class="block font-bold text-stone-700 mb-1">Precio al Público con IVA (€) *</label>
-          <input type="number" step="0.5" min="0" id="modal-srv-price" required value="45.00" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-stone-900">
+        <!-- Duración y Cálculo de Franjas en Agenda -->
+        <div class="p-3.5 bg-purple-50/50 rounded-2xl border border-purple-200 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold text-purple-950">Duración Estimada del Servicio *</label>
+            <span class="text-[11px] font-bold text-purple-700 font-mono-code" id="modal-srv-slots-indicator">Ocupa 2 citas de 30 min (60 min)</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="number" step="5" min="10" max="360" id="modal-srv-duration" oninput="updateServiceSlotsIndicator()" required value="45" class="w-24 bg-white border border-purple-300 rounded-xl px-3 py-2 font-mono-code font-black text-purple-900 text-sm text-center">
+            <span class="text-xs text-purple-800 font-semibold">minutos</span>
+            
+            <!-- Presets rápidos -->
+            <div class="flex flex-wrap items-center gap-1 text-[10px] ml-auto">
+              <button type="button" onclick="setServiceDurationPreset(30)" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-2 py-1 rounded-lg cursor-pointer">30m</button>
+              <button type="button" onclick="setServiceDurationPreset(45)" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-2 py-1 rounded-lg cursor-pointer">45m</button>
+              <button type="button" onclick="setServiceDurationPreset(60)" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-2 py-1 rounded-lg cursor-pointer">60m</button>
+              <button type="button" onclick="setServiceDurationPreset(90)" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-2 py-1 rounded-lg cursor-pointer">90m</button>
+              <button type="button" onclick="setServiceDurationPreset(120)" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold px-2 py-1 rounded-lg cursor-pointer">120m</button>
+            </div>
+          </div>
+          <p class="text-[10px] text-purple-600">Al reservar este tratamiento, la agenda bloqueará automáticamente el número de huecos de 30 min necesarios según este tiempo.</p>
         </div>
 
         <div>
-          <label class="block font-bold text-stone-700 mb-1">Materiales y Productos Necesarios</label>
-          <textarea id="modal-srv-materials" rows="2" placeholder="Ej. Tinte Igora 60ml, Oxigenada 20V 60ml, Capa desechable, Champú Post-Color" class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-mono-code text-[11px]"></textarea>
+          <label class="block font-bold text-stone-700 mb-1">Materiales y Productos Necesarios (Ficha Técnica)</label>
+          <textarea id="modal-srv-materials" rows="2" placeholder="Ej. Polvo decolorante Blondme (45g), oxidante 20vol (90ml), matizador 9.5-1, paletina balayage, papel térmico..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 font-mono-code text-[11px] focus:bg-white focus:border-indigo-500"></textarea>
         </div>
 
-        <div class="pt-2 flex justify-end gap-2">
-          <button type="button" onclick="closeServiceEditModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">Cancelar</button>
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Descripción Breve para la Clienta (Web / App)</label>
+          <textarea id="modal-srv-description" rows="2" placeholder="Breve descripción que ve la clienta al reservar cita en el salón..." class="w-full bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-stone-800 text-[11px] focus:bg-white focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-stone-100">
+          <button type="button" onclick="closeServiceEditModal()" class="px-4 py-2.5 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-200 transition cursor-pointer">
             <i data-lucide="save" class="w-4 h-4"></i> Guardar Servicio
           </button>
         </div>
@@ -9514,37 +9536,108 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         if (res.ok) state.services = await res.json();
       } catch (e) {}
 
-      tbody.innerHTML = state.services.map(s => `
-        <tr class="hover:bg-stone-50 transition">
-          <td class="p-3 font-bold text-stone-900">${s.name}</td>
-          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">${s.category || 'Peluquería'}</span></td>
-          <td class="p-3 text-center font-mono-code font-bold text-purple-700">${s.durationMinutes} min</td>
-          <td class="p-3 text-right font-mono-code font-bold text-stone-900">${s.price.toFixed(2)} €</td>
-          <td class="p-3 text-stone-600 font-mono-code text-[11px] truncate max-w-xs">${s.requiredMaterials || 'Productos estándar'}</td>
-          <td class="p-3 text-right whitespace-nowrap space-x-1">
-            <button onclick="openChargeModal({ serviceId: '${s.id}', concept: '${s.name}', defaultPrice: ${s.price} })" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-xl text-xs inline-flex items-center gap-1 shadow-2xs transition cursor-pointer">
-              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Cobrar
-            </button>
-            <button onclick="openServiceEditModal('${s.id}')" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-2 py-1 rounded">Editar</button>
-            <button onclick="deleteService('${s.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded">Eliminar</button>
-          </td>
-        </tr>
-      `).join('');
-      lucide.createIcons();
+      if (!state.services || !state.services.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-stone-400 italic">No hay servicios registrados en el catálogo</td></tr>';
+        return;
+      }
+
+      const categoryLabels = {
+        'coloracion': '🎨 Coloración & Mechas',
+        'corte': '✂️ Corte & Estilismo',
+        'peinado': '💨 Peinado & Brushing',
+        'tratamiento': '✨ Tratamiento Capilar',
+        'especial': '👰 Novias & Eventos'
+      };
+
+      tbody.innerHTML = state.services.map(s => {
+        const catKey = (s.category || 'corte').toLowerCase();
+        const catLabel = categoryLabels[catKey] || s.category || 'Peluquería';
+        const duration = s.durationMinutes || s.duration || 30;
+        const slotsCount = Math.ceil(duration / 30);
+
+        return `
+          <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+            <td class="p-3 font-bold text-stone-900">
+              <span class="block text-sm font-bold text-stone-900">${s.name}</span>
+              ${s.description ? `<span class="block text-[11px] text-stone-400 font-normal italic truncate max-w-xs">${s.description}</span>` : ''}
+            </td>
+            <td class="p-3">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap">
+                ${catLabel}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              <span class="font-mono-code font-bold text-purple-700 text-xs block">${duration} min</span>
+              <span class="text-[10px] text-stone-400 block font-medium">(${slotsCount} ${slotsCount === 1 ? 'cita' : 'citas'} de 30m)</span>
+            </td>
+            <td class="p-3 text-right font-mono-code font-bold text-stone-900 text-sm">
+              ${s.price.toFixed(2)} €
+            </td>
+            <td class="p-3 text-stone-600 font-mono-code text-[11px] truncate max-w-xs" title="${s.requiredMaterials || 'Productos estándar'}">
+              ${s.requiredMaterials || 'Productos estándar'}
+            </td>
+            <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+              <button type="button" onclick="openChargeModal({ serviceId: '${s.id}', concept: '${s.name}', defaultPrice: ${s.price} })" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs inline-flex items-center gap-1 shadow-2xs transition cursor-pointer">
+                <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Cobrar
+              </button>
+              <button type="button" onclick="openServiceEditModal('${s.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1.5 rounded-xl text-xs inline-flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+              </button>
+              <button type="button" onclick="deleteService('${s.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-2.5 py-1.5 rounded-xl text-xs inline-flex items-center gap-1 transition cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Eliminar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function openServiceEditModal(id) {
       const s = id ? state.services.find(x => x.id === id) : null;
-      document.getElementById('service-modal-title').innerText = s ? 'Editar Servicio' : 'Nuevo Servicio';
+      document.getElementById('service-modal-title').innerText = s ? `Editar Servicio: ${s.name}` : 'Nuevo Servicio de Peluquería';
       document.getElementById('modal-srv-id').value = s ? s.id : '';
       document.getElementById('modal-srv-name').value = s ? s.name : '';
-      document.getElementById('modal-srv-category').value = s ? (s.category || 'Color') : 'Color';
-      document.getElementById('modal-srv-duration').value = s ? s.durationMinutes : '45';
-      document.getElementById('modal-srv-price').value = s ? s.price : '35.00';
+
+      const categorySelect = document.getElementById('modal-srv-category');
+      if (categorySelect) {
+        const rawCat = (s && s.category ? s.category : 'coloracion').toLowerCase();
+        if (rawCat.includes('corte')) categorySelect.value = 'corte';
+        else if (rawCat.includes('color') || rawCat.includes('mecha') || rawCat.includes('tinte')) categorySelect.value = 'coloracion';
+        else if (rawCat.includes('peinado') || rawCat.includes('brushing')) categorySelect.value = 'peinado';
+        else if (rawCat.includes('tratamiento') || rawCat.includes('olaplex') || rawCat.includes('keratina')) categorySelect.value = 'tratamiento';
+        else categorySelect.value = 'especial';
+      }
+
+      const duration = s ? (s.durationMinutes || s.duration || 45) : 45;
+      document.getElementById('modal-srv-duration').value = duration;
+      updateServiceSlotsIndicator();
+
+      document.getElementById('modal-srv-price').value = s ? (s.price !== undefined ? s.price.toFixed(2) : '35.00') : '35.00';
       document.getElementById('modal-srv-materials').value = s ? (s.requiredMaterials || '') : '';
+      if (document.getElementById('modal-srv-description')) {
+        document.getElementById('modal-srv-description').value = s ? (s.description || '') : '';
+      }
 
       document.getElementById('modal-service-edit').classList.remove('hidden');
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateServiceSlotsIndicator() {
+      const durationInput = document.getElementById('modal-srv-duration');
+      const indicator = document.getElementById('modal-srv-slots-indicator');
+      if (!durationInput || !indicator) return;
+      const mins = parseInt(durationInput.value, 10) || 30;
+      const slots = Math.ceil(mins / 30);
+      indicator.innerText = `Ocupa ${slots} ${slots === 1 ? 'cita' : 'citas'} de 30 min (${mins} min)`;
+    }
+
+    function setServiceDurationPreset(mins) {
+      const durationInput = document.getElementById('modal-srv-duration');
+      if (!durationInput) return;
+      durationInput.value = mins;
+      updateServiceSlotsIndicator();
     }
 
     function closeServiceEditModal() {
@@ -9559,6 +9652,12 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       const durationMinutes = parseInt(document.getElementById('modal-srv-duration').value, 10);
       const price = parseFloat(document.getElementById('modal-srv-price').value);
       const requiredMaterials = document.getElementById('modal-srv-materials').value.trim();
+      const description = document.getElementById('modal-srv-description') ? document.getElementById('modal-srv-description').value.trim() : '';
+
+      if (!name || isNaN(price) || isNaN(durationMinutes)) {
+        alert('Por favor completa nombre, precio y duración válidos.');
+        return;
+      }
 
       const method = id ? 'PUT' : 'POST';
       const url = id ? `/api/services/${id}` : '/api/services';
@@ -9567,28 +9666,47 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         const res = await fetch(url, {
           method,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, category, durationMinutes, price, requiredMaterials })
+          body: JSON.stringify({
+            name,
+            category,
+            durationMinutes,
+            price,
+            requiredMaterials,
+            description
+          })
         });
         const data = await res.json();
         if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 40 });
           alert('✅ ' + data.message);
           closeServiceEditModal();
+          await fetchInitialData();
           await renderAdminServicesTable();
         } else {
           alert('Error: ' + data.error);
         }
       } catch (e) {
-        alert('Servicio guardado.');
-        closeServiceEditModal();
+        alert('Error al guardar el servicio.');
       }
     }
 
     async function deleteService(id) {
-      if (!confirm('¿Deseas eliminar este servicio?')) return;
+      const srv = state.services.find(s => s.id === id);
+      const name = srv ? srv.name : 'este servicio';
+      if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente "${name}" del catálogo?`)) return;
       try {
-        await fetch(`/api/services/${id}`, { method: 'DELETE' });
-        await renderAdminServicesTable();
-      } catch (e) {}
+        const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          await fetchInitialData();
+          await renderAdminServicesTable();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Error al eliminar servicio.');
+      }
     }
 
     // ========================================================================

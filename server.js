@@ -3943,12 +3943,15 @@ app.put('/api/services/:id', (req, res) => {
   const srv = db.services.find(s => s.id === req.params.id);
   if (!srv) return res.status(404).json({ error: 'Servicio no encontrado.' });
 
-  const { name, category, durationMinutes, price, requiredMaterials } = req.body;
+  const { name, category, durationMinutes, price, vatRate, requiredMaterials, description, isOnlineBooking } = req.body;
   if (name) srv.name = name.trim();
   if (category) srv.category = category.trim();
   if (durationMinutes !== undefined) srv.durationMinutes = Number(durationMinutes);
   if (price !== undefined) srv.price = Number(price);
+  if (vatRate !== undefined) srv.vatRate = Number(vatRate);
   if (requiredMaterials !== undefined) srv.requiredMaterials = requiredMaterials.trim();
+  if (description !== undefined) srv.description = description.trim();
+  if (isOnlineBooking !== undefined) srv.isOnlineBooking = Boolean(isOnlineBooking);
 
   res.json({
     success: true,
