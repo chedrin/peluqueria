@@ -196,6 +196,16 @@
               <input type="text" id="auth-input-allergies" placeholder="Ej: Sensibilidad al amoniaco, sin alergias..."
                 class="w-full px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-rose-500">
             </div>
+
+            <!-- Consentimiento RGPD / Aviso Legal / Términos -->
+            <div class="pt-2 border-t border-rose-200/50">
+              <label class="flex items-start gap-2 text-[11px] text-stone-600 cursor-pointer">
+                <input type="checkbox" id="auth-legal-consent" required checked class="mt-0.5 rounded text-rose-600 focus:ring-rose-500 accent-rose-600">
+                <span>
+                  He leído y acepto el <a href="javascript:void(0)" onclick="openLegalNoticeModal()" class="text-rose-600 underline font-semibold hover:text-rose-700">Aviso Legal</a>, los <a href="javascript:void(0)" onclick="openTermsModal()" class="text-rose-600 underline font-semibold hover:text-rose-700">Términos de Uso</a> y la <a href="javascript:void(0)" onclick="openPrivacyModal()" class="text-rose-600 underline font-semibold hover:text-rose-700">Política de Privacidad</a> para el tratamiento de mis datos y ficha capilar.
+                </span>
+              </label>
+            </div>
           </div>
 
           <div class="pt-2">
@@ -550,9 +560,15 @@
                   <span class="text-xl font-black text-stone-900 font-mono-code" id="booking-total-price">60,00 €</span>
                 </div>
               </div>
-              <button id="btn-confirm-booking" onclick="submitManualBooking(this)" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-rose-200 cursor-pointer">
-                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i> Aceptar y Confirmar Cita
-              </button>
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                <div class="text-[11px] text-stone-500 flex items-start gap-1.5 max-w-md">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                  <span>Al confirmar tu cita aceptas nuestros <a href="javascript:void(0)" onclick="openTermsModal()" class="text-rose-600 underline font-semibold hover:text-rose-700">Términos de Reserva</a> y la <a href="javascript:void(0)" onclick="openPrivacyModal()" class="text-rose-600 underline font-semibold hover:text-rose-700">Política de Privacidad</a>. Cancelación gratuita con 24h de antelación.</span>
+                </div>
+                <button id="btn-confirm-booking" onclick="submitManualBooking(this)" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 active:scale-95 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-rose-200 cursor-pointer">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i> Aceptar y Confirmar Cita
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2810,6 +2826,150 @@
   </main>
 
   <!-- ========================================================================= -->
+  <!-- PIE DE PÁGINA GLOBAL (AVISO LEGAL, PRIVACIDAD, COOKIES Y TÉRMINOS)         -->
+  <!-- ========================================================================= -->
+  <footer class="bg-stone-900 text-stone-300 border-t border-stone-800 mt-12 py-10 px-4 md:px-8 text-xs">
+    <div class="max-w-7xl mx-auto space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- Columna 1: Marca & Salón -->
+        <div class="space-y-3 md:col-span-1">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-300 flex items-center justify-center text-white shadow-sm">
+              <i data-lucide="scissors" class="w-4 h-4"></i>
+            </div>
+            <span class="text-white font-bold font-serif-luxury text-base salon-name-display">Peluquería Losan</span>
+          </div>
+          <p class="text-stone-400 text-[11px] leading-relaxed">
+            Salón de alta peluquería, colorimetría avanzada y cuidado capilar personalizado en Madrid.
+          </p>
+          <div class="text-[11px] text-stone-400 space-y-1.5 pt-1">
+            <p class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i> Calle Velázquez 42, 28001 Madrid</p>
+            <p class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3.5 h-3.5 text-rose-400"></i> +34 912 345 678</p>
+            <p class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i> contacto@peluquerialosan.es</p>
+          </div>
+        </div>
+
+        <!-- Columna 2: Navegación & Portales -->
+        <div class="space-y-3">
+          <h4 class="text-white font-bold uppercase tracking-wider text-[11px] text-rose-300">Portales & Servicios</h4>
+          <ul class="space-y-2 text-[11px]">
+            <li><a href="#clientes" onclick="switchPortal('client'); return false;" class="text-stone-400 hover:text-white transition flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3 h-3 text-rose-400"></i> Reserva Online Clientas</a></li>
+            <li><a href="#estilistas" onclick="switchPortal('staff'); return false;" class="text-stone-400 hover:text-white transition flex items-center gap-1.5"><i data-lucide="calendar" class="w-3 h-3 text-purple-400"></i> Portal Trabajadoras & Fichajes</a></li>
+            <li><a href="#admin" onclick="switchPortal('admin'); return false;" class="text-stone-400 hover:text-white transition flex items-center gap-1.5"><i data-lucide="shield" class="w-3 h-3 text-indigo-400"></i> Panel de Administración</a></li>
+            <li><a href="javascript:void(0)" onclick="switchPortal('client'); switchClientTab('loyalty');" class="text-stone-400 hover:text-white transition flex items-center gap-1.5"><i data-lucide="award" class="w-3 h-3 text-amber-400"></i> Club de Fidelización & QR</a></li>
+          </ul>
+        </div>
+
+        <!-- Columna 3: Información Legal & Cumplimiento -->
+        <div class="space-y-3">
+          <h4 class="text-white font-bold uppercase tracking-wider text-[11px] text-rose-300">Información Legal</h4>
+          <ul class="space-y-2 text-[11px]">
+            <li>
+              <button type="button" onclick="openLegalNoticeModal()" class="text-stone-400 hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer text-left">
+                <i data-lucide="scale" class="w-3 h-3 text-stone-500"></i> Aviso Legal (LSSI-CE)
+              </button>
+            </li>
+            <li>
+              <button type="button" onclick="openTermsModal()" class="text-stone-400 hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer text-left">
+                <i data-lucide="file-text" class="w-3 h-3 text-stone-500"></i> Términos y Condiciones de Uso
+              </button>
+            </li>
+            <li>
+              <button type="button" onclick="openPrivacyModal()" class="text-stone-400 hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer text-left">
+                <i data-lucide="shield-check" class="w-3 h-3 text-stone-500"></i> Política de Privacidad (RGPD)
+              </button>
+            </li>
+            <li>
+              <button type="button" onclick="openCookiePolicyModal()" class="text-stone-400 hover:text-rose-300 transition flex items-center gap-1.5 cursor-pointer text-left">
+                <i data-lucide="cookie" class="w-3 h-3 text-stone-500"></i> Política de Cookies
+              </button>
+            </li>
+            <li>
+              <button type="button" onclick="openCookieSettingsModal()" class="text-amber-400 hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer font-medium text-left">
+                <i data-lucide="sliders" class="w-3 h-3 text-amber-400"></i> Configurar Consentimiento Cookies
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Columna 4: Garantías Normativas -->
+        <div class="space-y-3">
+          <h4 class="text-white font-bold uppercase tracking-wider text-[11px] text-rose-300">Garantías & Certificaciones</h4>
+          <div class="space-y-2 text-[11px]">
+            <div class="p-2.5 rounded-xl bg-stone-800/80 border border-stone-700/60 flex items-start gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="text-white font-semibold block">Veri*Factu (Ley 11/2021)</span>
+                <span class="text-stone-400 text-[10px]">Facturación inalterable encadenada con huella SHA-256 AEAT.</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-stone-800/80 border border-stone-700/60 flex items-start gap-2">
+              <i data-lucide="lock" class="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="text-white font-semibold block">RGPD (UE 2016/679)</span>
+                <span class="text-stone-400 text-[10px]">Tratamiento confidencial de alergias y expedientes capilares.</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-stone-800/80 border border-stone-700/60 flex items-start gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <span class="text-white font-semibold block">Art. 34.9 Estatuto Trabajadores</span>
+                <span class="text-stone-400 text-[10px]">Control de jornada laboral oficial con exportación a Excel.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Barra Inferior de Derechos -->
+      <div class="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-stone-500 text-[11px]">
+        <p>© 2026 Peluquería & Estilismo Losan S.L. — NIF: B-87654321. Todos los derechos reservados.</p>
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1 text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-md text-[10px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Conforme al Marco Legal Español & UE
+          </span>
+          <button type="button" onclick="openCookieSettingsModal()" class="hover:text-stone-300 underline cursor-pointer">Preferencias de cookies</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- BANNER FLOTANTE DE CONSENTIMIENTO DE COOKIES (RGPD & ePrivacy)            -->
+  <!-- ========================================================================= -->
+  <div id="cookie-consent-banner" class="hidden fixed bottom-4 inset-x-4 max-w-4xl mx-auto bg-stone-900/95 backdrop-blur-md text-white p-5 rounded-2xl shadow-2xl border border-stone-700 z-50 animate-in fade-in slide-in-from-bottom-5">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 text-xl flex-shrink-0 shadow-inner">
+          🍪
+        </div>
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <h4 class="text-sm font-bold text-white font-serif-luxury">Control de Privacidad y Cookies</h4>
+            <span class="text-[10px] font-semibold bg-stone-800 text-amber-300 px-2 py-0.5 rounded-full border border-stone-700">RGPD / ePrivacy</span>
+          </div>
+          <p class="text-xs text-stone-300 leading-relaxed max-w-2xl">
+            Utilizamos cookies técnicas necesarias para el funcionamiento del portal (gestión de citas, sesiones y autenticación segura), así como almacenamiento de preferencias. Puedes aceptar todas las cookies, configurar tus preferencias o continuar solo con las técnicas esenciales. Más información en nuestra <a href="javascript:void(0)" onclick="openCookiePolicyModal()" class="text-amber-400 underline font-semibold hover:text-amber-300">Política de Cookies</a>.
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 w-full md:w-auto flex-shrink-0 justify-end">
+        <button type="button" onclick="openCookieSettingsModal()" class="px-3.5 py-2 text-xs font-semibold text-stone-300 hover:text-white bg-stone-800 hover:bg-stone-700 rounded-xl transition border border-stone-700 cursor-pointer">
+          Configurar
+        </button>
+        <button type="button" onclick="rejectOptionalCookies()" class="px-3.5 py-2 text-xs font-semibold text-stone-300 hover:text-white bg-stone-800 hover:bg-stone-700 rounded-xl transition border border-stone-700 cursor-pointer">
+          Solo Necesarias
+        </button>
+        <button type="button" onclick="acceptAllCookies()" class="px-5 py-2 text-xs font-bold text-stone-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer">
+          Aceptar Todas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: CAMBIO DE CONTRASEÑA DE USUARIO (BD) -->
   <div id="modal-change-password" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
@@ -4957,6 +5117,514 @@
   </div>
 
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: AVISO LEGAL (LSSI-CE LEY 34/2002)                                  -->
+  <!-- ========================================================================= -->
+  <div id="modal-legal-notice" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-700 border border-rose-200 flex items-center justify-center">
+            <i data-lucide="scale" class="w-5 h-5 text-rose-600"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Aviso Legal & Información General</h3>
+              <span class="text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">LSSI-CE 34/2002</span>
+            </div>
+            <p class="text-xs text-stone-500">Datos identificativos y condiciones de uso del portal oficial</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeLegalNoticeModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenido Legal Escroleable -->
+      <div class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-600 leading-relaxed">
+        <section class="bg-stone-50 p-4 rounded-2xl border border-stone-200/80 space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm flex items-center gap-2">
+            <i data-lucide="building-2" class="w-4 h-4 text-rose-600"></i>
+            1. Datos Identificativos del Prestador de Servicios (Art. 10 LSSI-CE)
+          </h4>
+          <p>En cumplimiento con el artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa a los usuarios de los datos identificativos del titular de este sitio web y aplicación PWA:</p>
+          <ul class="space-y-1.5 list-disc pl-5 text-[11px] text-stone-700">
+            <li><strong>Denominación Social:</strong> <span class="salon-legal-name-display">Peluquería & Estilismo Losan S.L.</span></li>
+            <li><strong>Nombre Comercial:</strong> <span class="salon-name-display">Peluquería Losan</span></li>
+            <li><strong>N.I.F. / C.I.F.:</strong> B-87654321</li>
+            <li><strong>Domicilio Social:</strong> Calle Velázquez 42, 28001 Madrid (España)</li>
+            <li><strong>Inscripción Registral:</strong> Registro Mercantil de Madrid, Tomo 34.567, Folio 89, Sección 8, Hoja M-621.450.</li>
+            <li><strong>Teléfono de Atención:</strong> +34 912 345 678 | WhatsApp: +34 611 223 344</li>
+            <li><strong>Correo Electrónico de Contacto:</strong> contacto@peluquerialosan.es</li>
+            <li><strong>Actividad Profesional:</strong> Prestación de servicios de peluquería, colorimetría, estética capilar y venta minorista de cosmética capilar.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">2. Objeto y Ámbito de Aplicación</h4>
+          <p>El presente Aviso Legal regula el acceso, navegación y utilización de la plataforma web y Progressive Web App (PWA) de <strong>Peluquería Losan</strong>, accesible tanto para clientas particulares que realizan reservas, consultas de servicios y fidelización, como para el personal laboral y administración del salón.</p>
+          <p>La condición de usuario atribuye la aceptación plena y sin reservas de todas y cada una de las disposiciones incluidas en este documento desde el momento en que se accede al servicio.</p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">3. Propiedad Intelectual e Industrial</h4>
+          <p>Todos los contenidos del portal, entendiendo por estos a título enunciativo y no limitativo los textos, fotografías del Lookbook de transformaciones reales, formulaciones de estilo, marcas, nombres comerciales, logotipos, iconos, tecnología software, código fuente y diseño gráfico, son propiedad de <strong>Peluquería & Estilismo Losan S.L.</strong> o de terceros que han autorizado expresamente su inclusión.</p>
+          <p>Queda expresamente prohibida la reproducción total o parcial, explotación, distribución o comunicación pública de cualquier contenido sin previa autorización expresa por escrito de la mercantil titular.</p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">4. Exclusión de Responsabilidad y Enlaces a Terceros</h4>
+          <p>Peluquería Losan no se hace responsable de las posibles pérdidas o perjuicios que pudieran derivarse de interferencias, omisiones, interrupciones o desconexiones en las redes de telecomunicaciones ajenas a su control. Asimismo, los enlaces externos (por ejemplo, pasarelas bancarias o enlaces directos de mensajería WhatsApp) se proporcionan para conveniencia del usuario sin que supongan aprobación o respaldo de sus contenidos.</p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">5. Legislación Aplicable y Jurisdicción</h4>
+          <p>La relación jurídica establecida entre el titular del sitio web y el usuario se rige de manera íntegra por la legislación española. Para la resolución de cualquier conflicto o litigio derivado del uso del portal, las partes renuncian expresamente a cualquier otro fuero que pudiera corresponderles y se someten a la competencia de los Juzgados y Tribunales de la ciudad de <strong>Madrid</strong>.</p>
+        </section>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-stone-400">Actualizado: Octubre 2026</span>
+        <button type="button" onclick="closeLegalNoticeModal()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-2 rounded-xl text-xs shadow-sm shadow-rose-200 transition cursor-pointer">
+          Cerrar Aviso Legal
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TÉRMINOS Y CONDICIONES DE USO Y CONTRATACIÓN                       -->
+  <!-- ========================================================================= -->
+  <div id="modal-terms-of-use" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center">
+            <i data-lucide="file-text" class="w-5 h-5 text-indigo-600"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Términos de Uso & Contratación</h3>
+              <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">Condiciones del Servicio</span>
+            </div>
+            <p class="text-xs text-stone-500">Normativa de reservas, cancelaciones, bonos y medios de pago</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeTermsModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenido Legal Escroleable -->
+      <div class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-600 leading-relaxed">
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">1. Ámbito de los Servicios</h4>
+          <p>Las presentes Condiciones Generales de Contratación regulan la reserva de citas online, adquisición de tratamientos, compra y canje de bonos de sesiones, tarjetas regalo digitales y adquisición de productos cosméticos en <strong>Peluquería Losan</strong>.</p>
+        </section>
+
+        <section class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 space-y-2">
+          <h4 class="font-bold text-amber-950 text-sm flex items-center gap-2">
+            <i data-lucide="calendar-check" class="w-4 h-4 text-amber-600"></i>
+            2. Política de Reservas, Puntualidad y Cancelaciones
+          </h4>
+          <ul class="space-y-1.5 list-disc pl-5 text-[11px] text-amber-900">
+            <li><strong>Confirmación de Cita:</strong> Toda cita confirmada a través de nuestra web, asistente IA o recepción queda registrada en la Agenda Maestra con fecha, franja horaria y estilista asignada.</li>
+            <li><strong>Puntualidad:</strong> Rogamos acudir al salón con 5 minutos de antelación. Existe un margen de cortesía máximo de 10 minutos. En caso de retraso superior, el servicio podrá verse reducido o adaptado para no perjudicar las citas de las clientas siguientes.</li>
+            <li><strong>Política de Cancelación (Preaviso 24 Horas):</strong> Las citas podrán modificarse o cancelarse sin coste alguno con un mínimo de <strong>24 horas de antelación</strong> a través del portal de clientas o comunicándolo por teléfono/WhatsApp. Las cancelaciones reiteradas sin previo aviso facultarán al salón a solicitar depósito previo para futuras reservas.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">3. Bonos de Sesiones y Suscripciones</h4>
+          <p>Los bonos de sesiones (ej. Bonos de 5 peinados, Bonos de colorimetría Balayage, etc.) ofrecen tarifas ventajosas y se sujetan a las siguientes normas:</p>
+          <ul class="space-y-1 list-disc pl-5 text-[11px]">
+            <li><strong>Caducidad:</strong> Los bonos tienen una validez de <strong>12 meses</strong> a contar desde la fecha de compra, transcurridos los cuales caducarán las sesiones no consumidas sin derecho a compensación económica.</li>
+            <li><strong>Canje y No Reembolso:</strong> Cada cita realizada con cargo a un bono descontará una sesión de la ficha de la clienta. Los bonos <strong>no son canjeables por dinero en efectivo</strong>.</li>
+            <li><strong>Carácter Nominativo:</strong> Los bonos son de carácter personal o transferible exclusivamente a familiares de primer grado previa autorización en recepción.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">4. Tarjetas Regalo Digitales</h4>
+          <p>Las tarjetas regalo emitidas por Peluquería Losan disponen de un código de barras / QR identificativo. Tienen una validez de <strong>1 año natural</strong> desde su emisión y pueden canjearse en múltiples visitas hasta agotar su saldo acumulado. En ningún caso serán reembolsables por dinero en metálico.</p>
+        </section>
+
+        <section class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm flex items-center gap-2">
+            <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i>
+            5. Medios de Pago y Cumplimiento Fiscal Veri*Factu
+          </h4>
+          <p>Se admiten los siguientes medios de pago en caja y plataforma online:</p>
+          <ul class="space-y-1 list-disc pl-5 text-[11px] text-stone-700">
+            <li><strong>Metálico / Efectivo:</strong> Conforme al límite legal vigente de la Ley 11/2021.</li>
+            <li><strong>Tarjeta Bancaria:</strong> Procesamiento seguro mediante datáfono y TPV virtual con encriptación SSL/TLS y protocolo PSD2.</li>
+            <li><strong>Bizum Profesional:</strong> Pago instantáneo mediante número habilitado del salón.</li>
+          </ul>
+          <p class="text-[11px] text-emerald-800 font-medium pt-1">
+            Emitimos obligatoriamente factura simplificada o factura ordinaria conforme a los requisitos técnicos de la Ley 11/2021 Antifraude y el sistema Veri*Factu de la AEAT, garantizando la inalterabilidad y encadenamiento criptográfico de cada operación.
+          </p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">6. Derecho de Desistimiento y Reclamaciones</h4>
+          <p>Conforme al artículo 103 del Real Decreto Legislativo 1/2007, el derecho de desistimiento de 14 días no es aplicable a contratos de servicios una vez que el servicio de peluquería o tratamiento capilar haya comenzado o finalizado con el consentimiento del cliente. En productos cosméticos, por motivos higiénicos y de salud, no se admiten devoluciones de envases desprecintados.</p>
+          <p>Peluquería Losan dispone de hojas oficiales de reclamación a disposición de los usuarios en el local situado en Calle Velázquez 42, Madrid.</p>
+        </section>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-stone-400">Condiciones vigentes para 2026</span>
+        <button type="button" onclick="closeTermsModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2 rounded-xl text-xs shadow-sm shadow-indigo-200 transition cursor-pointer">
+          Entendido y Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: POLÍTICA DE PRIVACIDAD (RGPD & LOPDGDD)                             -->
+  <!-- ========================================================================= -->
+  <div id="modal-privacy-policy" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 border border-sky-200 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5 text-sky-600"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Política de Privacidad & Protección de Datos</h3>
+              <span class="text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">RGPD UE 2016/679</span>
+            </div>
+            <p class="text-xs text-stone-500">Tratamiento de datos personales, historial capilar y derechos ARCO</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePrivacyModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenido Legal Escroleable -->
+      <div class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-600 leading-relaxed">
+        <section class="bg-sky-50/50 p-4 rounded-2xl border border-sky-200/80 space-y-2">
+          <h4 class="font-bold text-sky-950 text-sm flex items-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4 text-sky-600"></i>
+            1. Responsable del Tratamiento y Delegado de Protección de Datos
+          </h4>
+          <p>El responsable del tratamiento de sus datos personales es <strong>Peluquería & Estilismo Losan S.L.</strong>, con NIF B-87654321 y domicilio en Calle Velázquez 42, 28001 Madrid. Para cualquier cuestión relativa a la privacidad o para contactar con nuestro responsable de protección de datos, puede escribir a: <a href="mailto:dpo@peluquerialosan.es" class="text-sky-700 font-bold underline">dpo@peluquerialosan.es</a>.</p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">2. Categorías de Datos Tratados</h4>
+          <p>En función del uso que haga de nuestra plataforma y servicios en salón, tratamos las siguientes categorías de datos:</p>
+          <ul class="space-y-1.5 list-disc pl-5 text-[11px]">
+            <li><strong>Datos identificativos y de contacto:</strong> Nombre, apellidos, DNI / NIE (utilizado como identificador unívoco de su ficha de clienta), teléfono móvil y correo electrónico.</li>
+            <li><strong>Datos de Salud y Sensibilidad Capilar (Art. 9 RGPD - Categoría Especial):</strong> Registro de sensibilidades alérgicas (ej. alergia al amoníaco, oxidantes o parafenilendiamina), porosidad capilar, historial de tintes y notas de diagnóstico. Estos datos se recaban con su <em>consentimiento expreso</em> para evitar reacciones adversas y proteger su integridad física.</li>
+            <li><strong>Datos de Transacciones y Facturación:</strong> Historial de compras, tickets, facturas emitidas y método de pago (conforme a la Ley 11/2021).</li>
+            <li><strong>Datos de Registro de Jornada (Empleadas):</strong> Fichajes de entrada, salida y pausas con marca horaria criptográfica en cumplimiento del Art. 34.9 del Estatuto de los Trabajadores.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">3. Finalidades y Bases Legitimadoras</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px] border border-stone-200 rounded-xl overflow-hidden">
+              <thead class="bg-stone-100 text-stone-800 font-bold">
+                <tr>
+                  <th class="p-2.5 border-b border-stone-200">Finalidad</th>
+                  <th class="p-2.5 border-b border-stone-200">Base Jurídica</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100">
+                <tr>
+                  <td class="p-2.5 font-medium">Gestión de citas, agenda y avisos por WhatsApp/SMS</td>
+                  <td class="p-2.5 text-stone-500">Ejecución del contrato de servicios (Art. 6.1.b RGPD)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-medium">Ficha capilar 360, alergias y fórmulas químicas personalizadas</td>
+                  <td class="p-2.5 text-stone-500">Consentimiento explícito de la clienta (Art. 9.2.a RGPD)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-medium">Facturación simplificada / completa e inspección tributaria</td>
+                  <td class="p-2.5 text-stone-500">Obligación legal tributaria y Ley 11/2021 (Art. 6.1.c RGPD)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-medium">Control de presencia y jornada laboral de estilistas</td>
+                  <td class="p-2.5 text-stone-500">Obligación legal laboral Art. 34.9 ET (Art. 6.1.c RGPD)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-medium">Programa de fidelización y sellado QR de visitas</td>
+                  <td class="p-2.5 text-stone-500">Consentimiento del usuario e interés legítimo (Art. 6.1.a RGPD)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">4. Plazo de Conservación de los Datos</h4>
+          <p>Los datos se conservarán durante el tiempo estrictamente necesario para cumplir las finalidades descritas:</p>
+          <ul class="space-y-1 list-disc pl-5 text-[11px]">
+            <li><strong>Fichas capilares y citas:</strong> Mientras se mantenga activa la condición de clienta y no se solicite su supresión.</li>
+            <li><strong>Facturación y cobros:</strong> 5 años en cumplimiento de la normativa fiscal y Ley General Tributaria.</li>
+            <li><strong>Fichajes laborales de plantilla:</strong> 4 años a disposición de la Inspección de Trabajo según el Art. 34.9 ET.</li>
+          </ul>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">5. Ejercicio de Derechos ARCO y Reclamaciones</h4>
+          <p>Conforme al RGPD y a la Ley Orgánica 3/2018 (LOPDGDD), el usuario puede ejercitar en cualquier momento sus derechos de:</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] pt-1">
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Acceso:</strong> Conocer qué datos tratamos.</div>
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Rectificación:</strong> Modificar datos inexactos.</div>
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Supresión:</strong> Derecho al olvido.</div>
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Limitación:</strong> Limitar el alcance del tratamiento.</div>
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Portabilidad:</strong> Recibir sus datos en formato estructurado.</div>
+            <div class="bg-stone-50 p-2 rounded-xl border border-stone-200"><strong>Oposición:</strong> Oponerse al tratamiento comercial.</div>
+          </div>
+          <p class="pt-1">Para ejercerlos, envíe un correo electrónico a <a href="mailto:dpo@peluquerialosan.es" class="text-rose-600 font-bold underline">dpo@peluquerialosan.es</a> acreditando su identidad. Si considera vulnerados sus derechos, tiene la potestad de reclamar ante la <strong>Agencia Española de Protección de Datos (AEPD)</strong> en <a href="https://www.aepd.es" target="_blank" rel="noopener" class="text-sky-600 underline">www.aepd.es</a>.</p>
+        </section>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-stone-400">Protección garantizada RGPD</span>
+        <button type="button" onclick="closePrivacyModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-6 py-2 rounded-xl text-xs shadow-sm shadow-sky-200 transition cursor-pointer">
+          Cerrar Política de Privacidad
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: POLÍTICA DE COOKIES (DIRECTIVA ePRIVACY & LSSI-CE ART. 22.2)       -->
+  <!-- ========================================================================= -->
+  <div id="modal-cookie-policy" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl">
+            🍪
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Política de Cookies & Almacenamiento Local</h3>
+              <span class="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">Art. 22.2 LSSI-CE</span>
+            </div>
+            <p class="text-xs text-stone-500">Transparencia sobre el uso de cookies técnicas, preferencias y analítica</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCookiePolicyModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenido Legal Escroleable -->
+      <div class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-600 leading-relaxed">
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">1. ¿Qué son las Cookies y el Almacenamiento Local?</h4>
+          <p>Una cookie es un pequeño fichero de texto que un sitio web almacena en su navegador al visitarlo. En aplicaciones modernas como la PWA de <strong>Peluquería Losan</strong>, se utiliza de forma combinada el almacenamiento local (<em>localStorage</em> / <em>sessionStorage</em>) y cookies para permitir la autenticación de usuarios, recordar citas pendientes y agilizar el acceso seguro mediante su DNI.</p>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">2. Tipos de Cookies y Claves Utilizadas en este Portal</h4>
+          <p>Conforme a la Directiva 2002/58/CE y la Guía sobre Cookies de la AEPD, clasificamos nuestros elementos en:</p>
+          
+          <div class="space-y-3">
+            <!-- Técnicas -->
+            <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-stone-900 text-xs flex items-center gap-1.5"><i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-600"></i> Cookies Técnicas y Estrictamente Necesarias</span>
+                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Siempre Activas</span>
+              </div>
+              <p class="text-[11px] text-stone-500">Imprescindibles para que la aplicación funcione: navegación entre portales (#clientes, #estilistas, #admin), autenticación segura y persistencia de carritos de servicios.</p>
+            </div>
+
+            <!-- Preferencias -->
+            <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-stone-900 text-xs flex items-center gap-1.5"><i data-lucide="heart" class="w-3.5 h-3.5 text-rose-600"></i> Cookies de Preferencias y Funcionalidad</span>
+                <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full">Configurables</span>
+              </div>
+              <p class="text-[11px] text-stone-500">Permiten recordar si autorizó guardar su DNI en el dispositivo para no volver a escribirlo, la estilista seleccionada y el filtro activo de agenda.</p>
+            </div>
+
+            <!-- Analíticas -->
+            <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-stone-900 text-xs flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-indigo-600"></i> Cookies Analíticas Anónimas</span>
+                <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">Opcionales</span>
+              </div>
+              <p class="text-[11px] text-stone-500">Métricas agregadas sobre horas de mayor demanda y servicios solicitados para optimizar los turnos del personal y evitar esperas.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">3. Inventario de Almacenamiento Local y Cookies en Peluquería Losan</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px] border border-stone-200 rounded-xl overflow-hidden">
+              <thead class="bg-stone-100 text-stone-800 font-bold">
+                <tr>
+                  <th class="p-2 border-b border-stone-200">Identificador</th>
+                  <th class="p-2 border-b border-stone-200">Tipo</th>
+                  <th class="p-2 border-b border-stone-200">Finalidad</th>
+                  <th class="p-2 border-b border-stone-200">Duración</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100 font-mono-code text-[10px]">
+                <tr>
+                  <td class="p-2 font-bold text-stone-900">peluqueria_cookie_consent</td>
+                  <td class="p-2 text-emerald-700">Técnica</td>
+                  <td class="p-2 font-sans">Guarda su elección de consentimiento de cookies</td>
+                  <td class="p-2 font-sans">12 meses</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-stone-900">peluqueria_token_session</td>
+                  <td class="p-2 text-emerald-700">Técnica</td>
+                  <td class="p-2 font-sans">Mantiene la sesión de usuario y seguridad RBAC</td>
+                  <td class="p-2 font-sans">Sesión</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-stone-900">peluqueria_client_dni</td>
+                  <td class="p-2 text-rose-700">Preferencias</td>
+                  <td class="p-2 font-sans">Recuerda su DNI para no escribirlo en cada visita</td>
+                  <td class="p-2 font-sans">Persistente</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-stone-900">peluqueria_user_portal</td>
+                  <td class="p-2 text-rose-700">Preferencias</td>
+                  <td class="p-2 font-sans">Recuerda el último portal utilizado (#clientes, #admin)</td>
+                  <td class="p-2 font-sans">Persistente</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="space-y-2">
+          <h4 class="font-bold text-stone-900 text-sm">4. ¿Cómo Modificar o Revocar su Consentimiento?</h4>
+          <p>Puede cambiar sus preferencias en cualquier momento pulsando el botón <strong>"Configurar Preferencias de Cookies"</strong> ubicado en el pie de página de la aplicación o a continuación:</p>
+          <div class="pt-2">
+            <button type="button" onclick="closeCookiePolicyModal(); openCookieSettingsModal();" class="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-sm cursor-pointer">
+              <i data-lucide="sliders" class="w-4 h-4"></i> Abrir Panel de Configuración de Cookies
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-between flex-shrink-0">
+        <span class="text-[11px] text-stone-400">Guía de Cookies AEPD 2026</span>
+        <button type="button" onclick="closeCookiePolicyModal()" class="bg-stone-800 hover:bg-stone-700 text-white font-bold px-6 py-2 rounded-xl text-xs transition cursor-pointer">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PANEL DE CONFIGURACIÓN DE COOKIES INTERACTIVO                      -->
+  <!-- ========================================================================= -->
+  <div id="modal-cookie-settings" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95">
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
+            <i data-lucide="sliders" class="w-5 h-5 text-amber-600"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-stone-900 font-serif-luxury text-lg">Centro de Preferencias de Cookies</h3>
+            <p class="text-xs text-stone-500">Personaliza las categorías de cookies que deseas autorizar</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCookieSettingsModal()" class="w-9 h-9 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Controles con Switches -->
+      <div class="overflow-y-auto space-y-4 py-4 pr-1 text-xs text-stone-600">
+        <!-- 1. Técnicas -->
+        <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+              <h4 class="font-bold text-stone-900 text-sm">Cookies Técnicas & Esenciales</h4>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">
+              Obligatorias
+            </span>
+          </div>
+          <p class="text-[11px] text-stone-500 leading-relaxed">
+            Son necesarias para navegar y utilizar las funciones básicas: autenticación segura, prevención de fraudes, carrito de reservas y cumplimiento fiscal Veri*Factu. No pueden desactivarse.
+          </p>
+        </div>
+
+        <!-- 2. Preferencias -->
+        <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="heart" class="w-4 h-4 text-rose-600"></i>
+              <h4 class="font-bold text-stone-900 text-sm">Cookies de Preferencias</h4>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="cookie-pref-toggle" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+            </label>
+          </div>
+          <p class="text-[11px] text-stone-500 leading-relaxed">
+            Permiten recordar su sesión con DNI, estilista preferida, idioma y el portal que visualiza habitualmente para brindarle una experiencia fluida.
+          </p>
+        </div>
+
+        <!-- 3. Analíticas -->
+        <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i>
+              <h4 class="font-bold text-stone-900 text-sm">Cookies Analíticas</h4>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="cookie-analytics-toggle" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </div>
+          <p class="text-[11px] text-stone-500 leading-relaxed">
+            Nos ayudan a medir de forma completamente anónima el rendimiento de la aplicación y la afluencia de citas para mejorar los tiempos de atención.
+          </p>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="border-t border-stone-100 pt-3 flex flex-col sm:flex-row items-center justify-between gap-2.5 flex-shrink-0">
+        <button type="button" onclick="closeCookieSettingsModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 transition cursor-pointer">
+          Cancelar
+        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="button" onclick="saveCookiePreferences()" class="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl transition cursor-pointer">
+            Guardar Selección
+          </button>
+          <button type="button" onclick="acceptAllCookies()" class="w-full sm:w-auto px-5 py-2.5 text-xs font-bold text-stone-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition shadow-md shadow-amber-500/20 cursor-pointer">
+            Aceptar Todas
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- JAVASCRIPT DE LA APLICACIÓN -->
   <script>
     // ========================================================================
@@ -5067,6 +5735,7 @@
       renderAdminKpis();
       initPWA();
       loadStaffTimeTrackingStatus();
+      initCookieConsent();
     });
 
     async function fetchInitialData() {
@@ -8231,10 +8900,15 @@ Saldo: ${data.giftCard.balance.toFixed(2)} €`);
       const headerTagline = document.getElementById('header-salon-tagline');
       if (headerTagline && info.tagline) headerTagline.innerText = info.tagline;
 
-      // 3. ACTUALIZAR TODOS LOS ELEMENTOS CON CLASE .salon-name-display
+      // 3. ACTUALIZAR TODOS LOS ELEMENTOS CON CLASE .salon-name-display Y .salon-legal-name-display
       document.querySelectorAll('.salon-name-display').forEach(el => {
         el.innerText = info.name;
       });
+      if (info.legalName) {
+        document.querySelectorAll('.salon-legal-name-display').forEach(el => {
+          el.innerText = info.legalName;
+        });
+      }
 
       // 4. PRELLENAR FORMULARIO DE ADMINISTRACIÓN
       const setVal = (id, val) => {
@@ -13121,6 +13795,170 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         payBtn.disabled = false;
         if (procBox) procBox.classList.add('hidden');
       }
+    }
+
+    // =========================================================================
+    // GESTIÓN DE PRIVACIDAD, CONSENTIMIENTO DE COOKIES Y MODALES LEGALES
+    // =========================================================================
+
+    function showLegalToast(message) {
+      try {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 bg-stone-900 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl border border-stone-700 z-50 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3';
+        toast.innerHTML = '<span class="text-amber-400">✓</span> <span>' + message + '</span>';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function initCookieConsent() {
+      try {
+        const consent = localStorage.getItem('peluqueria_cookie_consent');
+        if (!consent) {
+          const banner = document.getElementById('cookie-consent-banner');
+          if (banner) banner.classList.remove('hidden');
+        } else {
+          const prefs = JSON.parse(localStorage.getItem('peluqueria_cookie_prefs') || '{}');
+          const prefToggle = document.getElementById('cookie-pref-toggle');
+          const analyticsToggle = document.getElementById('cookie-analytics-toggle');
+          if (prefToggle && prefs.preferences !== undefined) prefToggle.checked = Boolean(prefs.preferences);
+          if (analyticsToggle && prefs.analytics !== undefined) analyticsToggle.checked = Boolean(prefs.analytics);
+        }
+      } catch (e) {
+        console.warn('Error inicializando consentimiento de cookies:', e);
+      }
+    }
+
+    function acceptAllCookies() {
+      try {
+        localStorage.setItem('peluqueria_cookie_consent', 'all');
+        localStorage.setItem('peluqueria_cookie_prefs', JSON.stringify({
+          technical: true,
+          preferences: true,
+          analytics: true,
+          date: new Date().toISOString()
+        }));
+        const banner = document.getElementById('cookie-consent-banner');
+        if (banner) banner.classList.add('hidden');
+        closeCookieSettingsModal();
+        showLegalToast('Has aceptado todas las cookies. ¡Gracias por tu confianza!');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function rejectOptionalCookies() {
+      try {
+        localStorage.setItem('peluqueria_cookie_consent', 'essential');
+        localStorage.setItem('peluqueria_cookie_prefs', JSON.stringify({
+          technical: true,
+          preferences: false,
+          analytics: false,
+          date: new Date().toISOString()
+        }));
+        const banner = document.getElementById('cookie-consent-banner');
+        if (banner) banner.classList.add('hidden');
+        closeCookieSettingsModal();
+        showLegalToast('Preferencia guardada: Únicamente cookies técnicas necesarias.');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function openCookieSettingsModal() {
+      const modal = document.getElementById('modal-cookie-settings');
+      if (modal) {
+        const prefs = JSON.parse(localStorage.getItem('peluqueria_cookie_prefs') || '{"preferences":true,"analytics":true}');
+        const prefToggle = document.getElementById('cookie-pref-toggle');
+        const analyticsToggle = document.getElementById('cookie-analytics-toggle');
+        if (prefToggle) prefToggle.checked = prefs.preferences !== false;
+        if (analyticsToggle) analyticsToggle.checked = prefs.analytics !== false;
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeCookieSettingsModal() {
+      const modal = document.getElementById('modal-cookie-settings');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function saveCookiePreferences() {
+      try {
+        const prefToggle = document.getElementById('cookie-pref-toggle');
+        const analyticsToggle = document.getElementById('cookie-analytics-toggle');
+        const prefs = {
+          technical: true,
+          preferences: prefToggle ? prefToggle.checked : true,
+          analytics: analyticsToggle ? analyticsToggle.checked : false,
+          date: new Date().toISOString()
+        };
+        localStorage.setItem('peluqueria_cookie_consent', 'custom');
+        localStorage.setItem('peluqueria_cookie_prefs', JSON.stringify(prefs));
+        const banner = document.getElementById('cookie-consent-banner');
+        if (banner) banner.classList.add('hidden');
+        closeCookieSettingsModal();
+        showLegalToast('Tus preferencias de cookies se han actualizado correctamente.');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function openCookiePolicyModal() {
+      const modal = document.getElementById('modal-cookie-policy');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeCookiePolicyModal() {
+      const modal = document.getElementById('modal-cookie-policy');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openLegalNoticeModal() {
+      const modal = document.getElementById('modal-legal-notice');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeLegalNoticeModal() {
+      const modal = document.getElementById('modal-legal-notice');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openTermsModal() {
+      const modal = document.getElementById('modal-terms-of-use');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeTermsModal() {
+      const modal = document.getElementById('modal-terms-of-use');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openPrivacyModal() {
+      const modal = document.getElementById('modal-privacy-policy');
+      if (modal) {
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closePrivacyModal() {
+      const modal = document.getElementById('modal-privacy-policy');
+      if (modal) modal.classList.add('hidden');
     }
 
 
