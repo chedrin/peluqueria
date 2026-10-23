@@ -22,8 +22,22 @@ while ((match = scriptRegex.exec(html)) !== null) {
   }
 }
 
-// Check key modal IDs
+// Check key IDs
 const requiredIds = [
+  'aview-agenda',
+  'master-agenda-datepicker',
+  'btn-filter-agenda-all',
+  'btn-filter-agenda-free',
+  'btn-filter-agenda-busy',
+  'agenda-col-elena',
+  'agenda-col-raquel',
+  'agenda-col-carmen',
+  'stats-busy-elena',
+  'stats-free-elena',
+  'stats-busy-raquel',
+  'stats-free-raquel',
+  'stats-busy-carmen',
+  'stats-free-carmen',
   'aview-packages',
   'admin-client-packages-tbody',
   'modal-custom-package-assign',

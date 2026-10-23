@@ -4037,8 +4037,7 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
     a.id !== apt.id &&
     a.staffId === staffId &&
     a.status !== 'cancelled' &&
-    ((targetStart >= new Date(a.startTime).getTime() && targetStart < new Date(a.endTime).getTime()) ||
-     (targetEnd > new Date(a.startTime).getTime() && targetEnd <= new Date(a.endTime).getTime()))
+    (targetStart < new Date(a.endTime).getTime() && targetEnd > new Date(a.startTime).getTime())
   );
 
   if (collision) {

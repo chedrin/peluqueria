@@ -1440,47 +1440,110 @@
           </div>
         </div>
 
+        <!-- Barra de Control de Fecha y Filtros de Horas Libres/Ocupadas -->
+        <div class="luxury-card rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="changeAgendaDate(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Anterior
+            </button>
+            <input type="date" id="master-agenda-datepicker" value="2026-10-23" onchange="onMasterAgendaDateChange(this.value)" class="bg-stone-50 border border-stone-300 rounded-xl px-3 py-1.5 text-xs font-bold font-mono-code text-stone-900 focus:bg-white focus:border-purple-500 shadow-2xs">
+            <button type="button" onclick="changeAgendaDate(0)" class="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 text-xs font-bold transition cursor-pointer shadow-2xs">
+              Hoy (23 Oct)
+            </button>
+            <button type="button" onclick="changeAgendaDate(1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs">
+              Siguiente <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <span class="text-stone-400 font-bold uppercase text-[10px] tracking-wider mr-1">Filtrar:</span>
+            <button type="button" onclick="setAgendaFilter('all')" id="btn-filter-agenda-all" class="px-3 py-1.5 rounded-xl font-bold bg-stone-900 text-white shadow-xs transition cursor-pointer">
+              Todos los Tramos
+            </button>
+            <button type="button" onclick="setAgendaFilter('free')" id="btn-filter-agenda-free" class="px-3 py-1.5 rounded-xl font-bold bg-stone-100 text-emerald-800 hover:bg-emerald-50 border border-stone-200 transition cursor-pointer">
+              🟢 Solo Horas Libres
+            </button>
+            <button type="button" onclick="setAgendaFilter('busy')" id="btn-filter-agenda-busy" class="px-3 py-1.5 rounded-xl font-bold bg-stone-100 text-purple-800 hover:bg-purple-50 border border-stone-200 transition cursor-pointer">
+              🔴 Solo Citas Ocupadas
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner Explicativo del Funcionamiento de Arrastre -->
+        <div class="p-3 bg-gradient-to-r from-purple-50 via-indigo-50 to-emerald-50 border border-purple-200 rounded-2xl flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center flex-shrink-0">
+              <i data-lucide="move" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="font-bold text-stone-900 block">Agenda Maestra Multicanal con Horas Libres y Ocupadas</span>
+              <span class="text-stone-600 text-[11px]">Coge cualquier ficha de clienta y suéltala sobre cualquier <strong>HORA LIBRE 🟢</strong> de otra estilista para trasladar la cita y notificar a ambas al instante.</span>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold bg-white text-purple-800 px-2.5 py-1 rounded-xl border border-purple-200 shadow-2xs whitespace-nowrap">
+            Arrastre Activo
+          </span>
+        </div>
+
         <!-- Columnas de Agenda Multicanal por Profesional -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Columna Elena -->
           <div class="luxury-card rounded-2xl p-4">
             <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-purple-500"></span>
-                <span class="font-bold text-sm text-stone-900">Elena Gómez</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                  <span class="font-bold text-sm text-stone-900">Elena Gómez</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] mt-1">
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-purple-50 text-purple-800 border border-purple-200" id="stats-busy-elena">0 Citas</span>
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" id="stats-free-elena">0 Libres</span>
+                </div>
               </div>
               <span class="text-[11px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full font-medium">Sillón 1 (Color)</span>
             </div>
-            <div class="space-y-2.5 min-h-[220px] p-2 rounded-xl transition-all" id="agenda-col-elena" ondragover="handleAppointmentDragOver(event)" ondragleave="handleAppointmentDragLeave(event)" ondrop="handleAppointmentDrop(event, 'stf-1')">
-              <!-- Citas Elena -->
+            <div class="space-y-2.5 min-h-[350px] max-h-[680px] overflow-y-auto p-1 rounded-xl transition-all" id="agenda-col-elena">
+              <!-- Tramos Elena -->
             </div>
           </div>
 
           <!-- Columna Raquel -->
           <div class="luxury-card rounded-2xl p-4">
             <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-pink-500"></span>
-                <span class="font-bold text-sm text-stone-900" id="staff-name-raquel">Raquel Santos</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+                  <span class="font-bold text-sm text-stone-900" id="staff-name-raquel">Raquel Santos</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] mt-1">
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-purple-50 text-purple-800 border border-purple-200" id="stats-busy-raquel">0 Citas</span>
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" id="stats-free-raquel">0 Libres</span>
+                </div>
               </div>
               <span class="text-[11px] text-pink-700 bg-pink-50 px-2 py-0.5 rounded-full font-medium" id="staff-status-raquel">Sillón 2 (Cortes)</span>
             </div>
-            <div class="space-y-2.5 min-h-[220px] p-2 rounded-xl transition-all" id="agenda-col-raquel" ondragover="handleAppointmentDragOver(event)" ondragleave="handleAppointmentDragLeave(event)" ondrop="handleAppointmentDrop(event, 'stf-2')">
-              <!-- Citas Raquel -->
+            <div class="space-y-2.5 min-h-[350px] max-h-[680px] overflow-y-auto p-1 rounded-xl transition-all" id="agenda-col-raquel">
+              <!-- Tramos Raquel -->
             </div>
           </div>
 
           <!-- Columna Carmen -->
           <div class="luxury-card rounded-2xl p-4">
             <div class="flex items-center justify-between border-b border-stone-100 pb-2.5 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                <span class="font-bold text-sm text-stone-900">Carmen Vidal</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                  <span class="font-bold text-sm text-stone-900">Carmen Vidal</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] mt-1">
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-purple-50 text-purple-800 border border-purple-200" id="stats-busy-carmen">0 Citas</span>
+                  <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" id="stats-free-carmen">0 Libres</span>
+                </div>
               </div>
               <span class="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">Sillón 3 (Tratamientos)</span>
             </div>
-            <div class="space-y-2.5 min-h-[220px] p-2 rounded-xl transition-all" id="agenda-col-carmen" ondragover="handleAppointmentDragOver(event)" ondragleave="handleAppointmentDragLeave(event)" ondrop="handleAppointmentDrop(event, 'stf-3')">
-              <!-- Citas Carmen -->
+            <div class="space-y-2.5 min-h-[350px] max-h-[680px] overflow-y-auto p-1 rounded-xl transition-all" id="agenda-col-carmen">
+              <!-- Tramos Carmen -->
             </div>
           </div>
         </div>
@@ -4550,39 +4613,381 @@
     }
 
     // ========================================================================
-    // PANEL ADMINISTRACIÓN & PROTOCOLO DE BAJA MÉDICA
+    // PANEL ADMINISTRACIÓN & AGENDA MAESTRA MULTICANAL (HORAS LIBRES Y OCUPADAS)
     // ========================================================================
+    const MASTER_AGENDA_SLOTS = [
+      '09:00', '09:30',
+      '10:00', '10:30',
+      '11:00', '11:30',
+      '12:00', '12:30',
+      '13:00', '13:30',
+      '14:00',
+      '16:00', '16:30',
+      '17:00', '17:30',
+      '18:00', '18:30',
+      '19:00', '19:30'
+    ];
+
+    let draggedAppointmentId = null;
+
     function renderMasterAgenda() {
+      if (!state.masterAgendaDate) {
+        state.masterAgendaDate = '2026-10-23';
+      }
+      if (!state.agendaSlotFilter) {
+        state.agendaSlotFilter = 'all';
+      }
+
+      const dateInput = document.getElementById('master-agenda-datepicker');
+      if (dateInput) dateInput.value = state.masterAgendaDate;
+
       const colElena = document.getElementById('agenda-col-elena');
       const colRaquel = document.getElementById('agenda-col-raquel');
       const colCarmen = document.getElementById('agenda-col-carmen');
 
-      colElena.innerHTML = renderColumnApts('stf-1');
-      colRaquel.innerHTML = renderColumnApts('stf-2');
-      colCarmen.innerHTML = renderColumnApts('stf-3');
+      if (colElena) colElena.innerHTML = renderColumnSlots('stf-1');
+      if (colRaquel) colRaquel.innerHTML = renderColumnSlots('stf-2');
+      if (colCarmen) colCarmen.innerHTML = renderColumnSlots('stf-3');
+
+      updateAgendaCounters();
       lucide.createIcons();
     }
 
-    function renderColumnApts(staffId) {
-      const list = state.appointments.filter(a => a.staffId === staffId && a.status !== 'cancelled');
-      if (!list.length) return '<p class="text-xs text-stone-400 p-3 text-center bg-stone-50 rounded-xl">Sin citas asignadas</p>';
+    function renderColumnSlots(staffId) {
+      const activeDate = state.masterAgendaDate || '2026-10-23';
+      const staffObj = (state.staff || []).find(s => s.id === staffId) || { name: 'Estilista' };
 
-      return list.map(a => `
-        <div draggable="true" ondragstart="handleAppointmentDragStart(event, '${a.id}')" class="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-1.5 shadow-2xs hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing transition">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-stone-900">${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
-            <span class="text-[10px] bg-white text-stone-600 px-2 py-0.5 rounded border border-stone-200 font-semibold">${a.status}</span>
-          </div>
-          <p class="text-xs font-semibold text-stone-800">${a.clientName}</p>
-          <p class="text-[11px] text-stone-500 truncate">${a.serviceNames}</p>
-          <div class="flex items-center justify-between pt-1 border-t border-stone-200/60">
-            <span class="text-[10px] text-stone-400 font-mono-code">${a.totalPrice ? a.totalPrice + ' €' : '45.00 €'}</span>
-            <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2 py-0.5 rounded-lg text-[10px] inline-flex items-center gap-1 transition cursor-pointer shadow-2xs">
-              <i data-lucide="credit-card" class="w-3 h-3"></i> Cobrar
-            </button>
-          </div>
-        </div>
-      `).join('');
+      // Filtrar citas del estilista en la fecha seleccionada
+      const staffApts = (state.appointments || []).filter(a => {
+        if (a.staffId !== staffId || a.status === 'cancelled') return false;
+        const d = new Date(a.startTime);
+        const isoDate = d.toISOString().slice(0, 10);
+        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return isoDate === activeDate || localDate === activeDate;
+      });
+
+      // Mapear cada cita a sus horas de inicio y fin
+      const aptsWithTimes = staffApts.map(a => {
+        const dStart = new Date(a.startTime);
+        const dEnd = new Date(a.endTime);
+        const startMinutes = dStart.getHours() * 60 + dStart.getMinutes();
+        const endMinutes = dEnd.getHours() * 60 + dEnd.getMinutes();
+        const startTimeStr = `${String(dStart.getHours()).padStart(2, '0')}:${String(dStart.getMinutes()).padStart(2, '0')}`;
+        const endTimeStr = `${String(dEnd.getHours()).padStart(2, '0')}:${String(dEnd.getMinutes()).padStart(2, '0')}`;
+        const durationMin = Math.max(15, Math.round(endMinutes - startMinutes));
+
+        return {
+          apt: a,
+          startMinutes,
+          endMinutes,
+          startTimeStr,
+          endTimeStr,
+          durationMin
+        };
+      });
+
+      let html = '';
+      const filter = state.agendaSlotFilter || 'all';
+
+      MASTER_AGENDA_SLOTS.forEach(slotTime => {
+        const [sh, sm] = slotTime.split(':').map(Number);
+        const slotStartMinutes = sh * 60 + sm;
+        const slotEndMinutes = slotStartMinutes + 30;
+
+        // 1. ¿Hay una cita que comience en este tramo horario?
+        const startingApt = aptsWithTimes.find(item => 
+          item.startMinutes >= slotStartMinutes && item.startMinutes < slotEndMinutes
+        );
+
+        // 2. ¿Hay una cita que esté en curso pero haya empezado antes?
+        const ongoingApt = !startingApt && aptsWithTimes.find(item => 
+          item.startMinutes < slotStartMinutes && item.endMinutes > slotStartMinutes
+        );
+
+        if (startingApt) {
+          // --- HORA OCUPADA: CITA QUE COMIENZA ---
+          if (filter === 'free') return; // Filtro solo libres
+
+          const a = startingApt.apt;
+          const isSelectedToMove = state.selectedAppointmentToMove === a.id;
+
+          html += `
+            <div draggable="true" 
+                 ondragstart="handleAppointmentDragStart(event, '${a.id}')" 
+                 ondragend="handleAppointmentDragEnd(event)" 
+                 class="appointment-card p-3.5 bg-white border-2 ${isSelectedToMove ? 'border-purple-600 ring-2 ring-purple-400 bg-purple-50/60' : 'border-stone-200 hover:border-purple-400'} rounded-2xl space-y-2 shadow-2xs hover:shadow-md cursor-grab active:cursor-grabbing transition relative group">
+              
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-stone-900 font-mono-code flex items-center gap-1.5">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-purple-600"></i>
+                  ${startingApt.startTimeStr} - ${startingApt.endTimeStr}
+                  <span class="text-[10px] text-stone-500 font-normal">(${startingApt.durationMin} min)</span>
+                </span>
+                <span class="text-[10px] bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded-full border border-purple-200">
+                  🔴 OCUPADA
+                </span>
+              </div>
+
+              <div>
+                <strong class="text-xs font-bold text-stone-900 block">${a.clientName}</strong>
+                <span class="text-[11px] text-stone-600 block truncate font-medium">${a.serviceNames}</span>
+              </div>
+
+              <div class="flex items-center justify-between pt-1.5 border-t border-stone-100 text-xs">
+                <span class="font-mono-code font-bold text-stone-800 text-[11px]">
+                  ${a.totalPrice ? a.totalPrice.toFixed(2) + ' €' : '45.00 €'}
+                </span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="event.stopPropagation(); toggleSelectAppointmentToMove('${a.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${isSelectedToMove ? 'bg-purple-700 text-white' : 'bg-stone-100 hover:bg-purple-100 text-purple-700'} border border-purple-200 flex items-center gap-1 transition cursor-pointer">
+                    <i data-lucide="move" class="w-3 h-3"></i> ${isSelectedToMove ? 'Moviendo...' : 'Mover'}
+                  </button>
+                  <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2 py-0.5 rounded text-[10px] flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                    <i data-lucide="credit-card" class="w-3 h-3"></i> Cobrar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Indicador de Arrastre -->
+              <div class="pt-1 text-[9px] text-stone-400 font-semibold flex items-center justify-between group-hover:text-purple-600 transition">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="grip-vertical" class="w-3 h-3"></i> Coge y suelta en otra hora libre
+                </span>
+                <span class="text-[9px] text-stone-400 font-mono-code">${staffObj.name.split(' ')[0]}</span>
+              </div>
+            </div>
+          `;
+        } else if (ongoingApt) {
+          // --- HORA OCUPADA: CITA EN CURSO (SERVICIO LARGO) ---
+          if (filter === 'free') return; // Filtro solo libres
+
+          html += `
+            <div class="p-2.5 bg-purple-50/40 border border-dashed border-purple-200 rounded-xl flex items-center justify-between text-xs text-stone-500">
+              <div class="flex items-center gap-2">
+                <span class="font-mono-code font-bold text-[11px] text-stone-700 bg-white px-1.5 py-0.5 rounded border border-stone-200">${slotTime}</span>
+                <span class="text-[11px] text-purple-800 italic truncate font-medium">↳ Continúa: ${ongoingApt.apt.clientName}</span>
+              </div>
+              <span class="text-[10px] text-purple-600 font-bold bg-purple-100/60 px-1.5 py-0.5 rounded">En tratamiento</span>
+            </div>
+          `;
+        } else {
+          // --- 🟢 HORA LIBRE: HUECO DISPONIBLE PARA ARRASTRAR O SOLTAR ---
+          if (filter === 'busy') return; // Filtro solo ocupadas
+
+          const isMoveTarget = !!state.selectedAppointmentToMove;
+
+          html += `
+            <div class="free-slot-dropzone p-3 bg-emerald-50/40 hover:bg-emerald-100/70 border-2 border-dashed ${isMoveTarget ? 'border-emerald-500 ring-2 ring-emerald-300 animate-pulse bg-emerald-100/60' : 'border-emerald-300 hover:border-emerald-500'} rounded-2xl transition-all duration-200 flex items-center justify-between gap-2 group cursor-pointer shadow-2xs"
+                 data-staff-id="${staffId}" 
+                 data-slot-time="${slotTime}"
+                 ondragover="handleSlotDragOver(event)" 
+                 ondragleave="handleSlotDragLeave(event)" 
+                 ondrop="handleSlotDrop(event, '${staffId}', '${slotTime}')"
+                 onclick="handleFreeSlotClick('${staffId}', '${slotTime}')">
+              
+              <div class="flex items-center gap-2.5">
+                <span class="font-mono-code font-bold text-xs text-stone-800 bg-white px-2 py-1 rounded-lg border border-stone-200 shadow-2xs">${slotTime}</span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <strong class="text-xs font-bold text-emerald-800">HORA LIBRE</strong>
+                  </div>
+                  <span class="text-[10px] text-emerald-700 block dropzone-hint">
+                    ${isMoveTarget ? '👉 Haz clic para soltar la cita aquí' : 'Disponible · Suelta una ficha aquí'}
+                  </span>
+                </div>
+              </div>
+
+              <span class="text-[10px] bg-white text-emerald-800 font-bold px-2 py-1 rounded-lg border border-emerald-300 shadow-2xs group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition flex items-center gap-1 flex-shrink-0">
+                <i data-lucide="plus-circle" class="w-3 h-3"></i> Soltar
+              </span>
+            </div>
+          `;
+        }
+      });
+
+      return html || '<p class="text-xs text-stone-400 p-4 text-center bg-stone-50 rounded-xl">No hay tramos que coincidan con el filtro</p>';
+    }
+
+    function updateAgendaCounters() {
+      const activeDate = state.masterAgendaDate || '2026-10-23';
+
+      ['stf-1', 'stf-2', 'stf-3'].forEach(staffId => {
+        const staffApts = (state.appointments || []).filter(a => {
+          if (a.staffId !== staffId || a.status === 'cancelled') return false;
+          const d = new Date(a.startTime);
+          const isoDate = d.toISOString().slice(0, 10);
+          const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          return isoDate === activeDate || localDate === activeDate;
+        });
+
+        const busyCount = staffApts.length;
+        const freeCount = Math.max(0, MASTER_AGENDA_SLOTS.length - busyCount);
+
+        const idSuffix = staffId === 'stf-1' ? 'elena' : (staffId === 'stf-2' ? 'raquel' : 'carmen');
+        const busyBadge = document.getElementById(`stats-busy-${idSuffix}`);
+        const freeBadge = document.getElementById(`stats-free-${idSuffix}`);
+
+        if (busyBadge) busyBadge.innerText = `${busyCount} Cita${busyCount === 1 ? '' : 's'}`;
+        if (freeBadge) freeBadge.innerText = `${freeCount} Libres`;
+      });
+    }
+
+    function onMasterAgendaDateChange(newDate) {
+      state.masterAgendaDate = newDate;
+      renderMasterAgenda();
+    }
+
+    function changeAgendaDate(offset) {
+      const cur = new Date(state.masterAgendaDate || '2026-10-23');
+      if (offset === 0) {
+        state.masterAgendaDate = '2026-10-23';
+      } else {
+        cur.setDate(cur.getDate() + offset);
+        state.masterAgendaDate = cur.toISOString().slice(0, 10);
+      }
+      renderMasterAgenda();
+    }
+
+    function setAgendaFilter(filter) {
+      state.agendaSlotFilter = filter;
+      ['all', 'free', 'busy'].forEach(f => {
+        const btn = document.getElementById(`btn-filter-agenda-${f}`);
+        if (btn) {
+          if (f === filter) {
+            btn.className = 'px-3 py-1.5 rounded-xl font-bold bg-stone-900 text-white shadow-xs transition cursor-pointer';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-xl font-bold bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200 transition cursor-pointer';
+          }
+        }
+      });
+      renderMasterAgenda();
+    }
+
+    function handleAppointmentDragStart(e, appointmentId) {
+      draggedAppointmentId = appointmentId;
+      e.dataTransfer.setData('text/plain', appointmentId);
+      e.dataTransfer.effectAllowed = 'move';
+
+      document.querySelectorAll('.free-slot-dropzone').forEach(el => {
+        el.classList.add('ring-2', 'ring-purple-400', 'bg-purple-50/60', 'border-purple-400');
+        const hint = el.querySelector('.dropzone-hint');
+        if (hint) hint.innerText = '✨ ¡Suelta aquí para reubicar!';
+      });
+    }
+
+    function handleAppointmentDragEnd(e) {
+      document.querySelectorAll('.free-slot-dropzone').forEach(el => {
+        el.classList.remove('ring-2', 'ring-purple-400', 'bg-purple-50/60', 'border-purple-400', 'bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
+        const hint = el.querySelector('.dropzone-hint');
+        if (hint) hint.innerText = 'Disponible · Suelta una ficha aquí';
+      });
+    }
+
+    function handleSlotDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const slotEl = e.currentTarget;
+      slotEl.classList.remove('bg-purple-50/60');
+      slotEl.classList.add('bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
+    }
+
+    function handleSlotDragLeave(e) {
+      const slotEl = e.currentTarget;
+      slotEl.classList.remove('bg-purple-100', 'border-purple-600', 'scale-[1.02]', 'shadow-md');
+      if (draggedAppointmentId) {
+        slotEl.classList.add('bg-purple-50/60', 'border-purple-400');
+      }
+    }
+
+    async function handleSlotDrop(e, targetStaffId, slotTime) {
+      e.preventDefault();
+      handleAppointmentDragEnd(e);
+
+      const aptId = draggedAppointmentId || e.dataTransfer.getData('text/plain');
+      draggedAppointmentId = null;
+      if (!aptId) return;
+
+      await executeRescheduleAppointment(aptId, targetStaffId, slotTime);
+    }
+
+    function toggleSelectAppointmentToMove(appointmentId) {
+      if (state.selectedAppointmentToMove === appointmentId) {
+        state.selectedAppointmentToMove = null;
+      } else {
+        state.selectedAppointmentToMove = appointmentId;
+      }
+      renderMasterAgenda();
+    }
+
+    async function handleFreeSlotClick(targetStaffId, slotTime) {
+      if (!state.selectedAppointmentToMove) {
+        return; // No hay cita seleccionada para mover por clic
+      }
+      const aptId = state.selectedAppointmentToMove;
+      state.selectedAppointmentToMove = null;
+      await executeRescheduleAppointment(aptId, targetStaffId, slotTime);
+    }
+
+    async function executeRescheduleAppointment(aptId, targetStaffId, slotTime) {
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      if (!apt) {
+        alert('Cita no encontrada.');
+        return;
+      }
+
+      const activeDate = state.masterAgendaDate || '2026-10-23';
+      const newStaff = (state.staff || []).find(s => s.id === targetStaffId) || { name: 'Estilista' };
+      const prevStaff = (state.staff || []).find(s => s.id === apt.staffId) || { name: apt.staffName || 'Estilista Salón' };
+
+      // Calcular duración de la cita original (por defecto 30 min)
+      const oldStart = new Date(apt.startTime);
+      const oldEnd = new Date(apt.endTime);
+      let durationMs = oldEnd.getTime() - oldStart.getTime();
+      if (isNaN(durationMs) || durationMs <= 0) {
+        durationMs = 30 * 60 * 1000;
+      }
+
+      // Construir nuevo inicio y fin
+      const [sh, sm] = slotTime.split(':').map(Number);
+      const newStart = new Date(activeDate + 'T00:00:00');
+      newStart.setHours(sh, sm, 0, 0);
+      const newEnd = new Date(newStart.getTime() + durationMs);
+
+      const newStartIso = newStart.toISOString();
+      const newEndIso = newEnd.toISOString();
+
+      try {
+        const res = await fetch(`/api/appointments/${aptId}/reschedule`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            staffId: targetStaffId,
+            startTime: newStartIso,
+            endTime: newEndIso
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 35, spread: 60 });
+          
+          const isSameStaff = apt.staffId === targetStaffId;
+          const msg = isSameStaff 
+            ? `✅ Cita de ${apt.clientName} movida a las ${slotTime} con ${newStaff.name}.`
+            : `✅ Cita de ${apt.clientName} trasladada de ${prevStaff.name} a ${newStaff.name} a las ${slotTime}. ¡Ambas estilistas han sido notificadas!`;
+          
+          alert(msg);
+          await fetchInitialData();
+          renderMasterAgenda();
+          if (typeof loadAdminUsersTable === 'function') loadAdminUsersTable();
+          if (typeof pollAdminNotifications === 'function') pollAdminNotifications();
+          if (typeof renderWorkerAgenda === 'function') renderWorkerAgenda();
+        } else {
+          alert('⚠️ ' + data.error);
+        }
+      } catch (err) {
+        alert('Error al reasignar cita.');
+      }
     }
 
     async function executeMedicalLeaveProtocol() {
@@ -9930,67 +10335,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       document.getElementById('modal-product-history').classList.add('hidden');
     }
 
-    // ========================================================================
-    // AGENDA MAESTRA: DRAG & DROP DE FICHAS DE CLIENTAS
-    // ========================================================================
-    let draggedAppointmentId = null;
 
-    function handleAppointmentDragStart(e, appointmentId) {
-      draggedAppointmentId = appointmentId;
-      e.dataTransfer.setData('text/plain', appointmentId);
-      e.dataTransfer.effectAllowed = 'move';
-    }
-
-    function handleAppointmentDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      e.currentTarget.classList.add('bg-indigo-50/70', 'ring-2', 'ring-indigo-400');
-    }
-
-    function handleAppointmentDragLeave(e) {
-      e.currentTarget.classList.remove('bg-indigo-50/70', 'ring-2', 'ring-indigo-400');
-    }
-
-    async function handleAppointmentDrop(e, targetStaffId) {
-      e.preventDefault();
-      e.currentTarget.classList.remove('bg-indigo-50/70', 'ring-2', 'ring-indigo-400');
-
-      const aptId = draggedAppointmentId || e.dataTransfer.getData('text/plain');
-      if (!aptId) return;
-
-      const apt = state.appointments.find(a => a.id === aptId);
-      if (!apt) return;
-
-      if (apt.staffId === targetStaffId) {
-        return; // Mismo estilista
-      }
-
-      const newStaff = state.staff.find(s => s.id === targetStaffId) || { name: 'Estilista' };
-
-      try {
-        const res = await fetch(`/api/appointments/${aptId}/reschedule`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ staffId: targetStaffId })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 50 });
-          alert(`✅ Cita de ${apt.clientName} reasignada a ${newStaff.name} con éxito.`);
-          await fetchInitialData();
-          renderMasterAgenda();
-        loadAdminUsersTable();
-        pollAdminNotifications();
-        } else {
-          alert('Error al reasignar: ' + data.error);
-        }
-      } catch (err) {
-        apt.staffId = targetStaffId;
-        renderMasterAgenda();
-        loadAdminUsersTable();
-        pollAdminNotifications();
-      }
-    }
 
     // ========================================================================
     // SERVICIOS, DURACIONES Y MATERIALES
