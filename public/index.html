@@ -58,7 +58,7 @@
   <!-- BARRA SUPERIOR DE CONTROL RBAC (SELECTOR DE PORTALES) -->
   <!-- ========================================================================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50 px-4 py-3 shadow-xs">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="max-w-[1720px] w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
       
       <!-- Marca & Estado Fiscal -->
       <div class="flex items-center gap-3">
@@ -110,7 +110,7 @@
   </header>
 
   <!-- CONTENEDOR PRINCIPAL -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8">
+  <main class="flex-1 w-full max-w-[1720px] mx-auto p-3 sm:p-4 md:p-6 lg:p-8 transition-all duration-300">
 
     <!-- ======================================================================= -->
     <!-- PORTAL 1: PORTAL CLIENTAS (PWA / MOBILE FIRST) -->
@@ -1051,7 +1051,7 @@
         </div>
 
         <!-- Estado actual de la estilista y contador de tiempo -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
           <!-- Columna 1: Estado del Turno -->
           <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 flex flex-col justify-between">
             <div>
@@ -1424,7 +1424,7 @@
       <div class="flex flex-col lg:flex-row items-start gap-6 relative">
 
         <!-- MENÚ VERTICAL A LA IZQUIERDA CON DESPLEGABLES SUAVES (SIDEBAR) -->
-        <aside id="admin-vertical-sidebar" class="w-full lg:w-72 flex-shrink-0 bg-white border border-stone-200/90 rounded-3xl p-4 shadow-sm lg:sticky lg:top-24 space-y-3.5 z-20 transition-all duration-300">
+        <aside id="admin-vertical-sidebar" class="w-full lg:w-64 xl:w-68 flex-shrink-0 bg-white border border-stone-200/90 rounded-3xl p-3.5 shadow-sm lg:sticky lg:top-20 space-y-3 z-20 transition-all duration-300">
           
           <!-- Cabecera del Menú Vertical -->
           <div class="flex items-center justify-between pb-3 border-b border-stone-100">
@@ -1637,7 +1637,7 @@
         </div>
 
         <!-- Barra de Control de Fecha y Filtros de Horas Libres/Ocupadas -->
-        <div class="luxury-card rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="luxury-card rounded-2xl p-4 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-2">
             <button type="button" onclick="changeAgendaDate(-1)" class="p-2 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs">
               <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Anterior
@@ -1764,7 +1764,7 @@
       </div>
 
       <!-- VISTA 3B: TPV & COBROS EN CAJA -->
-      <div id="aview-tpv" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="aview-tpv" class="hidden grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         <div class="lg:col-span-2 luxury-card rounded-2xl p-6 space-y-4">
           <div class="flex items-center justify-between border-b border-stone-100 pb-3">
             <div>
@@ -1789,7 +1789,7 @@
             </div>
           </div>
 
-          <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
+          <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin shadow-2xs">
             <table class="w-full text-xs text-left">
               <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
                 <tr>
@@ -1807,20 +1807,20 @@
             </table>
           </div>
 
-          <div class="flex gap-2">
-            <select id="tpv-quick-service" class="bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium flex-1">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <select id="tpv-quick-service" class="bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium flex-1 min-w-0">
               <option value="">+ Añadir Servicio al Ticket...</option>
             </select>
-            <select id="tpv-quick-product" class="bg-stone-50 border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium flex-1">
+            <select id="tpv-quick-product" class="bg-stone-50 border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium flex-1 min-w-0">
               <option value="">+ Añadir Producto de Muestra...</option>
             </select>
-            <button onclick="addTpvQuickItem()" class="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs">
+            <button type="button" onclick="addTpvQuickItem()" class="bg-stone-800 hover:bg-stone-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xs flex-shrink-0 cursor-pointer">
               Añadir
             </button>
           </div>
         </div>
 
-        <div class="luxury-card rounded-2xl p-6 space-y-5 flex flex-col justify-between">
+        <div class="xl:col-span-5 2xl:col-span-4 luxury-card rounded-2xl p-4 sm:p-6 space-y-5 flex flex-col justify-between overflow-hidden">
           <div class="space-y-4">
             <h4 class="text-sm font-bold text-stone-900 font-serif-luxury">Desglose Fiscal (Ley Antifraude)</h4>
             
@@ -1855,9 +1855,9 @@
                 <span class="font-bold text-amber-800 font-mono-code bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200" id="tpv-client-points-badge">0 pts disp.</span>
               </div>
               <div class="flex items-center gap-2" id="tpv-points-buttons">
-                <button type="button" id="btn-tpv-redeem-100" onclick="applyLoyaltyPointsDiscount(100)" class="flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-1.5 font-semibold text-[11px] transition flex items-center justify-center gap-1">
-                  <i data-lucide="tag" class="w-3 h-3 text-amber-700"></i>
-                  <span>Canjear 100 pts (-5,00 €)</span>
+                <button type="button" id="btn-tpv-redeem-100" onclick="applyLoyaltyPointsDiscount(100)" class="w-full sm:flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg py-2 px-2.5 font-semibold text-xs transition flex items-center justify-center gap-1 text-center cursor-pointer">
+                  <i data-lucide="tag" class="w-3.5 h-3.5 text-amber-700 flex-shrink-0"></i>
+                  <span class="truncate">Canjear 100 pts (-5,00 €)</span>
                 </button>
                 <button type="button" id="btn-tpv-remove-discount" onclick="removeLoyaltyPointsDiscount()" class="hidden bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-300 rounded-lg px-2.5 py-1.5 font-semibold text-[11px] transition">
                   ✕ Quitar
@@ -1875,8 +1875,8 @@
                 <span class="text-[10px] text-purple-700 font-mono-code" id="tpv-voucher-status">Voucher Digital</span>
               </div>
               <div class="flex gap-2">
-                <input type="text" id="tpv-voucher-code" placeholder="Código: REGALO-50" class="flex-1 bg-white border border-purple-300 rounded-lg p-2 text-xs font-mono-code uppercase focus:outline-none focus:border-purple-500">
-                <button type="button" onclick="applyTpvGiftCard()" class="bg-purple-700 hover:bg-purple-600 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition">
+                <input type="text" id="tpv-voucher-code" placeholder="Código: REGALO-50" class="flex-1 min-w-0 bg-white border border-purple-300 rounded-lg p-2 text-xs font-mono-code uppercase focus:outline-none focus:border-purple-500">
+                <button type="button" onclick="applyTpvGiftCard()" class="bg-purple-700 hover:bg-purple-600 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition flex-shrink-0 cursor-pointer">
                   Aplicar
                 </button>
               </div>
@@ -1898,8 +1898,9 @@
             </div>
           </div>
 
-          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-200 cursor-pointer">
-            <i data-lucide="receipt" class="w-4 h-4"></i> Cobrar y Generar Factura (Comprobación Previa)
+          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-200 cursor-pointer text-center leading-snug">
+            <i data-lucide="receipt" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Cobrar y Generar Factura (Comprobación Previa)</span>
           </button>
         </div>
       </div>
@@ -1955,7 +1956,7 @@
           </button>
         </div>
 
-        <div class="border border-stone-200 rounded-xl overflow-hidden shadow-2xs">
+        <div class="border border-stone-200 rounded-xl overflow-x-auto scrollbar-thin shadow-2xs">
           <table class="w-full text-xs text-left">
             <thead class="bg-stone-50 text-stone-600 uppercase font-semibold border-b border-stone-200">
               <tr>
@@ -2911,7 +2912,7 @@
   <!-- PIE DE PÁGINA GLOBAL (AVISO LEGAL, PRIVACIDAD, COOKIES Y TÉRMINOS)         -->
   <!-- ========================================================================= -->
   <footer class="bg-stone-900 text-stone-300 border-t border-stone-800 mt-12 py-10 px-4 md:px-8 text-xs">
-    <div class="max-w-7xl mx-auto space-y-8">
+    <div class="max-w-[1720px] w-full mx-auto space-y-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         
         <!-- Columna 1: Marca & Salón -->
@@ -4484,7 +4485,7 @@
           <div class="grid grid-cols-3 gap-2">
             <button type="button" onclick="selectChargePaymentMethod('card')" id="btn-charge-method-card" class="charge-method-btn p-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 font-bold flex flex-col items-center justify-center gap-1 transition shadow-xs">
               <i data-lucide="credit-card" class="w-5 h-5 text-indigo-600"></i>
-              <span>Tarjeta / Datáfono</span>
+              <span class="truncate">Tarjeta</span>
             </button>
             <button type="button" onclick="selectChargePaymentMethod('cash')" id="btn-charge-method-cash" class="charge-method-btn p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 font-semibold flex flex-col items-center justify-center gap-1 hover:bg-stone-50 transition">
               <i data-lucide="banknote" class="w-5 h-5 text-stone-500"></i>
@@ -4522,9 +4523,6 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
-  <!-- ========================================================================= -->
   <!-- ========================================================================= -->
   <!-- MODAL: FACTURA OFICIAL EN PDF Y TICKET DIGITAL VERI*FACTU                -->
   <!-- ========================================================================= -->
@@ -4572,7 +4570,7 @@
   <div class="overflow-y-auto p-4 sm:p-6 bg-stone-100/60 flex-1">
     
     <!-- BANNER DE COMPROBACIÓN PREVIA ANTES DE COBRAR -->
-    <div id="invoice-precharge-actions-bar" class="hidden mb-5 p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
+    <div id="invoice-precharge-actions-bar" class="hidden mb-5 p-3.5 sm:p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 animate-in fade-in">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
           <i data-lucide="alert-circle" class="w-5 h-5"></i>
@@ -8152,14 +8150,14 @@
                  class="appointment-card p-4 bg-gradient-to-br from-white via-indigo-50/25 to-purple-50/40 border-2 ${isSelectedToMove ? 'border-purple-600 ring-4 ring-purple-300 bg-purple-50/90' : 'border-indigo-200 hover:border-indigo-400'} border-l-[6px] ${staffBorderColor} rounded-2xl space-y-2.5 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all relative group">
               
               <!-- Cabecera de Hora y Badge de Ocupación de Alto Contraste -->
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-bold text-stone-900 font-mono-code text-xs flex items-center gap-1.5 bg-stone-900 text-white px-2.5 py-1 rounded-lg shadow-2xs">
-                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-300"></i>
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <span class="font-bold text-stone-900 font-mono-code text-[11px] sm:text-xs flex items-center gap-1 bg-stone-900 text-white px-2 py-0.5 rounded-lg shadow-2xs">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-300 flex-shrink-0"></i>
                   ${startingApt.startTimeStr} - ${startingApt.endTimeStr}
                   <span class="text-[10px] text-stone-300 font-normal">(${startingApt.durationMin}m)</span>
                 </span>
                 
-                <span class="text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white px-2.5 py-1 rounded-full shadow-2xs flex items-center gap-1">
+                <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                   OCUPADA
                 </span>
@@ -8182,15 +8180,15 @@
               </div>
 
               <!-- Fila de Precio, Estado y Acciones Rápidas -->
-              <div class="flex items-center justify-between pt-2 border-t border-stone-200/80 text-xs">
-                <span class="font-mono-code font-black text-stone-900 bg-white px-2.5 py-1 rounded-md border border-stone-300 shadow-2xs text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-stone-200/80 text-xs">
+                <span class="font-mono-code font-black text-stone-900 bg-white px-2 py-0.5 rounded-md border border-stone-300 shadow-2xs text-[11px]">
                   ${a.totalPrice ? a.totalPrice.toFixed(2) + ' €' : '45.00 €'}
                 </span>
-                <div class="flex items-center gap-1.5">
-                  <button type="button" onclick="event.stopPropagation(); toggleSelectAppointmentToMove('${a.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${isSelectedToMove ? 'bg-purple-700 text-white ring-2 ring-purple-300' : 'bg-white hover:bg-purple-100 text-purple-800'} border border-purple-300 flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                <div class="flex flex-wrap items-center gap-1">
+                  <button type="button" onclick="event.stopPropagation(); toggleSelectAppointmentToMove('${a.id}')" class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${isSelectedToMove ? 'bg-purple-700 text-white ring-2 ring-purple-300' : 'bg-white hover:bg-purple-100 text-purple-800'} border border-purple-300 flex items-center gap-0.5 transition cursor-pointer shadow-2xs">
                     <i data-lucide="move" class="w-3 h-3"></i> ${isSelectedToMove ? 'Moviendo...' : 'Mover'}
                   </button>
-                  <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                  <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-0.5 rounded-lg text-[10px] flex items-center gap-0.5 transition cursor-pointer shadow-2xs">
                     <i data-lucide="credit-card" class="w-3 h-3"></i> Cobrar
                   </button>
                 </div>
