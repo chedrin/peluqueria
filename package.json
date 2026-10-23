@@ -5,7 +5,16 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "node -c server.js && node validate_syntax.js",
+    "validate": "node validate_syntax.js",
+    "test": "node test_full_suite.js",
+    "deploy": "git push origin main",
+    "deploy:prod": "npm run build && npm test && git push origin main"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "cors": "^2.8.5",
