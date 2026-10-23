@@ -27,12 +27,13 @@ function request(path, method = 'GET', body = null) {
 
 async function testAll() {
   console.log('--- TEST 1: RESERVA MANUAL WALK-IN (SIN CITA PREVIA) ---');
+  const testTime = new Date(Date.now() + 86400000 * 2 + Math.floor(Math.random() * 36000000)).toISOString();
   const bookRes = await request('/api/appointments/book', 'POST', {
     clientName: 'Marcos Benítez (Walk-in)',
     clientPhone: '611223344',
     staffId: 'stf-2', // Raquel Santos
     serviceIds: ['srv-4'], // Corte Caballero (22€, 30m)
-    startTime: '2026-10-23T16:00:00.000Z',
+    startTime: testTime,
     clientComments: 'Cliente llegado a salón sin cita previa',
     isWalkIn: true
   });

@@ -1765,8 +1765,8 @@
             </div>
           </div>
 
-          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-200">
-            <i data-lucide="printer" class="w-4 h-4"></i> Cobrar y Emitir Factura Veri*Factu
+          <button onclick="executeFiscalInvoicing()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-emerald-200 cursor-pointer">
+            <i data-lucide="receipt" class="w-4 h-4"></i> Cobrar y Generar Factura (Comprobación Previa)
           </button>
         </div>
       </div>
@@ -1821,12 +1821,12 @@
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <h3 class="font-bold text-stone-900 font-serif-luxury text-base sm:text-lg">Comprobante de Cobro & Facturación</h3>
-                    <span class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <h3 class="font-bold text-stone-900 font-serif-luxury text-base sm:text-lg" id="ticket-modal-title">Comprobante de Cobro & Facturación</h3>
+                    <span id="ticket-modal-badge" class="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Veri*Factu AEAT
                     </span>
                   </div>
-                  <p class="text-xs text-stone-500">Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021</p>
+                  <p class="text-xs text-stone-500" id="ticket-modal-subtitle">Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021</p>
                 </div>
               </div>
 
@@ -1852,6 +1852,44 @@
 
             <!-- Cuerpo del Modal: Contenedor con Scroll -->
             <div class="overflow-y-auto p-4 sm:p-6 bg-stone-100/60 flex-1">
+              
+              <!-- BANNER DE COMPROBACIÓN PREVIA ANTES DE COBRAR -->
+              <div id="invoice-precharge-actions-bar" class="hidden mb-5 p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
+                      <span>Comprobación Previa al Cobro</span>
+                      <span class="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">Revisión Obligatoria</span>
+                    </h5>
+                    <p class="text-xs text-amber-900 font-medium mt-0.5">
+                      Verifica que los conceptos, la clienta y el desglose de IVA sean correctos antes de confirmar el cobro.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end flex-shrink-0">
+                  <!-- Selector rápido de método de pago en borrador -->
+                  <div class="flex items-center gap-1 bg-white/90 p-1 rounded-xl border border-amber-200 text-xs shadow-2xs">
+                    <span class="text-[10px] font-bold text-stone-500 px-1">Medio:</span>
+                    <button type="button" onclick="setPreChargePaymentMethod('card')" id="prepay-card" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💳 Tarjeta</button>
+                    <button type="button" onclick="setPreChargePaymentMethod('cash')" id="prepay-cash" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">💵 Efectivo</button>
+                    <button type="button" onclick="setPreChargePaymentMethod('bizum')" id="prepay-bizum" class="px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer transition">📱 Bizum</button>
+                  </div>
+
+                  <button type="button" onclick="modifyTpvTicket()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-amber-700"></i>
+                    <span>Modificar</span>
+                  </button>
+                  <button type="button" id="btn-precharge-confirm-top" onclick="confirmAndExecuteCharge()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-emerald-200 cursor-pointer">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
+                    <span id="btn-precharge-confirm-top-text">✓ Aceptar y Cobrar</span>
+                  </button>
+                </div>
+              </div>
+
               <div id="invoice-modal-grid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 <!-- =========================================================== -->
@@ -1875,7 +1913,7 @@
                     </div>
 
                     <div class="text-left sm:text-right bg-stone-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none w-full sm:w-auto border sm:border-0 border-stone-200 space-y-1">
-                      <div class="inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs">
+                      <div id="inv-a4-badge" class="inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs">
                         FACTURA OFICIAL VERI*FACTU
                       </div>
                       <div class="pt-1">
@@ -1989,7 +2027,7 @@
                       <h4 class="font-bold text-xs uppercase font-serif-luxury tracking-wide salon-legal-name-display">Peluquería & Estilismo Losan S.L.</h4>
                       <p class="text-[10px] text-stone-500">NIF: B-87654321</p>
                       <p class="text-[10px] text-stone-500">Calle Velázquez 42, 28001 Madrid</p>
-                      <p class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
+                      <p id="ticket-badge" class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200">
                         FACTURA SIMPLIFICADA (VERI*FACTU)
                       </p>
                     </div>
@@ -2062,14 +2100,16 @@
             </div>
 
             <!-- Barra Inferior de Estado -->
-            <div class="p-3 sm:px-6 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-500 flex-shrink-0">
-              <span class="flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-                Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.
-              </span>
-              <button onclick="closeTicketModal()" class="px-5 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold transition cursor-pointer">
-                Cerrar
-              </button>
+            <div class="p-3 sm:px-6 bg-stone-50 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-600 flex-shrink-0">
+              <div id="modal-footer-status" class="flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600" id="modal-footer-status-icon"></i>
+                <span id="modal-footer-status-text">Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.</span>
+              </div>
+              <div id="modal-footer-actions" class="flex items-center gap-2">
+                <button type="button" onclick="closeTicketModal()" class="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold transition cursor-pointer">
+                  Cerrar
+                </button>
+              </div>
             </div>
 
           </div>
@@ -8603,25 +8643,13 @@
       }
 
       const client = getActiveTpvClient();
-      const grossTotal = state.tpvItems.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
-      const total = Math.max(0, grossTotal - (state.tpvDiscountPoints || 0) - (state.tpvVoucherDiscount || 0));
+      const grossTotal = state.tpvItems.reduce((acc, it) => acc + (it.quantity * it.unitPrice), 0);
+      const discount = state.tpvDiscountPoints || 0;
+      const voucherDiscount = state.tpvVoucherDiscount || 0;
+      const finalGross = Math.max(0, grossTotal - discount - voucherDiscount);
 
-      // Si el método seleccionado en TPV es tarjeta, abrir datáfono virtual
-      if (state.tpvPaymentMethod === 'card') {
-        let concept = state.tpvItems.map(i => i.concept).join(' + ');
-        if (state.tpvDiscountPoints > 0) concept += ` (Dto. Puntos: -${state.tpvDiscountPoints.toFixed(2)} €)`;
-        if (state.tpvVoucherDiscount > 0) concept += ` (Bono: -${state.tpvVoucherDiscount.toFixed(2)} €)`;
-
-        openCardTerminalModal({
-          concept,
-          amount: total,
-          clientId: client ? client.id : 'cli-1',
-          clientName: client ? client.name : 'Clienta en TPV',
-          staffId: state.activeStaffId || 'stf-1',
-          notes: 'Cobro TPV con Datáfono'
-        });
-        return;
-      }
+      const base = Math.round((finalGross / 1.21) * 100) / 100;
+      const vat = Math.round((finalGross - base) * 100) / 100;
 
       // Preparar líneas de factura con descuentos aplicados
       const invoiceItems = [...state.tpvItems];
@@ -8642,7 +8670,88 @@
         });
       }
 
-      // Resolver cita vinculada si hay alguna seleccionada
+      const series = 'FS2026';
+      const seriesCount = (state.invoices || []).filter(i => i.series === series).length;
+      const nextNumber = seriesCount + 1;
+
+      // Crear borrador previo completo para la comprobación
+      const draftInvoice = {
+        id: 'draft-preview-' + Date.now(),
+        isDraft: true,
+        series,
+        invoiceNumber: nextNumber,
+        type: 'simplified',
+        issueDate: new Date().toISOString(),
+        clientName: client ? client.name : 'Consumidor Final (Mostrador)',
+        clientNif: (client && client.dni) ? client.dni : 'N/A',
+        clientId: client ? client.id : 'cli-1',
+        taxBase: base,
+        vatRate: 21.0,
+        vatAmount: vat,
+        totalAmount: finalGross,
+        paymentMethod: state.tpvPaymentMethod || 'card',
+        recordHash: 'BORRADOR-PREVIO-A-CONFIRMACION-FISCAL',
+        qrUrl: `https://www.agenciatributaria.gob.es/verifactu/consulta?borrador=true&total=${finalGross.toFixed(2)}`,
+        items: invoiceItems
+      };
+
+      // Mostrar modal en modo comprobación previa antes de cobrar
+      showTicketModal(draftInvoice, null, true);
+    }
+
+    function modifyTpvTicket() {
+      closeTicketModal();
+      switchPortal('admin');
+      switchAdminTab('pos-tpv');
+      showLegalToast('Comprobante en modo edición: modifica los conceptos, cantidades o clienta en el TPV.');
+    }
+
+    function setPreChargePaymentMethod(method) {
+      setTpvPaymentMethod(method);
+      if (state.lastInvoice) {
+        state.lastInvoice.paymentMethod = method;
+        const elA4Payment = document.getElementById('inv-a4-payment');
+        if (elA4Payment) elA4Payment.innerText = method.toUpperCase();
+      }
+      updatePreChargePaymentButtons(method);
+    }
+
+    function updatePreChargePaymentButtons(method) {
+      ['card', 'cash', 'bizum'].forEach(m => {
+        const btn = document.getElementById('prepay-' + m);
+        if (!btn) return;
+        if (m === method) {
+          btn.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-600 text-white shadow-xs cursor-pointer';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg text-xs font-medium text-stone-600 hover:text-stone-900 cursor-pointer';
+        }
+      });
+    }
+
+    async function confirmAndExecuteCharge() {
+      const inv = state.lastInvoice;
+      if (!inv) return;
+
+      // 1. Si el método de pago seleccionado es tarjeta, cerrar comprobante y abrir pasarela bancaria virtual
+      if (state.tpvPaymentMethod === 'card') {
+        closeTicketModal();
+        let concept = state.tpvItems.map(i => i.concept).join(' + ');
+        if (state.tpvDiscountPoints > 0) concept += ` (Dto. Puntos: -${state.tpvDiscountPoints.toFixed(2)} €)`;
+        if (state.tpvVoucherDiscount > 0) concept += ` (Bono: -${state.tpvVoucherDiscount.toFixed(2)} €)`;
+
+        openCardTerminalModal({
+          concept,
+          amount: inv.totalAmount,
+          clientId: inv.clientId || 'cli-1',
+          clientName: inv.clientName || 'Clienta en TPV',
+          staffId: state.activeStaffId || 'stf-1',
+          notes: 'Cobro TPV con Datáfono'
+        });
+        return;
+      }
+
+      // 2. Si es efectivo o bizum, emitir factura fiscal y persistir cobro en el backend
+      const client = getActiveTpvClient();
       const aptSelect = document.getElementById('tpv-appointment-select');
       const appointmentId = aptSelect ? aptSelect.value : null;
 
@@ -8655,16 +8764,22 @@
             type: 'simplified',
             appointmentId: appointmentId || undefined,
             clientId: client ? client.id : 'cli-1',
-            items: invoiceItems,
+            items: inv.items,
             paymentMethod: state.tpvPaymentMethod
           })
         });
 
-        const invoice = await res.json();
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Error al emitir factura: ' + (err.error || 'Error en servidor'));
+          return;
+        }
+
+        const realInvoice = await res.json();
         await fetchInitialData();
         renderInvoicesTable();
 
-        showTicketModal(invoice);
+        // Limpiar carrito de TPV tras cobrar satisfactoriamente
         state.tpvItems = [];
         state.tpvDiscountPoints = 0;
         state.tpvRedeemedPoints = 0;
@@ -8672,21 +8787,114 @@
         renderTpvTable();
         updateTpvPointsBadge();
 
+        if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+        showLegalToast('¡Cobro registrado y factura Veri*Factu emitida con éxito!');
+
+        // Actualizar el modal a modo definitivo
+        showTicketModal(realInvoice, null, false);
+
       } catch (e) {
-        alert('Factura emitida localmente.');
+        console.error('Error emitiendo factura:', e);
+        alert('Error de conexión al emitir la factura.');
       }
     }
 
-    function showTicketModal(inv, transaction) {
+    function showTicketModal(inv, transaction, isPreChargePreview = false) {
       if (!inv) return;
       state.lastInvoice = inv;
       state.lastTransaction = transaction;
+      state.isPreChargePreview = isPreChargePreview;
 
-      const formattedNumber = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
+      const formattedNumber = inv.isDraft
+        ? `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')} (Borrador)`
+        : `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
       const formattedDate = new Date(inv.issueDate).toLocaleString('es-ES');
       const clientName = inv.clientName || 'Consumidor Final';
       const clientNif = inv.clientNif || 'N/A';
       const paymentMethodStr = (inv.paymentMethod || 'card').toUpperCase();
+
+      // Cabeceras y estados del modal
+      const elTitle = document.getElementById('ticket-modal-title');
+      const elSubtitle = document.getElementById('ticket-modal-subtitle');
+      const elBadge = document.getElementById('ticket-modal-badge');
+      const prechargeBar = document.getElementById('invoice-precharge-actions-bar');
+      const elA4Badge = document.getElementById('inv-a4-badge');
+      const elTicketBadge = document.getElementById('ticket-badge');
+      const footerStatusIcon = document.getElementById('modal-footer-status-icon');
+      const footerStatusText = document.getElementById('modal-footer-status-text');
+      const footerActions = document.getElementById('modal-footer-actions');
+      const btnConfirmTopText = document.getElementById('btn-precharge-confirm-top-text');
+
+      if (isPreChargePreview) {
+        if (elTitle) elTitle.innerText = 'Comprobación de Factura & Ticket';
+        if (elSubtitle) elSubtitle.innerText = 'Revisa la factura oficial (PDF) y el ticket antes de confirmar el cobro';
+        if (elBadge) {
+          elBadge.className = 'text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1';
+          elBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Vista Previa / Antes de Cobrar';
+        }
+        if (prechargeBar) prechargeBar.classList.remove('hidden');
+        if (btnConfirmTopText) btnConfirmTopText.innerText = `✓ Aceptar y Cobrar (${inv.totalAmount.toFixed(2)} €)`;
+        if (elA4Badge) {
+          elA4Badge.className = 'inline-block bg-amber-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs';
+          elA4Badge.innerText = 'BORRADOR PREVIO - PENDIENTE DE COBRO';
+        }
+        if (elTicketBadge) {
+          elTicketBadge.className = 'text-[9px] text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-amber-200';
+          elTicketBadge.innerText = 'BORRADOR DE TICKET (PRE-COBRO)';
+        }
+        if (footerStatusIcon) {
+          footerStatusIcon.className = 'w-4 h-4 text-amber-600';
+          footerStatusIcon.setAttribute('data-lucide', 'help-circle');
+        }
+        if (footerStatusText) {
+          footerStatusText.innerText = 'Borrador sin efecto fiscal ni cargo bancario. Pulsa "Aceptar" para cobrar o "Modificar" para volver al TPV.';
+        }
+        if (footerActions) {
+          footerActions.innerHTML = `
+            <button type="button" onclick="modifyTpvTicket()" class="px-4 py-2 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="edit-3" class="w-4 h-4 text-amber-800"></i>
+              <span>Modificar / Volver al TPV</span>
+            </button>
+            <button type="button" onclick="confirmAndExecuteCharge()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md shadow-emerald-200">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
+              <span>Aceptar y Cobrar (${inv.totalAmount.toFixed(2)} €)</span>
+            </button>
+          `;
+        }
+        updatePreChargePaymentButtons(inv.paymentMethod || state.tpvPaymentMethod || 'card');
+
+      } else {
+        // Modo definitivo (post-cobro)
+        if (elTitle) elTitle.innerText = 'Comprobante de Cobro & Facturación';
+        if (elSubtitle) elSubtitle.innerText = 'Factura oficial en PDF y ticket digital emitidos conforme a la Ley 11/2021';
+        if (elBadge) {
+          elBadge.className = 'text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1';
+          elBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Veri*Factu AEAT Emitido';
+        }
+        if (prechargeBar) prechargeBar.classList.add('hidden');
+        if (elA4Badge) {
+          elA4Badge.className = 'inline-block bg-emerald-600 text-white font-bold text-xs uppercase px-3 py-1 rounded-lg shadow-2xs';
+          elA4Badge.innerText = 'FACTURA OFICIAL VERI*FACTU';
+        }
+        if (elTicketBadge) {
+          elTicketBadge.className = 'text-[9px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 border border-emerald-200';
+          elTicketBadge.innerText = 'FACTURA SIMPLIFICADA (VERI*FACTU)';
+        }
+        if (footerStatusIcon) {
+          footerStatusIcon.className = 'w-4 h-4 text-emerald-600';
+          footerStatusIcon.setAttribute('data-lucide', 'shield-check');
+        }
+        if (footerStatusText) {
+          footerStatusText.innerText = 'Registro fiscal persistido con inalterabilidad SHA-256 en base de datos.';
+        }
+        if (footerActions) {
+          footerActions.innerHTML = `
+            <button type="button" onclick="closeTicketModal()" class="px-6 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition cursor-pointer shadow-sm">
+              Cerrar
+            </button>
+          `;
+        }
+      }
 
       // =======================================================================
       // 1. POBLAR FACTURA OFICIAL A4 (PDF)
@@ -8710,11 +8918,16 @@
       if (elA4Base) elA4Base.innerText = inv.taxBase.toFixed(2) + ' €';
       if (elA4Vat) elA4Vat.innerText = inv.vatAmount.toFixed(2) + ' €';
       if (elA4Total) elA4Total.innerText = inv.totalAmount.toFixed(2) + ' €';
-      if (elA4Hash) elA4Hash.innerText = 'Huella Hash SHA-256: ' + inv.recordHash;
+      if (elA4Hash) {
+        elA4Hash.innerText = inv.isDraft
+          ? 'Huella Hash SHA-256: Generación automática conforme a Ley 11/2021 tras aceptar el cobro'
+          : 'Huella Hash SHA-256: ' + inv.recordHash;
+      }
 
       if (elA4Rows && inv.items) {
         elA4Rows.innerHTML = inv.items.map(it => {
-          const base = it.taxBase !== undefined ? it.taxBase : (it.totalAmount / 1.21);
+          const gross = it.totalAmount !== undefined ? it.totalAmount : (Number(it.quantity) * Number(it.unitPrice));
+          const base = it.taxBase !== undefined ? it.taxBase : (gross / 1.21);
           return `
             <tr class="hover:bg-stone-50 transition">
               <td class="p-3 font-sans font-semibold text-stone-900">${it.concept}</td>
@@ -8722,7 +8935,7 @@
               <td class="p-3 text-right">${it.unitPrice.toFixed(2)} €</td>
               <td class="p-3 text-right">${base.toFixed(2)} €</td>
               <td class="p-3 text-center">21%</td>
-              <td class="p-3 text-right font-bold text-stone-900">${it.totalAmount.toFixed(2)} €</td>
+              <td class="p-3 text-right font-bold text-stone-900">${gross.toFixed(2)} €</td>
             </tr>
           `;
         }).join('');
@@ -8754,22 +8967,29 @@
       if (elTicketBase) elTicketBase.innerText = inv.taxBase.toFixed(2) + ' €';
       if (elTicketVat) elTicketVat.innerText = inv.vatAmount.toFixed(2) + ' €';
       if (elTicketTotal) elTicketTotal.innerText = inv.totalAmount.toFixed(2) + ' €';
-      if (elTicketHash) elTicketHash.innerText = 'HASH SHA-256: ' + inv.recordHash;
+      if (elTicketHash) {
+        elTicketHash.innerText = inv.isDraft
+          ? 'HASH SHA-256: PENDIENTE DE COBRO'
+          : 'HASH SHA-256: ' + inv.recordHash;
+      }
 
       const itemsContainer = document.getElementById('ticket-items');
       if (itemsContainer && inv.items) {
-        itemsContainer.innerHTML = inv.items.map(i => `
-          <div class="flex justify-between">
-            <span>${i.quantity}x ${i.concept}</span>
-            <span class="font-bold">${i.totalAmount.toFixed(2)} €</span>
-          </div>
-        `).join('');
+        itemsContainer.innerHTML = inv.items.map(i => {
+          const itemTotal = i.totalAmount !== undefined ? i.totalAmount : (Number(i.quantity) * Number(i.unitPrice));
+          return `
+            <div class="flex justify-between">
+              <span>${i.quantity}x ${i.concept}</span>
+              <span class="font-bold">${itemTotal.toFixed(2)} €</span>
+            </div>
+          `;
+        }).join('');
       }
 
       // Desglose de tarjeta si aplica
       const cardSlip = document.getElementById('ticket-card-slip');
       if (cardSlip) {
-        if (transaction || inv.paymentMethod === 'card') {
+        if (!inv.isDraft && (transaction || inv.paymentMethod === 'card')) {
           const t = transaction || {
             cardBrand: 'VISA',
             cardMask: '**** **** **** 4242',
@@ -8869,6 +9089,10 @@
         alert('No hay ninguna factura activa para descargar.');
         return;
       }
+      if (inv.isDraft) {
+        alert('Este documento es una comprobación previa. Para descargar el PDF oficial emitido y encadenado en AEAT, pulsa primero "✓ Aceptar y Cobrar".');
+        return;
+      }
       const url = `/api/invoices/${inv.id}/print?download=pdf`;
       window.open(url, '_blank');
       showLegalToast('Abriendo vista de Factura Oficial A4. Pulsa Guardar como PDF en tu navegador.');
@@ -8878,6 +9102,10 @@
       const inv = state.lastInvoice;
       if (!inv) {
         alert('No hay ninguna factura activa.');
+        return;
+      }
+      if (inv.isDraft) {
+        alert('Este documento es una comprobación previa. Para imprimir la factura oficial legal, pulsa primero "✓ Aceptar y Cobrar".');
         return;
       }
       const url = `/api/invoices/${inv.id}/print?autoprint=true`;
