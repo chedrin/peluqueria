@@ -1682,6 +1682,16 @@
               <!-- Items -->
             </div>
 
+            <!-- Resguardo Bancario de Pago con Tarjeta / Datáfono -->
+            <div id="ticket-card-slip" class="hidden p-3 bg-stone-50 rounded-xl border border-dashed border-stone-300 font-mono-code text-[10px] space-y-0.5">
+              <div class="text-center font-bold text-stone-800">*** COPIA OPERACIÓN CON TARJETA ***</div>
+              <div class="text-center text-[9px] text-stone-500">TERMINAL TPV BANCARIO ACREDITADO</div>
+              <div class="flex justify-between pt-1"><span>TARJETA:</span><span id="ticket-card-brand-mask" class="font-bold text-stone-900">VISA **** 4242</span></div>
+              <div class="flex justify-between"><span>AUTORIZACIÓN:</span><span id="ticket-card-auth" class="font-bold text-stone-900">AUTH-849201</span></div>
+              <div class="flex justify-between"><span>TERMINAL:</span><span id="ticket-card-terminal">TPV-LOSAN-01</span></div>
+              <div class="flex justify-between"><span>TITULAR:</span><span id="ticket-card-holder">CLIENTA</span></div>
+            </div>
+
             <div class="space-y-1 text-right text-[11px]">
               <div class="flex justify-between">
                 <span class="text-stone-500">Base Imponible:</span>
@@ -3649,9 +3659,13 @@
             <!-- Botones de Acción de Cita: Finalizar Servicio & Avisar Caja, WhatsApp, Ficha -->
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
               ${a.status !== 'completed' ? `
-                <button type="button" onclick="event.stopPropagation(); completeAndNotifyAppointment('${a.id}')" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer animate-in fade-in">
+                <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition cursor-pointer">
+                  <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+                  <span>Cobrar</span>
+                </button>
+                <button type="button" onclick="event.stopPropagation(); completeAndNotifyAppointment('${a.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition cursor-pointer animate-in fade-in">
                   <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                  <span>Finalizar y Avisar a Caja</span>
+                  <span>Avisar Caja</span>
                 </button>
               ` : `
                 <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
@@ -4501,6 +4515,12 @@
           </div>
           <p class="text-xs font-semibold text-stone-800">${a.clientName}</p>
           <p class="text-[11px] text-stone-500 truncate">${a.serviceNames}</p>
+          <div class="flex items-center justify-between pt-1 border-t border-stone-200/60">
+            <span class="text-[10px] text-stone-400 font-mono-code">${a.totalPrice ? a.totalPrice + ' €' : '45.00 €'}</span>
+            <button type="button" onclick="event.stopPropagation(); openChargeModal({ appointmentId: '${a.id}', clientId: '${a.clientId}', clientName: '${a.clientName}', concept: '${a.serviceNames}', defaultPrice: ${a.totalPrice || 45.00}, staffId: '${a.staffId}' })" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2 py-0.5 rounded-lg text-[10px] inline-flex items-center gap-1 transition cursor-pointer shadow-2xs">
+              <i data-lucide="credit-card" class="w-3 h-3"></i> Cobrar
+            </button>
+          </div>
         </div>
       `).join('');
     }
@@ -4695,6 +4715,21 @@
         return;
       }
 
+      // Si el método seleccionado en TPV es tarjeta, abrir datáfono virtual
+      if (state.tpvPaymentMethod === 'card') {
+        const total = state.tpvItems.reduce((sum, it) => sum + (it.quantity * it.unitPrice), 0);
+        const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
+        openCardTerminalModal({
+          concept: state.tpvItems.map(i => i.concept).join(' + '),
+          amount: total,
+          clientId: client ? client.id : 'cli-1',
+          clientName: client ? client.name : 'Cliente en TPV',
+          staffId: state.activeStaffId || 'stf-1',
+          notes: 'Cobro TPV con Datáfono'
+        });
+        return;
+      }
+
       const client = state.clients.find(c => c.id === state.selectedClientId) || state.clients[0];
 
       try {
@@ -4724,7 +4759,7 @@
       }
     }
 
-    function showTicketModal(inv) {
+    function showTicketModal(inv, transaction) {
       document.getElementById('ticket-num').innerText = `${inv.series}-${String(inv.invoiceNumber).padStart(4, '0')}`;
       document.getElementById('ticket-date').innerText = new Date(inv.issueDate).toLocaleString('es-ES');
       document.getElementById('ticket-client').innerText = inv.clientName || 'Consumidor Final';
@@ -4740,6 +4775,32 @@
           <span>${i.totalAmount.toFixed(2)} €</span>
         </div>
       `).join('');
+
+      // Desglose de tarjeta si aplica
+      const cardSlip = document.getElementById('ticket-card-slip');
+      if (cardSlip) {
+        if (transaction || inv.paymentMethod === 'card') {
+          const t = transaction || {
+            cardBrand: 'VISA',
+            cardMask: '**** **** **** 4242',
+            authCode: 'AUTH-849201',
+            terminalId: 'TPV-LOSAN-01',
+            cardHolder: inv.clientName || 'CLIENTA'
+          };
+          const brandEl = document.getElementById('ticket-card-brand-mask');
+          const authEl = document.getElementById('ticket-card-auth');
+          const termEl = document.getElementById('ticket-card-terminal');
+          const holdEl = document.getElementById('ticket-card-holder');
+
+          if (brandEl) brandEl.innerText = `${t.cardBrand || 'VISA'} ${t.cardMask || '**** 4242'}`;
+          if (authEl) authEl.innerText = t.authCode || 'AUTH-849201';
+          if (termEl) termEl.innerText = t.terminalId || 'TPV-LOSAN-01';
+          if (holdEl) holdEl.innerText = (t.cardHolder || inv.clientName || 'CLIENTA').toUpperCase();
+          cardSlip.classList.remove('hidden');
+        } else {
+          cardSlip.classList.add('hidden');
+        }
+      }
 
       new QRious({
         element: document.getElementById('ticket-qr-canvas'),
@@ -7193,6 +7254,263 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     </div>
   </div>
 
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: COBRAR TRATAMIENTO O SERVICIO (INTRODUCIR LO COBRADO) -->
+  <!-- ========================================================================= -->
+  <div id="modal-charge-treatment" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
+            <i data-lucide="receipt" class="w-5 h-5 text-emerald-600"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-stone-900 font-serif-luxury" id="charge-modal-title">Cobro de Tratamiento o Servicio</h4>
+            <span class="text-[11px] text-stone-500">Introduce el importe exacto cobrado y selecciona la forma de pago</span>
+          </div>
+        </div>
+        <button onclick="closeChargeModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleChargeFormSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="charge-appointment-id" value="">
+        <input type="hidden" id="charge-service-id" value="">
+        <input type="hidden" id="charge-default-price" value="0">
+
+        <!-- Info del Tratamiento -->
+        <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Tratamiento / Servicio:</span>
+            <span id="charge-base-price-badge" class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200">PVP Catálogo: 45,00 €</span>
+          </div>
+          <p class="text-sm font-bold text-stone-900" id="charge-concept-display">Coloración Completa + Corte y Estilismo</p>
+        </div>
+
+        <!-- Clienta y Estilista -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Clienta *</label>
+            <input type="text" id="charge-client-name" required value="Laura Martínez" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-stone-800 font-semibold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Estilista *</label>
+            <select id="charge-staff-select" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-stone-800 font-semibold">
+              <option value="stf-1">Elena Gómez (Color)</option>
+              <option value="stf-2">Raquel Santos (Cortes)</option>
+              <option value="stf-3">Carmen Vidal (Tratamientos)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CAMPO PARA INTRODUCIR LO COBRADO -->
+        <div class="p-4 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 rounded-2xl border-2 border-emerald-300 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold text-emerald-950 text-xs">
+              💰 Importe Total Cobrado (€) *
+            </label>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Campo Editable</span>
+          </div>
+
+          <div class="relative flex items-center">
+            <span class="absolute left-3.5 text-xl font-black text-emerald-700">€</span>
+            <input type="number" step="0.50" min="0.50" id="charge-input-amount" oninput="updateChargeBreakdown()" required value="45.00" class="w-full bg-white border-2 border-emerald-400 rounded-xl pl-9 pr-4 py-2.5 font-mono-code font-black text-2xl text-emerald-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+
+          <!-- Botones Rápidos de Ajuste -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="text-[11px] text-stone-500">Ajustes rápidos:</span>
+            <button type="button" onclick="adjustChargeAmount(-5)" class="bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 font-bold px-2 py-0.5 rounded text-[11px] transition shadow-2xs">
+              -5 € Dto
+            </button>
+            <button type="button" onclick="adjustChargeAmount(5)" class="bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 font-bold px-2 py-0.5 rounded text-[11px] transition shadow-2xs">
+              +5 € Suplemento
+            </button>
+            <button type="button" onclick="resetChargeToDefaultPrice()" class="bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 font-semibold px-2 py-0.5 rounded text-[11px] transition shadow-2xs">
+              Restaurar PVP
+            </button>
+          </div>
+
+          <!-- Desglose Fiscal en Vivo -->
+          <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-emerald-200/80 text-emerald-900">
+            <div>Base Imponible (21%): <strong id="charge-breakdown-base" class="font-mono-code">37.19 €</strong></div>
+            <div class="text-right">Cuota IVA (21%): <strong id="charge-breakdown-vat" class="font-mono-code">7.81 €</strong></div>
+          </div>
+        </div>
+
+        <!-- Selector de Forma de Pago -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-stone-700 text-xs">Forma de Pago del Cobro:</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="selectChargePaymentMethod('card')" id="btn-charge-method-card" class="charge-method-btn p-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 font-bold flex flex-col items-center justify-center gap-1 transition shadow-xs">
+              <i data-lucide="credit-card" class="w-5 h-5 text-indigo-600"></i>
+              <span>Tarjeta / Datáfono</span>
+            </button>
+            <button type="button" onclick="selectChargePaymentMethod('cash')" id="btn-charge-method-cash" class="charge-method-btn p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 font-semibold flex flex-col items-center justify-center gap-1 hover:bg-stone-50 transition">
+              <i data-lucide="banknote" class="w-5 h-5 text-stone-500"></i>
+              <span>Efectivo</span>
+            </button>
+            <button type="button" onclick="selectChargePaymentMethod('bizum')" id="btn-charge-method-bizum" class="charge-method-btn p-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 font-semibold flex flex-col items-center justify-center gap-1 hover:bg-stone-50 transition">
+              <i data-lucide="smartphone" class="w-5 h-5 text-stone-500"></i>
+              <span>Bizum</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Desglose Efectivo si aplica -->
+        <div id="charge-cash-details" class="hidden p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-stone-700 mb-0.5">Importe Entregado (€)</label>
+              <input type="number" step="1" id="charge-cash-given" oninput="calculateCashChange()" placeholder="50.00" class="w-full bg-white border border-stone-300 rounded-lg px-2.5 py-1.5 font-mono-code font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-stone-700 mb-0.5">Cambio a Devolver</label>
+              <div id="charge-cash-change" class="text-sm font-black font-mono-code text-emerald-700 py-1.5">0.00 €</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-stone-100">
+          <button type="button" onclick="closeChargeModal()" class="px-4 py-2 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">Cancelar</button>
+          <button type="submit" id="btn-submit-charge" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-md shadow-indigo-200 transition cursor-pointer text-xs">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+            <span id="charge-submit-label">Proceder al Cobro con Tarjeta</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MÓDULO DE COBRO CON TARJETA & DATÁFONO VIRTUAL INTEGRADO -->
+  <!-- ========================================================================= -->
+  <div id="modal-card-terminal" class="hidden fixed inset-0 bg-stone-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-sm">
+            <i data-lucide="credit-card" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-stone-900 font-serif-luxury">Terminal de Cobro con Tarjeta</h4>
+            <span class="text-[11px] text-stone-500">Datáfono TPV Virtual Seguro Redsys / Stripe</span>
+          </div>
+        </div>
+        <button onclick="closeCardTerminalModal()" class="text-stone-400 hover:text-stone-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- TARJETA VISUAL ANIMADA EN VIVO -->
+      <div class="relative bg-gradient-to-tr from-stone-900 via-indigo-950 to-purple-950 text-white rounded-2xl p-5 shadow-xl space-y-4 overflow-hidden border border-white/10">
+        <div class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/5 blur-xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <!-- Chip EMV Dorado -->
+            <div class="w-9 h-7 rounded-md bg-gradient-to-br from-amber-200 to-amber-400 border border-amber-500/80 shadow-xs flex items-center justify-center">
+              <div class="w-6 h-4 border border-amber-600/60 rounded-xs"></div>
+            </div>
+            <!-- Contactless Icon -->
+            <i data-lucide="wifi" class="w-4 h-4 text-amber-200 rotate-90 opacity-80"></i>
+          </div>
+          <span class="font-bold tracking-widest text-sm font-mono-code text-amber-300" id="card-preview-brand">VISA</span>
+        </div>
+
+        <div>
+          <span class="text-[9px] text-stone-400 uppercase tracking-wider block">Número de Tarjeta</span>
+          <div class="font-mono-code text-lg sm:text-xl font-black tracking-wider text-white" id="card-preview-number">
+            •••• •••• •••• 4242
+          </div>
+        </div>
+
+        <div class="flex justify-between items-end text-xs">
+          <div>
+            <span class="text-[9px] text-stone-400 uppercase tracking-wider block">Titular</span>
+            <span class="font-bold tracking-wide text-stone-100 uppercase" id="card-preview-holder">LAURA MARTÍNEZ</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[9px] text-stone-400 uppercase tracking-wider block">Caduca</span>
+            <span class="font-mono-code font-bold text-stone-100" id="card-preview-expiry">12/28</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Presets Rápidos de Cobro en Salón (1 Clic) -->
+      <div class="space-y-1.5">
+        <span class="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Cobro Express en Mostrador:</span>
+        <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+          <button type="button" onclick="fillCardPreset('visa')" class="bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-xl p-2 text-center font-bold text-stone-800 transition cursor-pointer">
+            💳 Visa •••• 4242
+          </button>
+          <button type="button" onclick="fillCardPreset('nfc')" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl p-2 text-center font-bold text-indigo-800 transition cursor-pointer flex items-center justify-center gap-1">
+            <i data-lucide="smartphone" class="w-3.5 h-3.5 text-indigo-600"></i> Apple / GPay
+          </button>
+          <button type="button" onclick="fillCardPreset('tpv')" class="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl p-2 text-center font-bold text-purple-800 transition cursor-pointer flex items-center justify-center gap-1">
+            <i data-lucide="radio" class="w-3.5 h-3.5 text-purple-600"></i> Datáfono BT
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario de Tarjeta -->
+      <form onsubmit="executeCardTransaction(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Número de Tarjeta *</label>
+          <div class="relative">
+            <input type="text" id="terminal-card-number" oninput="formatAndPreviewCardNumber(this)" maxlength="19" required value="4532 8901 2345 4242" class="w-full bg-stone-50 border border-stone-300 rounded-xl pl-3 pr-10 py-2.5 font-mono-code font-bold text-stone-900 focus:outline-none focus:border-indigo-600 focus:bg-white text-sm shadow-2xs">
+            <span class="absolute right-3 top-2.5 text-stone-400 font-bold" id="card-brand-icon">💳</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Fecha Caducidad (MM/AA) *</label>
+            <input type="text" id="terminal-card-expiry" oninput="formatCardExpiry(this)" maxlength="5" required value="12/28" placeholder="MM/AA" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Código CVC / CVV *</label>
+            <input type="password" id="terminal-card-cvc" maxlength="4" required value="888" placeholder="•••" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-mono-code font-bold text-center">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Nombre Titular de la Tarjeta *</label>
+          <input type="text" id="terminal-card-holder" oninput="previewCardHolder(this)" required value="LAURA MARTÍNEZ" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 font-bold uppercase">
+        </div>
+
+        <!-- Pantalla de Procesamiento Animado -->
+        <div id="terminal-processing-state" class="hidden p-4 bg-indigo-50 rounded-2xl border border-indigo-200 text-center space-y-2 animate-in fade-in">
+          <div class="inline-block animate-spin text-2xl">🔄</div>
+          <p class="text-xs font-bold text-indigo-900" id="terminal-status-text">Conectando con datáfono bancario...</p>
+          <div class="w-full bg-indigo-200 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-indigo-600 h-full w-2/3 animate-pulse"></div>
+          </div>
+        </div>
+
+        <!-- Resumen de Importe y Botón de Cobro -->
+        <div class="pt-2">
+          <div class="flex justify-between items-center mb-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <span class="text-xs font-semibold text-stone-600">Total a Cargar en Tarjeta:</span>
+            <span class="text-xl font-black font-mono-code text-stone-900" id="terminal-total-display">45.00 €</span>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="button" onclick="closeCardTerminalModal()" class="w-1/3 py-3 rounded-xl text-stone-500 hover:bg-stone-100 font-bold transition">
+              Atrás
+            </button>
+            <button type="submit" id="btn-execute-card-pay" class="w-2/3 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-300/50 cursor-pointer active:scale-95">
+              <i data-lucide="credit-card" class="w-4 h-4"></i>
+              <span>Autorizar y Cobrar</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </body>
         </html>
       `);
@@ -8626,7 +8944,10 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           <td class="p-3 text-center font-mono-code font-bold text-purple-700">${s.durationMinutes} min</td>
           <td class="p-3 text-right font-mono-code font-bold text-stone-900">${s.price.toFixed(2)} €</td>
           <td class="p-3 text-stone-600 font-mono-code text-[11px] truncate max-w-xs">${s.requiredMaterials || 'Productos estándar'}</td>
-          <td class="p-3 text-right whitespace-nowrap">
+          <td class="p-3 text-right whitespace-nowrap space-x-1">
+            <button onclick="openChargeModal({ serviceId: '${s.id}', concept: '${s.name}', defaultPrice: ${s.price} })" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-xl text-xs inline-flex items-center gap-1 shadow-2xs transition cursor-pointer">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Cobrar
+            </button>
             <button onclick="openServiceEditModal('${s.id}')" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold px-2 py-1 rounded">Editar</button>
             <button onclick="deleteService('${s.id}')" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-2 py-1 rounded">Eliminar</button>
           </td>
@@ -8936,6 +9257,342 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         loadVipClientDetails();
       } catch (e) {
         alert('Ajuste procesado.');
+      }
+    }
+
+
+  
+    // ========================================================================
+    // MÓDULO DE COBRO UNIVERSAL POR TRATAMIENTO & PASARELA DE TARJETA
+    // ========================================================================
+    let currentChargeContext = null;
+    let selectedChargeMethod = 'card';
+
+    function openChargeModal(options = {}) {
+      // options: { appointmentId, serviceId, concept, defaultPrice, clientId, clientName, staffId }
+      currentChargeContext = {
+        appointmentId: options.appointmentId || null,
+        serviceId: options.serviceId || null,
+        concept: options.concept || 'Servicio de Peluquería',
+        defaultPrice: Number(options.defaultPrice || 35.00),
+        clientId: options.clientId || null,
+        clientName: options.clientName || (state.loggedInClient ? state.loggedInClient.name : 'Laura Martínez'),
+        staffId: options.staffId || state.activeStaffId || 'stf-1'
+      };
+
+      document.getElementById('charge-appointment-id').value = currentChargeContext.appointmentId || '';
+      document.getElementById('charge-service-id').value = currentChargeContext.serviceId || '';
+      document.getElementById('charge-default-price').value = currentChargeContext.defaultPrice;
+
+      document.getElementById('charge-concept-display').innerText = currentChargeContext.concept;
+      document.getElementById('charge-base-price-badge').innerText = `PVP Catálogo: ${currentChargeContext.defaultPrice.toFixed(2)} €`;
+
+      const clientInput = document.getElementById('charge-client-name');
+      if (clientInput) clientInput.value = currentChargeContext.clientName;
+
+      const staffSelect = document.getElementById('charge-staff-select');
+      if (staffSelect && currentChargeContext.staffId) staffSelect.value = currentChargeContext.staffId;
+
+      const amountInput = document.getElementById('charge-input-amount');
+      if (amountInput) amountInput.value = currentChargeContext.defaultPrice.toFixed(2);
+
+      updateChargeBreakdown();
+      selectChargePaymentMethod('card');
+
+      document.getElementById('modal-charge-treatment').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeChargeModal() {
+      document.getElementById('modal-charge-treatment').classList.add('hidden');
+    }
+
+    function updateChargeBreakdown() {
+      const amountInput = document.getElementById('charge-input-amount');
+      const val = parseFloat(amountInput ? amountInput.value : 0) || 0;
+      const base = Math.round((val / 1.21) * 100) / 100;
+      const vat = Math.round((val - base) * 100) / 100;
+
+      const baseEl = document.getElementById('charge-breakdown-base');
+      const vatEl = document.getElementById('charge-breakdown-vat');
+      if (baseEl) baseEl.innerText = base.toFixed(2) + ' €';
+      if (vatEl) vatEl.innerText = vat.toFixed(2) + ' €';
+
+      calculateCashChange();
+    }
+
+    function adjustChargeAmount(delta) {
+      const amountInput = document.getElementById('charge-input-amount');
+      if (!amountInput) return;
+      let cur = parseFloat(amountInput.value) || 0;
+      cur = Math.max(0.50, cur + delta);
+      amountInput.value = cur.toFixed(2);
+      updateChargeBreakdown();
+    }
+
+    function resetChargeToDefaultPrice() {
+      const def = parseFloat(document.getElementById('charge-default-price').value) || 35.00;
+      const amountInput = document.getElementById('charge-input-amount');
+      if (amountInput) {
+        amountInput.value = def.toFixed(2);
+        updateChargeBreakdown();
+      }
+    }
+
+    function selectChargePaymentMethod(method) {
+      selectedChargeMethod = method;
+      document.querySelectorAll('.charge-method-btn').forEach(b => {
+        b.classList.remove('border-2', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-900', 'shadow-xs');
+        b.classList.add('border', 'border-stone-200', 'bg-white', 'text-stone-600');
+      });
+
+      const activeBtn = document.getElementById('btn-charge-method-' + method);
+      if (activeBtn) {
+        activeBtn.classList.remove('border', 'border-stone-200', 'bg-white', 'text-stone-600');
+        activeBtn.classList.add('border-2', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-900', 'shadow-xs');
+      }
+
+      const cashDetails = document.getElementById('charge-cash-details');
+      const submitLabel = document.getElementById('charge-submit-label');
+
+      if (method === 'cash') {
+        if (cashDetails) cashDetails.classList.remove('hidden');
+        if (submitLabel) submitLabel.innerText = 'Cobrar en Efectivo y Emitir Factura';
+      } else if (method === 'bizum') {
+        if (cashDetails) cashDetails.classList.add('hidden');
+        if (submitLabel) submitLabel.innerText = 'Confirmar Cobro Bizum';
+      } else {
+        if (cashDetails) cashDetails.classList.add('hidden');
+        if (submitLabel) submitLabel.innerText = 'Proceder al Cobro con Tarjeta';
+      }
+    }
+
+    function calculateCashChange() {
+      const amountInput = document.getElementById('charge-input-amount');
+      const cashGivenInput = document.getElementById('charge-cash-given');
+      const changeEl = document.getElementById('charge-cash-change');
+      if (!amountInput || !cashGivenInput || !changeEl) return;
+
+      const total = parseFloat(amountInput.value) || 0;
+      const given = parseFloat(cashGivenInput.value) || 0;
+      const change = Math.max(0, given - total);
+      changeEl.innerText = change.toFixed(2) + ' €';
+    }
+
+    function handleChargeFormSubmit(event) {
+      event.preventDefault();
+      const amount = parseFloat(document.getElementById('charge-input-amount').value);
+      const clientName = document.getElementById('charge-client-name').value.trim();
+      const staffSelect = document.getElementById('charge-staff-select');
+      const staffId = staffSelect ? staffSelect.value : 'stf-1';
+      const staffName = staffSelect && staffSelect.options[staffSelect.selectedIndex] ? staffSelect.options[staffSelect.selectedIndex].text.split('(')[0].trim() : 'Estilista';
+
+      if (!amount || amount <= 0) {
+        alert('Por favor introduce un importe válido a cobrar.');
+        return;
+      }
+
+      const chargePayload = {
+        appointmentId: currentChargeContext.appointmentId,
+        serviceId: currentChargeContext.serviceId,
+        concept: currentChargeContext.concept,
+        amount,
+        clientName,
+        staffId,
+        staffName,
+        paymentMethod: selectedChargeMethod
+      };
+
+      if (selectedChargeMethod === 'card') {
+        // Abrir terminal de cobro con tarjeta
+        closeChargeModal();
+        openCardTerminalModal(chargePayload);
+      } else {
+        // Cobro en efectivo o bizum directo
+        submitDirectPayment(chargePayload);
+      }
+    }
+
+    async function submitDirectPayment(payload) {
+      try {
+        const res = await fetch('/api/payments/charge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 70 });
+          closeChargeModal();
+          await fetchInitialData();
+          renderWorkerAgenda();
+          renderMasterAgenda();
+          pollAdminNotifications();
+          showTicketModal(data.invoice, data.transaction);
+        } else {
+          alert('Error al registrar el cobro: ' + data.error);
+        }
+      } catch (err) {
+        alert('Error de conexión con el servidor.');
+      }
+    }
+
+    // ========================================================================
+    // MÓDULO DE COBRO CON TARJETA & DATÁFONO VIRTUAL
+    // ========================================================================
+    let terminalActiveCharge = null;
+
+    function openCardTerminalModal(chargePayload) {
+      terminalActiveCharge = chargePayload;
+
+      document.getElementById('terminal-total-display').innerText = chargePayload.amount.toFixed(2) + ' €';
+      document.getElementById('card-preview-holder').innerText = (chargePayload.clientName || 'LAURA MARTÍNEZ').toUpperCase();
+      document.getElementById('terminal-card-holder').value = (chargePayload.clientName || 'LAURA MARTÍNEZ').toUpperCase();
+
+      document.getElementById('terminal-processing-state').classList.add('hidden');
+      document.getElementById('btn-execute-card-pay').disabled = false;
+
+      fillCardPreset('visa');
+
+      document.getElementById('modal-card-terminal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCardTerminalModal() {
+      document.getElementById('modal-card-terminal').classList.add('hidden');
+    }
+
+    function formatAndPreviewCardNumber(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 16);
+      let formatted = '';
+      for (let i = 0; i < v.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += v[i];
+      }
+      input.value = formatted;
+
+      const brandEl = document.getElementById('card-preview-brand');
+      const iconEl = document.getElementById('card-brand-icon');
+      const numPreview = document.getElementById('card-preview-number');
+
+      // Detectar marca
+      let brand = 'TARJETA';
+      if (v.startsWith('4')) brand = 'VISA';
+      else if (v.startsWith('5')) brand = 'MASTERCARD';
+      else if (v.startsWith('3')) brand = 'AMEX';
+
+      if (brandEl) brandEl.innerText = brand;
+      if (iconEl) iconEl.innerText = brand === 'VISA' ? '💳 VISA' : (brand === 'MASTERCARD' ? '💳 MC' : '💳');
+
+      if (numPreview) {
+        let display = formatted;
+        while (display.length < 19) {
+          if (display.length === 4 || display.length === 9 || display.length === 14) display += ' ';
+          else display += '•';
+        }
+        numPreview.innerText = display;
+      }
+    }
+
+    function formatCardExpiry(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 4);
+      if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
+      input.value = v;
+      const expPreview = document.getElementById('card-preview-expiry');
+      if (expPreview) expPreview.innerText = v || 'MM/AA';
+    }
+
+    function previewCardHolder(input) {
+      const holderPreview = document.getElementById('card-preview-holder');
+      if (holderPreview) holderPreview.innerText = input.value.toUpperCase() || 'CLIENTA';
+    }
+
+    function fillCardPreset(type) {
+      const numInput = document.getElementById('terminal-card-number');
+      const expInput = document.getElementById('terminal-card-expiry');
+      const cvcInput = document.getElementById('terminal-card-cvc');
+
+      if (type === 'visa') {
+        numInput.value = '4532 8901 2345 4242';
+        expInput.value = '12/28';
+        cvcInput.value = '888';
+      } else if (type === 'nfc') {
+        numInput.value = '5412 7534 8901 9921';
+        expInput.value = '09/29';
+        cvcInput.value = '321';
+      } else {
+        numInput.value = '4916 2300 4589 1102';
+        expInput.value = '06/27';
+        cvcInput.value = '555';
+      }
+
+      formatAndPreviewCardNumber(numInput);
+      formatCardExpiry(expInput);
+    }
+
+    async function executeCardTransaction(event) {
+      event.preventDefault();
+      if (!terminalActiveCharge) return;
+
+      const cardNumber = document.getElementById('terminal-card-number').value.replace(/\s/g, '');
+      const expiry = document.getElementById('terminal-card-expiry').value;
+      const cvc = document.getElementById('terminal-card-cvc').value;
+      const cardHolder = document.getElementById('terminal-card-holder').value.trim();
+
+      const procBox = document.getElementById('terminal-processing-state');
+      const statusText = document.getElementById('terminal-status-text');
+      const payBtn = document.getElementById('btn-execute-card-pay');
+
+      payBtn.disabled = true;
+      if (procBox) procBox.classList.remove('hidden');
+
+      // Simulación de pasos de seguridad bancaria
+      if (statusText) statusText.innerText = '1. Conectando con datáfono bancario Redsys / Stripe...';
+      await new Promise(r => setTimeout(r, 600));
+
+      if (statusText) statusText.innerText = '2. Verificando chip / contactless & 3D Secure...';
+      await new Promise(r => setTimeout(r, 600));
+
+      if (statusText) statusText.innerText = '3. ¡Autorización concedida! Emitiendo factura...';
+      await new Promise(r => setTimeout(r, 400));
+
+      const payload = {
+        ...terminalActiveCharge,
+        paymentMethod: 'card',
+        cardDetails: {
+          cardNumber,
+          brand: cardNumber.startsWith('4') ? 'VISA' : (cardNumber.startsWith('5') ? 'MASTERCARD' : 'TARJETA BANCARIA'),
+          cardHolder,
+          expiry,
+          authCode: 'AUTH-' + Math.floor(100000 + Math.random() * 900000),
+          terminalId: 'TPV-LOSAN-01'
+        }
+      };
+
+      try {
+        const res = await fetch('/api/payments/charge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+          closeCardTerminalModal();
+          await fetchInitialData();
+          renderWorkerAgenda();
+          renderMasterAgenda();
+          pollAdminNotifications();
+          showTicketModal(data.invoice, data.transaction);
+        } else {
+          alert('Error en pasarela bancaria: ' + data.error);
+        }
+      } catch (err) {
+        alert('Error de conexión al procesar la tarjeta.');
+      } finally {
+        payBtn.disabled = false;
+        if (procBox) procBox.classList.add('hidden');
       }
     }
 

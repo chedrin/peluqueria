@@ -3870,6 +3870,189 @@ app.post('/api/clients/:id/adjust-loyalty', (req, res) => {
   });
 });
 
+// ========================================================================
+// MÓDULO DE COBRO CON TARJETA & PASARELA DE PAGOS DIRECTOS POR SERVICIO
+// ========================================================================
+if (!db.cardTransactions) {
+  db.cardTransactions = [
+    {
+      id: 'txn-card-001',
+      date: '2026-10-22',
+      time: '11:30',
+      timestamp: '2026-10-22T11:30:00.000Z',
+      concept: 'Coloración Completa + Matiz Gloss',
+      amount: 45.00,
+      clientName: 'Laura Martínez',
+      staffName: 'Elena Gómez',
+      cardBrand: 'VISA',
+      cardMask: '**** **** **** 4242',
+      authCode: 'AUTH-849201',
+      terminalId: 'TPV-LOSAN-01',
+      status: 'APPROVED',
+      invoiceId: 'inv-101'
+    },
+    {
+      id: 'txn-card-002',
+      date: '2026-10-22',
+      time: '16:45',
+      timestamp: '2026-10-22T16:45:00.000Z',
+      concept: 'Tratamiento Ácido Hialurónico',
+      amount: 48.00,
+      clientName: 'Sofía Navarro',
+      staffName: 'Carmen Vidal',
+      cardBrand: 'MASTERCARD',
+      cardMask: '**** **** **** 8812',
+      authCode: 'AUTH-710394',
+      terminalId: 'TPV-LOSAN-01',
+      status: 'APPROVED',
+      invoiceId: 'inv-102'
+    }
+  ];
+}
+
+app.get('/api/payments/card-transactions', (req, res) => {
+  res.json(db.cardTransactions || []);
+});
+
+app.post('/api/payments/charge', (req, res) => {
+  const {
+    concept,
+    amount,
+    chargedAmount,
+    clientId,
+    clientName,
+    staffId,
+    staffName,
+    paymentMethod = 'card',
+    cardDetails = {},
+    appointmentId,
+    serviceId,
+    notes
+  } = req.body;
+
+  const numAmount = Number(amount !== undefined ? amount : chargedAmount);
+  if (!numAmount || numAmount <= 0) {
+    return res.status(400).json({ error: 'El importe a cobrar debe ser mayor a 0 €.' });
+  }
+
+  // 1. Resolver clienta
+  let resolvedClient = null;
+  if (clientId) {
+    resolvedClient = db.clients.find(c => c.id === clientId);
+  }
+  const finalClientName = clientName || (resolvedClient ? resolvedClient.name : 'Cliente de paso');
+  const finalClientNif = (resolvedClient && resolvedClient.dni) ? resolvedClient.dni : 'N/A';
+
+  // 2. Resolver estilista
+  let finalStaffName = staffName;
+  if (!finalStaffName && staffId) {
+    const stf = db.staff.find(s => s.id === staffId);
+    if (stf) finalStaffName = stf.name;
+  }
+  if (!finalStaffName) finalStaffName = 'Estilista Salón';
+
+  // 3. Cálculos fiscales Veri*Factu
+  const base = Math.round((numAmount / 1.21) * 100) / 100;
+  const vat = Math.round((numAmount - base) * 100) / 100;
+
+  const series = 'FS2026';
+  const seriesInvoices = db.invoices.filter(i => i.series === series);
+  const nextNumber = seriesInvoices.length + 1;
+  const previousHash = seriesInvoices.length > 0 
+    ? seriesInvoices[seriesInvoices.length - 1].recordHash 
+    : '0'.repeat(64);
+
+  const issueDateISO = new Date().toISOString();
+  const recordHash = calculateNextInvoiceHash(series, nextNumber, issueDateISO, base, vat, numAmount, previousHash);
+  const qrUrl = `https://www.agenciatributaria.gob.es/verifactu/consulta?nif=${COMPANY_NIF}&serie=${series}&num=${nextNumber}&total=${numAmount.toFixed(2)}&hash=${recordHash.slice(0, 8)}`;
+
+  const newInvoice = {
+    id: 'inv-' + Date.now(),
+    series,
+    invoiceNumber: nextNumber,
+    type: 'simplified',
+    issueDate: issueDateISO,
+    clientName: finalClientName,
+    clientNif: finalClientNif,
+    taxBase: base,
+    vatRate: 21.0,
+    vatAmount: vat,
+    totalAmount: numAmount,
+    paymentMethod: paymentMethod === 'card' ? 'card' : (paymentMethod === 'bizum' ? 'bizum' : 'cash'),
+    previousInvoiceHash: previousHash,
+    recordHash,
+    qrUrl,
+    items: [
+      {
+        concept: concept || 'Servicio de Peluquería / Tratamiento',
+        quantity: 1,
+        unitPrice: numAmount,
+        vatRate: 21.0,
+        taxBase: base,
+        vatAmount: vat,
+        totalAmount: numAmount
+      }
+    ]
+  };
+
+  db.invoices.push(newInvoice);
+
+  // 4. Si es pago con tarjeta, generar resguardo bancario
+  let transactionRecord = null;
+  if (paymentMethod === 'card') {
+    const rawNum = String(cardDetails.cardNumber || '4242424242424242').replace(/\s/g, '');
+    const last4 = rawNum.slice(-4) || '4242';
+    const brand = cardDetails.brand || (rawNum.startsWith('4') ? 'VISA' : (rawNum.startsWith('5') ? 'MASTERCARD' : 'TARJETA BANCARIA'));
+    const authCode = cardDetails.authCode || 'AUTH-' + Math.floor(100000 + Math.random() * 900000);
+    const terminalId = cardDetails.terminalId || 'TPV-LOSAN-01';
+
+    const now = new Date();
+    transactionRecord = {
+      id: 'txn-card-' + Date.now(),
+      date: now.toISOString().slice(0, 10),
+      time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+      timestamp: now.toISOString(),
+      concept: concept || 'Tratamiento / Servicio',
+      amount: numAmount,
+      clientName: finalClientName,
+      staffName: finalStaffName,
+      cardBrand: brand,
+      cardMask: `**** **** **** ${last4}`,
+      cardHolder: cardDetails.cardHolder || finalClientName,
+      authCode,
+      terminalId,
+      status: 'APPROVED',
+      invoiceId: newInvoice.id,
+      notes: notes || 'Cobro directo con datáfono virtual'
+    };
+
+    if (!db.cardTransactions) db.cardTransactions = [];
+    db.cardTransactions.unshift(transactionRecord);
+  }
+
+  // 5. Si estaba vinculado a una cita, marcarla como completada y limpiar avisos
+  if (appointmentId) {
+    const apt = db.appointments.find(a => a.id === appointmentId);
+    if (apt) {
+      apt.status = 'completed';
+      apt.paidAmount = numAmount;
+      apt.paymentMethod = paymentMethod;
+    }
+    // Marcar como leída la notificación de cobro si existía
+    if (db.notifications) {
+      const notif = db.notifications.find(n => n.appointmentId === appointmentId);
+      if (notif) notif.read = true;
+    }
+  }
+
+  res.status(201).json({
+    success: true,
+    message: `Cobro de ${numAmount.toFixed(2)} € registrado con éxito (${paymentMethod === 'card' ? 'Tarjeta / Datáfono' : paymentMethod.toUpperCase()}). Factura ${newInvoice.series}-${newInvoice.invoiceNumber} emitida con Veri*Factu.`,
+    invoice: newInvoice,
+    transaction: transactionRecord
+  });
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`\n==========================================================`);
