@@ -3871,6 +3871,34 @@ app.post('/api/staff/:id/overtime', (req, res) => {
   });
 });
 
+app.post('/api/staff/:id/extra-day', (req, res) => {
+  const staff = db.staff.find(s => s.id === req.params.id);
+  if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });
+
+  const { date, shift, reason } = req.body;
+  if (!date) return res.status(400).json({ error: 'Fecha requerida para el día extra.' });
+
+  if (!db.staffSchedules) db.staffSchedules = {};
+  if (!db.staffSchedules[staff.id]) db.staffSchedules[staff.id] = { extraDays: [] };
+  if (!db.staffSchedules[staff.id].extraDays) db.staffSchedules[staff.id].extraDays = [];
+
+  const extraDay = {
+    id: 'xd-' + Date.now(),
+    date,
+    shift: shift || 'Jornada Completa',
+    reason: reason || 'Refuerzo de fin de semana'
+  };
+
+  db.staffSchedules[staff.id].extraDays.unshift(extraDay);
+
+  res.status(201).json({
+    success: true,
+    message: `Día extra añadido para ${staff.name} (${date}).`,
+    extraDay,
+    extraDays: db.staffSchedules[staff.id].extraDays
+  });
+});
+
 app.get('/api/staff/:id/schedule-slots', (req, res) => {
   const staff = db.staff.find(s => s.id === req.params.id);
   if (!staff) return res.status(404).json({ error: 'Estilista no encontrada.' });

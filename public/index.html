@@ -5410,13 +5410,18 @@
       tbody.innerHTML = state.clients.map(c => {
         const pts = c.loyaltyPoints !== undefined ? c.loyaltyPoints : (c.points || 0);
         const dto = ((pts / 100) * 5.0).toFixed(2);
+        const stamps = c.stampsCount !== undefined ? c.stampsCount : (c.loyaltyStamps || 0);
+
         return `
-          <tr class="hover:bg-stone-50 transition">
-            <td class="p-3 font-mono-code font-bold text-stone-900">${c.dni || 'Sin DNI'}</td>
-            <td class="p-3 font-semibold text-stone-900">${c.name}</td>
-            <td class="p-3 text-stone-500 font-mono-code">${c.phone || 'N/A'}</td>
+          <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+            <td class="p-3 font-mono-code font-bold text-stone-900 cursor-pointer hover:text-indigo-600" onclick="openClient360Modal('${c.id}')" title="Clic para abrir y editar la Ficha 360°">${c.dni || 'Sin DNI'}</td>
+            <td class="p-3">
+              <span class="font-bold text-stone-900 block cursor-pointer hover:text-indigo-600 transition" onclick="openClient360Modal('${c.id}')" title="Clic para abrir y editar la Ficha 360°">${c.name}</span>
+              <span class="text-[11px] text-stone-400 font-mono-code">${stamps}/8 sellos estampados</span>
+            </td>
+            <td class="p-3 text-stone-600 font-mono-code">${c.phone || 'N/A'}</td>
             <td class="p-3 text-center">
-              <span class="inline-block bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full text-xs font-bold border border-amber-200">
+              <span class="inline-block bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-xs font-bold border border-amber-200">
                 ⭐ ${pts} pts (${dto} €)
               </span>
             </td>
@@ -5431,17 +5436,51 @@
                 : '<span class="text-stone-400 text-[10px]">Pendiente</span>'
               }
             </td>
-            <td class="p-3 text-center space-x-1">
-              <button onclick="quickSelectClientForTpv('${c.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-lg text-xs font-semibold transition">
-                Cobrar TPV
+            <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+              <button type="button" onclick="openClient360Modal('${c.id}')" title="Editar Ficha 360 de la Clienta" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs inline-flex items-center gap-1 shadow-2xs transition cursor-pointer">
+                <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Ficha 360° (Editar)
               </button>
-              <button onclick="quickLoginWithDni('${c.dni}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg text-xs font-semibold transition">
-                Ver como Clienta
+              <button type="button" onclick="quickManualStampClient('${c.id}')" title="Sellar visita (+1 sello de fidelización)" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2.5 py-1.5 rounded-xl text-xs inline-flex items-center gap-1 shadow-2xs transition cursor-pointer">
+                <i data-lucide="stamp" class="w-3.5 h-3.5"></i> +1 Sello
+              </button>
+              <button type="button" onclick="quickSelectClientForTpv('${c.id}')" title="Cobrar a esta clienta en TPV" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold px-2 py-1.5 rounded-xl text-xs border border-stone-200 transition cursor-pointer">
+                Cobrar
               </button>
             </td>
           </tr>
         `;
       }).join('');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function quickManualStampClient(clientId) {
+      const client = (state.clients || []).find(c => c.id === clientId);
+      const name = client ? client.name : 'la clienta';
+      try {
+        const res = await fetch(`/api/clients/${clientId}/adjust-loyalty`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'add_stamp',
+            staffName: 'Administración CRM',
+            note: 'Sellado manual directo desde el panel'
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 40 });
+          alert('✅ ' + (data.message || `Visita sellada para ${name}.`));
+          await fetchInitialData();
+          renderAdminCrmTable();
+          populateAllLoyaltyClientSelects();
+          renderAdminStampHistory();
+          loadVipClientDetails();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Error al estampar sello.');
+      }
     }
 
     function quickSelectClientForTpv(clientId) {
@@ -9164,46 +9203,65 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           }).join('');
         }
 
-        // 3. Cargar histórico con filtros
+        // 3. Cargar histórico con filtros de fecha o periodo
         const staffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
-        const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '2026-10';
+        const startVal = document.getElementById('filter-timetrack-start') ? document.getElementById('filter-timetrack-start').value : '';
+        const endVal = document.getElementById('filter-timetrack-end') ? document.getElementById('filter-timetrack-end').value : '';
+        const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '';
 
-        const historyRes = await fetch(`/api/time-tracking/records?staffId=${staffFilter}&month=${monthFilter}`);
+        const params = new URLSearchParams();
+        if (staffFilter && staffFilter !== 'all') params.append('staffId', staffFilter);
+        if (startVal && endVal) {
+          params.append('startDate', startVal);
+          params.append('endDate', endVal);
+        } else if (startVal) {
+          params.append('startDate', startVal);
+        } else if (endVal) {
+          params.append('endDate', endVal);
+        } else if (monthFilter && monthFilter !== 'all') {
+          params.append('month', monthFilter);
+        }
+
+        const historyRes = await fetch(`/api/time-tracking/records?${params.toString()}`);
         const historyData = await historyRes.json();
 
         const historyTbody = document.getElementById('admin-time-records-tbody');
         if (historyTbody && historyData.records) {
-          historyTbody.innerHTML = historyData.records.map(r => {
-            const inFormatted = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
-            const outFormatted = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : (r.status === 'WORKING' ? 'En Curso' : (r.status === 'ON_BREAK' ? 'En Pausa' : '-'));
+          if (!historyData.records.length) {
+            historyTbody.innerHTML = '<tr><td colspan="11" class="p-6 text-center text-stone-400 italic">No hay registros de fichajes para el filtro seleccionado</td></tr>';
+          } else {
+            historyTbody.innerHTML = historyData.records.map(r => {
+              const inFormatted = r.clockIn ? new Date(r.clockIn).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+              const outFormatted = r.clockOut ? new Date(r.clockOut).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : (r.status === 'WORKING' ? 'En Curso' : (r.status === 'ON_BREAK' ? 'En Pausa' : '-'));
 
-            return `
-              <tr class="hover:bg-stone-50/70 transition">
-                <td class="p-3 font-mono-code text-stone-700">
-                  <span class="font-bold block">${r.date}</span>
-                  <span class="text-[10px] text-stone-400">${r.id}</span>
-                </td>
-                <td class="p-3 font-bold text-stone-900">${r.staffName}</td>
-                <td class="p-3 font-mono-code text-stone-600">${r.staffDni || 'N/A'}</td>
-                <td class="p-3 font-mono-code font-bold text-emerald-800">${inFormatted}</td>
-                <td class="p-3 font-mono-code font-bold text-rose-800">${outFormatted}</td>
-                <td class="p-3 text-center font-mono-code text-stone-600">${r.breakMinutes || 0}</td>
-                <td class="p-3 text-right font-mono-code font-black text-purple-900">${(r.effectiveHours || 0).toFixed(2)} h</td>
-                <td class="p-3 text-right font-mono-code text-amber-700 font-semibold">${(r.overtimeHours || 0).toFixed(2)} h</td>
-                <td class="p-3 text-center">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    r.status === 'COMPLETED' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
-                    r.status === 'WORKING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                    'bg-amber-50 text-amber-700 border border-amber-200'
-                  }">
-                    ${r.status === 'COMPLETED' ? 'Cerrada' : (r.status === 'WORKING' ? 'Trabajando' : 'Descanso')}
-                  </span>
-                </td>
-                <td class="p-3 text-stone-500 text-[11px] truncate max-w-xs">${r.device || 'PWA Móvil'}</td>
-                <td class="p-3 text-stone-600 text-[11px] italic max-w-xs">${r.notes || '-'}</td>
-              </tr>
-            `;
-          }).join('');
+              return `
+                <tr class="hover:bg-stone-50/70 transition">
+                  <td class="p-3 font-mono-code text-stone-700">
+                    <span class="font-bold block">${r.date}</span>
+                    <span class="text-[10px] text-stone-400">${r.id}</span>
+                  </td>
+                  <td class="p-3 font-bold text-stone-900">${r.staffName}</td>
+                  <td class="p-3 font-mono-code text-stone-600">${r.staffDni || 'N/A'}</td>
+                  <td class="p-3 font-mono-code font-bold text-emerald-800">${inFormatted}</td>
+                  <td class="p-3 font-mono-code font-bold text-rose-800">${outFormatted}</td>
+                  <td class="p-3 text-center font-mono-code text-stone-600">${r.breakMinutes || 0}</td>
+                  <td class="p-3 text-right font-mono-code font-black text-purple-900">${(r.effectiveHours || 0).toFixed(2)} h</td>
+                  <td class="p-3 text-right font-mono-code text-amber-700 font-semibold">${(r.overtimeHours || 0).toFixed(2)} h</td>
+                  <td class="p-3 text-center">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      r.status === 'COMPLETED' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                      r.status === 'WORKING' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                      'bg-amber-50 text-amber-700 border border-amber-200'
+                    }">
+                      ${r.status === 'COMPLETED' ? 'Cerrada' : (r.status === 'WORKING' ? 'Trabajando' : 'Descanso')}
+                    </span>
+                  </td>
+                  <td class="p-3 text-stone-500 text-[11px] truncate max-w-xs">${r.device || 'PWA Móvil'}</td>
+                  <td class="p-3 text-stone-600 text-[11px] italic max-w-xs">${r.notes || '-'}</td>
+                </tr>
+              `;
+            }).join('');
+          }
         }
 
         lucide.createIcons();
@@ -9212,12 +9270,67 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       }
     }
 
+    function setTimeFilterPreset(preset) {
+      const startInput = document.getElementById('filter-timetrack-start');
+      const endInput = document.getElementById('filter-timetrack-end');
+      if (!startInput || !endInput) return;
+
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const formatDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+      if (preset === 'today') {
+        const todayStr = formatDate(now);
+        startInput.value = todayStr;
+        endInput.value = todayStr;
+      } else if (preset === 'yesterday') {
+        const yest = new Date(now);
+        yest.setDate(yest.getDate() - 1);
+        const yestStr = formatDate(yest);
+        startInput.value = yestStr;
+        endInput.value = yestStr;
+      } else if (preset === 'this_week') {
+        const d = new Date(now);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(d.setDate(diff));
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        startInput.value = formatDate(monday);
+        endInput.value = formatDate(sunday);
+      } else if (preset === 'this_month') {
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        startInput.value = formatDate(firstDay);
+        endInput.value = formatDate(lastDay);
+      } else if (preset === 'all') {
+        startInput.value = '2026-01-01';
+        endInput.value = '2026-12-31';
+      }
+
+      renderAdminTimeTracking();
+    }
+
     function downloadTimeTrackingExcel(format = 'xlsx') {
       const staffFilter = document.getElementById('filter-timetrack-staff') ? document.getElementById('filter-timetrack-staff').value : 'all';
+      const startVal = document.getElementById('filter-timetrack-start') ? document.getElementById('filter-timetrack-start').value : '';
+      const endVal = document.getElementById('filter-timetrack-end') ? document.getElementById('filter-timetrack-end').value : '';
       const monthFilter = document.getElementById('filter-timetrack-month') ? document.getElementById('filter-timetrack-month').value : '2026-10';
 
-      const downloadUrl = `/api/time-tracking/export-excel?month=${monthFilter}&staffId=${staffFilter}&format=${format}`;
-      window.location.href = downloadUrl;
+      const params = new URLSearchParams({ format });
+      if (staffFilter && staffFilter !== 'all') params.append('staffId', staffFilter);
+      if (startVal && endVal) {
+        params.append('startDate', startVal);
+        params.append('endDate', endVal);
+      } else if (startVal) {
+        params.append('startDate', startVal);
+      } else if (endVal) {
+        params.append('endDate', endVal);
+      } else if (monthFilter && monthFilter !== 'all') {
+        params.append('month', monthFilter);
+      }
+
+      window.location.href = `/api/time-tracking/export-excel?${params.toString()}`;
     }
 
     function openManualClockModal() {
@@ -9747,9 +9860,20 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
                 <p class="text-xs text-stone-600">${n.message}</p>
               </div>
               ${!n.read ? `
-                <button onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg flex-shrink-0">
-                  TPV
-                </button>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'cash')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Cobrar en Metálico">
+                    <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'bizum')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Cobrar con Bizum">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'card')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2 py-1 rounded-lg text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer" title="Cobrar con Tarjeta">
+                    <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="text-xs bg-stone-700 hover:bg-stone-600 text-white font-bold px-2.5 py-1 rounded-lg transition cursor-pointer" title="Abrir en TPV">
+                    TPV
+                  </button>
+                </div>
               ` : ''}
             </div>
           `).join('');
@@ -10052,31 +10176,87 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     }
 
     // ========================================================================
-    // GESTIÓN DE HORARIOS Y FRANJAS ACTIVAS / DESACTIVADAS POR ESTILISTA
+    // GESTIÓN INTEGRAL DE HORARIOS, DÍAS DE DESCANSO, DÍAS EXTRA Y HORAS EXTRAS
     // ========================================================================
+    let currentStaffSchedule = {
+      slots: [],
+      restDays: [],
+      vacationDates: [],
+      extraDays: [],
+      overtimeRecords: [],
+      shiftType: 'COMPLETO'
+    };
     let currentStaffScheduleSlots = [];
+
+    function switchScheduleTab(tabKey) {
+      document.querySelectorAll('.sch-tab-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'text-indigo-700', 'font-bold');
+        btn.classList.add('border-transparent', 'text-stone-500');
+      });
+      document.querySelectorAll('.sch-tab-pane').forEach(pane => pane.classList.add('hidden'));
+
+      const activeBtn = document.getElementById('sch-tabbtn-' + tabKey);
+      const activePane = document.getElementById('sch-tab-' + tabKey);
+      if (activeBtn) {
+        activeBtn.classList.add('border-indigo-600', 'text-indigo-700', 'font-bold');
+        activeBtn.classList.remove('border-transparent', 'text-stone-500');
+      }
+      if (activePane) activePane.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
 
     async function openStaffScheduleModal(staffId) {
       document.getElementById('schedule-modal-staff-id').value = staffId;
-      const worker = state.staff.find(s => s.id === staffId);
+      const worker = (state.staff || []).find(s => s.id === staffId);
       const title = document.getElementById('schedule-modal-title');
+      const chairBadge = document.getElementById('schedule-modal-chair-badge');
       if (title && worker) title.innerText = `Horarios de ${worker.name}`;
+      if (chairBadge && worker) chairBadge.innerText = worker.chair || 'Sillón Principal';
 
       try {
-        const res = await fetch(`/api/staff/${staffId}/schedule-slots`);
+        const res = await fetch(`/api/staff/${staffId}/schedule`);
         if (res.ok) {
           const data = await res.json();
-          currentStaffScheduleSlots = Array.isArray(data) ? data : (data.slots || getDefaultScheduleSlots());
+          const sch = data.schedule || {};
+          currentStaffSchedule = {
+            slots: Array.isArray(sch.slots) && sch.slots.length ? sch.slots : getDefaultScheduleSlots(),
+            restDays: Array.isArray(sch.restDays) ? sch.restDays : ['Domingo'],
+            vacationDates: Array.isArray(sch.vacationDates) ? sch.vacationDates : [],
+            extraDays: Array.isArray(sch.extraDays) ? sch.extraDays : [],
+            overtimeRecords: Array.isArray(sch.overtimeRecords) ? sch.overtimeRecords : [],
+            shiftType: sch.shiftType || 'COMPLETO'
+          };
         } else {
-          currentStaffScheduleSlots = getDefaultScheduleSlots();
+          currentStaffSchedule = {
+            slots: getDefaultScheduleSlots(),
+            restDays: ['Domingo'],
+            vacationDates: [],
+            extraDays: [],
+            overtimeRecords: [],
+            shiftType: 'COMPLETO'
+          };
         }
       } catch (e) {
-        currentStaffScheduleSlots = getDefaultScheduleSlots();
+        currentStaffSchedule = {
+          slots: getDefaultScheduleSlots(),
+          restDays: ['Domingo'],
+          vacationDates: [],
+          extraDays: [],
+          overtimeRecords: [],
+          shiftType: 'COMPLETO'
+        };
       }
 
+      currentStaffScheduleSlots = currentStaffSchedule.slots;
       renderScheduleSlotsGrid();
+      renderScheduleRestDays();
+      renderScheduleVacationDates();
+      renderScheduleExtraDays();
+      renderScheduleOvertime();
+
+      switchScheduleTab('slots');
       document.getElementById('modal-staff-schedule').classList.remove('hidden');
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function getDefaultScheduleSlots() {
@@ -10118,29 +10298,220 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       renderScheduleSlotsGrid();
     }
 
-    function setShiftScheduleSlots(shift, active) {
+    function applyPresetShift(preset) {
+      if (!currentStaffScheduleSlots || !currentStaffScheduleSlots.length) {
+        currentStaffScheduleSlots = getDefaultScheduleSlots();
+      }
+      currentStaffSchedule.shiftType = preset;
+
       currentStaffScheduleSlots.forEach(s => {
-        const isMorning = s.time < '14:30';
-        if (shift === 'morning' && isMorning) s.isActive = active;
-        if (shift === 'afternoon' && !isMorning) s.isActive = active;
+        if (preset === 'COMPLETO') {
+          s.isActive = true;
+        } else if (preset === 'MANANA') {
+          s.isActive = (s.time < '14:30');
+        } else if (preset === 'TARDE') {
+          s.isActive = (s.time >= '15:30');
+        }
       });
       renderScheduleSlotsGrid();
     }
 
-    async function saveStaffScheduleSlots() {
+    function renderScheduleRestDays() {
+      const days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
+      days.forEach(d => {
+        const cb = document.getElementById('rest-day-' + d);
+        if (cb) {
+          cb.checked = (currentStaffSchedule.restDays || []).includes(d);
+        }
+      });
+    }
+
+    function renderScheduleVacationDates() {
+      const container = document.getElementById('vacation-dates-chips');
+      const count = document.getElementById('vacation-dates-count');
+      if (!container) return;
+      const dates = currentStaffSchedule.vacationDates || [];
+      if (count) count.innerText = `${dates.length} días`;
+
+      if (!dates.length) {
+        container.innerHTML = '<span class="text-xs text-stone-400 italic">No hay días de vacaciones programados.</span>';
+      } else {
+        container.innerHTML = dates.map(d => `
+          <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg text-xs font-mono-code font-bold">
+            <i data-lucide="palmtree" class="w-3 h-3 text-emerald-600"></i>
+            ${d}
+            <button type="button" onclick="removeVacationDate('${d}')" class="text-emerald-700 hover:text-rose-600 cursor-pointer ml-1 font-bold">
+              &times;
+            </button>
+          </span>
+        `).join('');
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function addVacationDate() {
+      const input = document.getElementById('input-new-vacation-date');
+      if (!input || !input.value) return;
+      const dateVal = input.value;
+      if (!currentStaffSchedule.vacationDates.includes(dateVal)) {
+        currentStaffSchedule.vacationDates.push(dateVal);
+        currentStaffSchedule.vacationDates.sort();
+        renderScheduleVacationDates();
+        input.value = '';
+      }
+    }
+
+    function removeVacationDate(date) {
+      currentStaffSchedule.vacationDates = (currentStaffSchedule.vacationDates || []).filter(d => d !== date);
+      renderScheduleVacationDates();
+    }
+
+    function renderScheduleExtraDays() {
+      const tbody = document.getElementById('staff-extra-days-tbody');
+      if (!tbody) return;
+      const list = currentStaffSchedule.extraDays || [];
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">Sin días extra de refuerzo programados</td></tr>';
+      } else {
+        tbody.innerHTML = list.map(item => `
+          <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+            <td class="p-2.5 font-mono-code font-bold text-stone-900">${item.date}</td>
+            <td class="p-2.5 text-stone-700">${item.shift || '09:00 - 15:00'}</td>
+            <td class="p-2.5 text-stone-600">${item.reason || 'Refuerzo'}</td>
+            <td class="p-2.5 text-center">
+              <button type="button" onclick="removeStaffExtraDay('${item.id || item.date}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function addStaffExtraDay() {
+      const date = document.getElementById('input-extra-day-date').value;
+      const shift = document.getElementById('input-extra-day-shift').value.trim() || 'Jornada Completa';
+      const reason = document.getElementById('input-extra-day-reason').value.trim() || 'Día de refuerzo especial';
+      if (!date) {
+        alert('Por favor selecciona una fecha para el día extra.');
+        return;
+      }
+
       const staffId = document.getElementById('schedule-modal-staff-id').value;
       try {
-        const res = await fetch(`/api/staff/${staffId}/schedule-slots`, {
-          method: 'PUT',
+        const res = await fetch(`/api/staff/${staffId}/extra-day`, {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slots: currentStaffScheduleSlots })
+          body: JSON.stringify({ date, shift, reason })
         });
         const data = await res.json();
-        alert('✅ ' + data.message);
-        closeStaffScheduleModal();
-        renderBookingSlots(state.bookingCalendarStaffId);
+        if (res.ok) {
+          currentStaffSchedule.extraDays = data.extraDays;
+          renderScheduleExtraDays();
+          document.getElementById('input-extra-day-date').value = '';
+          document.getElementById('input-extra-day-shift').value = '';
+          document.getElementById('input-extra-day-reason').value = '';
+          alert('✅ ' + data.message);
+        }
       } catch (e) {
-        alert('Horario actualizado.');
+        currentStaffSchedule.extraDays.unshift({ id: 'xd-' + Date.now(), date, shift, reason });
+        renderScheduleExtraDays();
+      }
+    }
+
+    function removeStaffExtraDay(idOrDate) {
+      currentStaffSchedule.extraDays = (currentStaffSchedule.extraDays || []).filter(item => (item.id !== idOrDate && item.date !== idOrDate));
+      renderScheduleExtraDays();
+    }
+
+    function renderScheduleOvertime() {
+      const tbody = document.getElementById('staff-overtime-tbody');
+      if (!tbody) return;
+      const list = currentStaffSchedule.overtimeRecords || [];
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-stone-400 italic">No hay registros de horas extras para esta trabajadora</td></tr>';
+      } else {
+        tbody.innerHTML = list.map(item => `
+          <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+            <td class="p-2.5 font-mono-code font-bold text-stone-900">${item.date}</td>
+            <td class="p-2.5 text-center font-mono-code font-bold text-amber-700">+${Number(item.hours).toFixed(1)} h</td>
+            <td class="p-2.5 text-stone-600">${item.reason || 'Servicio extendido'}</td>
+            <td class="p-2.5 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Aprobada</span>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    async function addStaffOvertimeRecord() {
+      const date = document.getElementById('input-overtime-date').value;
+      const hours = parseFloat(document.getElementById('input-overtime-hours').value);
+      const reason = document.getElementById('input-overtime-reason').value.trim() || 'Servicio de peluquería extendido';
+      if (!date || isNaN(hours) || hours <= 0) {
+        alert('Por favor introduce una fecha y un número de horas extras válido (>0).');
+        return;
+      }
+
+      const staffId = document.getElementById('schedule-modal-staff-id').value;
+      try {
+        const res = await fetch(`/api/staff/${staffId}/overtime`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date, hours, reason })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          currentStaffSchedule.overtimeRecords = data.overtimeRecords;
+          renderScheduleOvertime();
+          document.getElementById('input-overtime-date').value = '';
+          document.getElementById('input-overtime-hours').value = '';
+          document.getElementById('input-overtime-reason').value = '';
+          alert('✅ ' + data.message);
+        }
+      } catch (e) {
+        currentStaffSchedule.overtimeRecords.unshift({ id: 'ot-' + Date.now(), date, hours, reason, approved: true });
+        renderScheduleOvertime();
+      }
+    }
+
+    async function saveStaffScheduleModal() {
+      const staffId = document.getElementById('schedule-modal-staff-id').value;
+      if (!staffId) return;
+
+      const days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
+      const restDays = days.filter(d => {
+        const cb = document.getElementById('rest-day-' + d);
+        return cb && cb.checked;
+      });
+
+      const payload = {
+        slots: currentStaffScheduleSlots,
+        restDays,
+        vacationDates: currentStaffSchedule.vacationDates || [],
+        extraDays: currentStaffSchedule.extraDays || [],
+        shiftType: currentStaffSchedule.shiftType || 'COMPLETO'
+      };
+
+      try {
+        const res = await fetch(`/api/staff/${staffId}/schedule`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          if (typeof confetti === 'function') confetti({ particleCount: 40 });
+          alert('✅ ' + (data.message || 'Horario guardado con éxito.'));
+          closeStaffScheduleModal();
+          await fetchInitialData();
+          renderBookingSlots(state.bookingCalendarStaffId);
+          renderMasterAgenda();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Horario laboral actualizado correctamente.');
         closeStaffScheduleModal();
       }
     }
@@ -10468,7 +10839,10 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         return `
           <tr class="hover:bg-stone-50 transition border-b border-stone-100">
             <td class="p-3 font-bold text-stone-900">
-              <span class="block text-sm font-bold text-stone-900">${s.name}</span>
+              <a href="javascript:void(0)" onclick="openServiceEditModal('${s.id}')" class="text-sm font-bold text-stone-900 hover:text-indigo-600 transition inline-flex items-center gap-1.5 group cursor-pointer">
+                <span>${s.name}</span>
+                <i data-lucide="edit-2" class="w-3.5 h-3.5 text-stone-300 group-hover:text-indigo-600 transition"></i>
+              </a>
               ${s.description ? `<span class="block text-[11px] text-stone-400 font-normal italic truncate max-w-xs">${s.description}</span>` : ''}
             </td>
             <td class="p-3">
@@ -10592,6 +10966,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           closeServiceEditModal();
           await fetchInitialData();
           await renderAdminServicesTable();
+          if (typeof renderServicesChecklist === 'function') renderServicesChecklist();
         } else {
           alert('Error: ' + data.error);
         }
@@ -10611,6 +10986,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
           alert('✅ ' + data.message);
           await fetchInitialData();
           await renderAdminServicesTable();
+          if (typeof renderServicesChecklist === 'function') renderServicesChecklist();
         } else {
           alert('Error: ' + data.error);
         }
@@ -11510,7 +11886,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       if (amountInput) amountInput.value = currentChargeContext.defaultPrice.toFixed(2);
 
       updateChargeBreakdown();
-      selectChargePaymentMethod('card');
+      selectChargePaymentMethod(options.initialMethod || 'card');
 
       document.getElementById('modal-charge-treatment').classList.remove('hidden');
       lucide.createIcons();
