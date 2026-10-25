@@ -1249,6 +1249,9 @@
           </div>
 
           <p class="text-xs text-stone-500 mb-4">Haz clic en cualquier cita para cargar y editar el expediente técnico de esa clienta.</p>
+          <!-- BANNER DE AVISOS Y NOVEDADES PARA LA ESTILISTA ACTIVA -->
+          <div id="staff-portal-notifications-area" class="mb-4"></div>
+
           <div class="space-y-3" id="worker-agenda-list">
             <!-- Citas asignadas a la trabajadora -->
           </div>
@@ -3367,6 +3370,53 @@
       </button>
     </div>
   </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE AVISO DE CAMBIO DE CITA (NOTIFICAR A CLIENTA Y ESTILISTAS AFECTADAS) -->
+  <!-- ========================================================================= -->
+  <div id="modal-appointment-change-notice" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      
+      <!-- Encabezado con Icono -->
+      <div class="flex items-start justify-between border-b border-stone-100 pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md flex-shrink-0">
+            <i data-lucide="bell-ring" class="w-5 h-5 text-purple-100 animate-bounce"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury">Avisar de Cambio de Cita</h3>
+              <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full border border-purple-200">
+                1-Clic WhatsApp
+              </span>
+            </div>
+            <p class="text-xs text-stone-500 mt-0.5">Notificaciones automáticas preparadas para la clienta y las estilistas afectadas.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAppointmentChangeModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenedor Dinámico de Notificaciones -->
+      <div id="modal-change-notice-content" class="space-y-4">
+        <!-- Renderizado dinámicamente con las tarjetas de clienta y estilistas -->
+      </div>
+
+      <!-- Pie del modal -->
+      <div class="border-t border-stone-100 pt-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 text-stone-400 text-[11px]">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-purple-500"></i>
+          <span>Se ha registrado en el historial de la cita y en el panel interno.</span>
+        </div>
+        <button type="button" onclick="closeAppointmentChangeModal()" class="w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow-sm">
+          ✓ Todo Listo / Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 
 <!-- ========================================================================= -->
   <!-- MODAL: REGISTRAR PROPINA CON MÉTODO, MOTIVO, CLIENTA Y HORA -->
@@ -7174,7 +7224,234 @@
       loadStaffTimeTrackingStatus();
     }
 
+    
+    // ========================================================================
+    // GESTIÓN DE AVISOS DE CAMBIO DE CITA (CLIENTA Y ESTILISTAS AFECTADAS)
+    // ========================================================================
+    function openAppointmentChangeNoticeModal(notifData) {
+      if (!notifData) return;
+      window.currentChangeNoticeData = notifData;
+
+      const modal = document.getElementById('modal-appointment-change-notice');
+      const content = document.getElementById('modal-change-notice-content');
+      if (!modal || !content) return;
+
+      const client = notifData.client || {};
+      const staffAffected = notifData.staffAffected || [];
+
+      let staffCardsHtml = '';
+      if (staffAffected.length > 0) {
+        staffCardsHtml = staffAffected.map((sn, idx) => {
+          let badgeBg = 'bg-purple-100 text-purple-800 border-purple-200';
+          let cardBg = 'bg-purple-50/50 border-purple-200';
+          let iconColor = 'text-purple-600 bg-purple-100';
+          let badgeText = 'Estilista Asignada';
+          let btnBg = 'bg-purple-600 hover:bg-purple-500';
+
+          if (sn.type === 'reassignment_loss') {
+            badgeBg = 'bg-amber-100 text-amber-800 border-amber-200';
+            cardBg = 'bg-amber-50/50 border-amber-200';
+            iconColor = 'text-amber-600 bg-amber-100';
+            badgeText = '⚠️ Hueco Liberado';
+            btnBg = 'bg-amber-600 hover:bg-amber-500';
+          } else if (sn.type === 'reassignment_gain') {
+            badgeBg = 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            cardBg = 'bg-indigo-50/50 border-indigo-200';
+            iconColor = 'text-indigo-600 bg-indigo-100';
+            badgeText = '✨ Nueva Cita Asignada';
+            btnBg = 'bg-indigo-600 hover:bg-indigo-500';
+          } else if (sn.type === 'reassignment_time') {
+            badgeBg = 'bg-sky-100 text-sky-800 border-sky-200';
+            cardBg = 'bg-sky-50/50 border-sky-200';
+            iconColor = 'text-sky-600 bg-sky-100';
+            badgeText = '🕒 Horario Modificado';
+            btnBg = 'bg-sky-600 hover:bg-sky-500';
+          }
+
+          return `
+            <div class="p-4 rounded-2xl border ${cardBg} space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl ${iconColor} flex items-center justify-center font-bold text-xs shadow-2xs">
+                    <i data-lucide="scissors" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <span class="text-xs font-bold text-stone-900 block">${sn.staffName}</span>
+                    <span class="text-[11px] text-stone-500">${sn.staffPhone || 'Estilista Salón'}</span>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeBg}">
+                  ${badgeText}
+                </span>
+              </div>
+
+              <p class="text-xs text-stone-700 bg-white/90 p-2.5 rounded-xl border border-stone-200/60 leading-relaxed shadow-2xs">${sn.message}</p>
+
+              <div class="flex items-center gap-2 pt-1">
+                ${sn.whatsappUrl ? `
+                  <a href="${sn.whatsappUrl}" target="_blank" class="${btnBg} text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    <span>Avisar a ${sn.staffName.split(' ')[0]} por WhatsApp</span>
+                  </a>
+                ` : ''}
+                <button type="button" onclick="copyStaffChangeText(${idx}, this)" class="bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer">
+                  <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      content.innerHTML = `
+        <!-- BLOQUE 1: AVISO A LA CLIENTA -->
+        <div class="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-stone-900">${client.name || 'Clienta'}</span>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                    Aviso a Clienta
+                  </span>
+                </div>
+                <span class="text-[11px] text-stone-500 font-mono-code">${client.phone ? '+' + client.phone : 'Teléfono no indicado'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-white rounded-xl border border-emerald-200/80 text-xs text-stone-800 whitespace-pre-line leading-relaxed shadow-2xs">
+            ${client.whatsappText || 'Cita actualizada con éxito.'}
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            ${client.whatsappUrl ? `
+              <a href="${client.whatsappUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-2 transition shadow-sm cursor-pointer">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                <span>Enviar WhatsApp a ${client.name ? client.name.split(' ')[0] : 'Clienta'}</span>
+              </a>
+            ` : ''}
+            <button type="button" onclick="copyClientChangeText(this)" class="bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 font-bold py-2 px-3 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar Mensaje</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BLOQUE 2: AVISO A LAS ESTILISTAS AFECTADAS -->
+        <div class="space-y-2.5">
+          <div class="flex items-center gap-2 px-1">
+            <i data-lucide="users" class="w-4 h-4 text-purple-600"></i>
+            <h4 class="text-xs font-bold text-stone-800 uppercase tracking-wide">Estilistas Afectadas (${staffAffected.length})</h4>
+          </div>
+          ${staffCardsHtml}
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeAppointmentChangeModal() {
+      const modal = document.getElementById('modal-appointment-change-notice');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyClientChangeText(btn) {
+      if (!window.currentChangeNoticeData || !window.currentChangeNoticeData.client) return;
+      const text = window.currentChangeNoticeData.client.whatsappText || '';
+      navigator.clipboard.writeText(text).then(() => {
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i> ¡Copiado!';
+          if (window.lucide) lucide.createIcons();
+          setTimeout(() => { btn.innerHTML = orig; if (window.lucide) lucide.createIcons(); }, 2000);
+        }
+      });
+    }
+
+    function copyStaffChangeText(idx, btn) {
+      if (!window.currentChangeNoticeData || !window.currentChangeNoticeData.staffAffected) return;
+      const sn = window.currentChangeNoticeData.staffAffected[idx];
+      if (!sn) return;
+      const text = sn.whatsappText || sn.message || '';
+      navigator.clipboard.writeText(text).then(() => {
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> ¡Copiado!';
+          if (window.lucide) lucide.createIcons();
+          setTimeout(() => { btn.innerHTML = orig; if (window.lucide) lucide.createIcons(); }, 2000);
+        }
+      });
+    }
+
+    async function dismissStaffNotification(id) {
+      try {
+        await fetch('/api/notifications/' + id + '/read', { method: 'POST' });
+        if (typeof pollAdminNotifications === 'function') await pollAdminNotifications();
+        if (typeof renderWorkerAgenda === 'function') renderWorkerAgenda();
+      } catch (e) {
+        console.error('Error descartando notificacion de estilista:', e);
+      }
+    }
+
+    function renderStaffPortalNotifications() {
+      const container = document.getElementById('staff-portal-notifications-area');
+      if (!container) return;
+      const staffId = state.activeStaffId || 'stf-1';
+      const notifs = (adminNotificationsData || []).filter(n => 
+        !n.read && (n.targetStaffId === staffId || (!n.targetStaffId && n.targetRole === 'staff'))
+      );
+
+      if (notifs.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 shadow-sm space-y-3 animate-in slide-in-from-top-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-amber-900 font-sans">Avisos y Cambios en tu Agenda</h4>
+              <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">${notifs.length} aviso(s)</span>
+            </div>
+          </div>
+          <div class="space-y-2">
+            ${notifs.map(n => `
+              <div class="p-3 bg-white rounded-xl border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-stone-900">${n.title}</span>
+                    <span class="text-[10px] bg-stone-100 text-stone-500 font-mono-code px-1.5 py-0.5 rounded">${new Date(n.timestamp).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                  </div>
+                  <p class="text-xs text-stone-600">${n.message}</p>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+                  ${n.whatsappUrl ? `
+                    <a href="${n.whatsappUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-2xs">
+                      <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp
+                    </a>
+                  ` : ''}
+                  <button type="button" onclick="dismissStaffNotification('${n.id}')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                    ✓ Entendido
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+
     function renderWorkerAgenda() {
+      renderStaffPortalNotifications();
+
       const container = document.getElementById('worker-agenda-list');
       if (!container) return;
 
@@ -8436,7 +8713,7 @@
     // =========================================================================
     let currentAgendaToastTimeout = null;
 
-    function showAgendaToast(title, subtitle = '', iconName = 'check-circle-2', undoCallback = null) {
+    function showAgendaToast(title, subtitle = '', iconName = 'check-circle-2', undoCallback = null, noticeCallback = null) {
       try {
         const existing = document.getElementById('floating-agenda-toast');
         if (existing) existing.remove();
@@ -8444,15 +8721,25 @@
 
         const toast = document.createElement('div');
         toast.id = 'floating-agenda-toast';
-        toast.className = 'agenda-toast fixed bottom-6 right-6 z-[9999] bg-stone-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl border border-stone-700/80 flex items-center gap-3.5 max-w-md';
+        toast.className = 'agenda-toast fixed bottom-6 right-6 z-[9999] bg-stone-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl border border-stone-700/80 flex items-center gap-3 max-w-lg';
 
         const iconColor = iconName === 'alert-circle' ? 'text-rose-400' : 'text-emerald-400';
         const iconBg = iconName === 'alert-circle' ? 'bg-rose-500/20' : 'bg-emerald-500/20';
 
+        let noticeBtnHtml = '';
+        if (noticeCallback) {
+          noticeBtnHtml = `
+            <button type="button" id="btn-agenda-toast-notice" class="ml-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer flex-shrink-0">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>Avisar WhatsApp</span>
+            </button>
+          `;
+        }
+
         let undoBtnHtml = '';
         if (undoCallback) {
           undoBtnHtml = `
-            <button type="button" id="btn-agenda-toast-undo" class="ml-2 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer flex-shrink-0">
+            <button type="button" id="btn-agenda-toast-undo" class="ml-1 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer flex-shrink-0">
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
               <span>Deshacer</span>
             </button>
@@ -8467,6 +8754,7 @@
             <strong class="text-xs font-bold block text-white leading-snug">${title}</strong>
             ${subtitle ? `<span class="text-[11px] text-stone-300 block truncate leading-tight mt-0.5">${subtitle}</span>` : ''}
           </div>
+          ${noticeBtnHtml}
           ${undoBtnHtml}
           <button type="button" onclick="this.closest('#floating-agenda-toast').remove()" class="text-stone-400 hover:text-white p-1 rounded-lg transition ml-1 cursor-pointer">
             <i data-lucide="x" class="w-4 h-4"></i>
@@ -8475,6 +8763,15 @@
 
         document.body.appendChild(toast);
         if (window.lucide) lucide.createIcons();
+
+        if (noticeCallback) {
+          const noticeBtn = document.getElementById('btn-agenda-toast-notice');
+          if (noticeBtn) {
+            noticeBtn.addEventListener('click', () => {
+              noticeCallback();
+            });
+          }
+        }
 
         if (undoCallback) {
           const undoBtn = document.getElementById('btn-agenda-toast-undo');
@@ -8491,7 +8788,7 @@
           toast.style.opacity = '0';
           toast.style.transform = 'translateY(20px) scale(0.95)';
           setTimeout(() => toast.remove(), 350);
-        }, 4500);
+        }, 6500);
       } catch (e) {
         console.warn('Error showing agenda toast:', e);
       }
@@ -8692,7 +8989,39 @@
           renderMasterAgenda();
           showAgendaToast('No se pudo reubicar', data.error || 'Horario ocupado', 'alert-circle');
         } else {
-          // Éxito en backend
+          // Éxito en backend: procesar avisos automáticos para estilistas y clienta
+          if (data.notifications) {
+            window.lastAppointmentChangeNotifications = data.notifications;
+            // Actualizar toast flotante con acceso 1-clic a WhatsApp
+            showAgendaToast(
+              toastTitle,
+              toastSubtitle,
+              'check-circle-2',
+              () => {
+                apt.staffId = prevStaffId;
+                apt.staffName = prevStaffName;
+                apt.startTime = prevStartTime;
+                apt.endTime = prevEndTime;
+                state.justMovedAppointmentId = aptId;
+                renderMasterAgenda();
+                showAgendaToast('Movimiento deshecho', `Cita devuelta a ${prevStaff.name} a su hora original`, 'rotate-ccw');
+                fetch(`/api/appointments/${aptId}/reschedule`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    staffId: prevStaffId,
+                    startTime: prevStartTime,
+                    endTime: prevEndTime
+                  })
+                }).catch(() => {});
+              },
+              () => openAppointmentChangeNoticeModal(data.notifications)
+            );
+
+            // Abrir automáticamente el modal ágil de avisos para notificar en 1 clic
+            openAppointmentChangeNoticeModal(data.notifications);
+          }
+
           if (typeof pollAdminNotifications === 'function') pollAdminNotifications();
           if (typeof renderWorkerAgenda === 'function') renderWorkerAgenda();
         }
@@ -12917,41 +13246,73 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
         if (unread.length === 0) {
           bannerArea.innerHTML = '';
         } else {
-          bannerArea.innerHTML = unread.slice(0, 2).map(n => `
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-in slide-in-from-top-2">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm animate-bounce">
-                  <i data-lucide="bell-ring" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Aviso de Cobro en Caja</span>
-                    <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">${new Date(n.timestamp).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+          bannerArea.innerHTML = unread.slice(0, 2).map(n => {
+            const isChangeNotice = n.type && (n.type.startsWith('reassignment_') || n.type === 'client_reschedule_notice');
+            if (isChangeNotice) {
+              return `
+                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-in slide-in-from-top-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-purple-900 uppercase tracking-wide">${n.title || 'Cambio de Cita'}</span>
+                        <span class="text-[10px] bg-purple-200 text-purple-900 font-bold px-2 py-0.5 rounded-full">${new Date(n.timestamp).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                      </div>
+                      <p class="text-sm font-bold text-stone-900 mt-0.5">${n.message}</p>
+                    </div>
                   </div>
-                  <p class="text-sm font-bold text-stone-900 mt-0.5">${n.message}</p>
+                  <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    ${n.whatsappUrl ? `
+                      <a href="${n.whatsappUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1.5 transition shadow-2xs cursor-pointer">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp
+                      </a>
+                    ` : ''}
+                    <button onclick="dismissNotification('${n.id}')" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer" title="Descartar">
+                      <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-in slide-in-from-top-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm animate-bounce">
+                    <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Aviso de Cobro en Caja</span>
+                      <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">${new Date(n.timestamp).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <p class="text-sm font-bold text-stone-900 mt-0.5">${n.message}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'cash')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                      <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Metálico
+                    </button>
+                    <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'bizum')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                      <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Bizum
+                    </button>
+                    <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'card')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
+                      <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Tarjeta
+                    </button>
+                    <button type="button" onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-1.5 px-2 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap" title="Cobro personalizado en TPV">
+                      <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+                  <button onclick="dismissNotification('${n.id}')" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
                 </div>
               </div>
-              <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'cash')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
-                    <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Metálico
-                  </button>
-                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'bizum')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
-                    <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Bizum
-                  </button>
-                  <button type="button" onclick="quickPayCashierNotice('${n.appointmentId}', '${n.id}', 'card')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-xs flex items-center gap-1 transition shadow-2xs cursor-pointer whitespace-nowrap">
-                    <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Tarjeta
-                  </button>
-                  <button type="button" onclick="loadAppointmentIntoPos('${n.appointmentId}', '${n.id}')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-1.5 px-2 rounded-xl text-xs flex items-center gap-1 transition cursor-pointer whitespace-nowrap" title="Cobro personalizado en TPV">
-                    <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-                  </button>
-                </div>
-                <button onclick="dismissNotification('${n.id}')" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg">
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
           lucide.createIcons();
         }
       }

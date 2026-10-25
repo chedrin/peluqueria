@@ -1804,6 +1804,10 @@ app.patch('/api/appointments/:id', (req, res) => {
 
   const { staffId, startTime, status, clientComments } = req.body;
 
+  const prevStaffId = apt.staffId;
+  const prevStaffName = apt.staffName;
+  const prevStartTime = apt.startTime;
+
   if (staffId) {
     const stf = db.staff.find(s => s.id === staffId);
     if (stf) {
@@ -1819,6 +1823,19 @@ app.patch('/api/appointments/:id', (req, res) => {
     apt.endTime = new Date(start.getTime() + durationMs).toISOString();
   }
 
+  let notifPayload = null;
+  if ((staffId && staffId !== prevStaffId) || (startTime && startTime !== prevStartTime)) {
+    const currentStaff = db.staff.find(s => s.id === apt.staffId) || { id: apt.staffId, name: apt.staffName };
+    notifPayload = generateRescheduleNotifications(
+      apt,
+      prevStaffId,
+      prevStaffName,
+      prevStartTime,
+      currentStaff,
+      apt.startTime
+    );
+  }
+
   if (status) apt.status = status;
   if (clientComments !== undefined) apt.clientComments = clientComments;
 
@@ -1829,7 +1846,7 @@ app.patch('/api/appointments/:id', (req, res) => {
     timestamp: new Date().toISOString()
   });
 
-  res.json(apt);
+  res.json({ ...apt, notifications: notifPayload });
 });
 
 // 6. PROTOCOLO DE BAJA MÉDICA REPENTINA (ALGORITMO EN CASCADA)
@@ -4086,6 +4103,12 @@ app.get('/api/notifications', (req, res) => {
   res.json(db.notifications || []);
 });
 
+app.post('/api/notifications/:id/read', (req, res) => {
+  const notif = (db.notifications || []).find(n => n.id === req.params.id);
+  if (notif) notif.read = true;
+  res.json({ success: true });
+});
+
 app.put('/api/notifications/:id/read', (req, res) => {
   const notif = (db.notifications || []).find(n => n.id === req.params.id);
   if (notif) notif.read = true;
@@ -4362,7 +4385,210 @@ app.get('/api/loyalty/export-excel', (req, res) => {
 // D. ACTUALIZACIÓN DE FICHAJES EXCEL CON RANGO DE FECHAS (startDate, endDate)
 // (Se apoya en /api/time-tracking/export-excel con soporte para startDate y endDate)
 
-// E. ARRASTRE DE CITAS (DRAG & DROP EN AGENDA MAESTRA)
+
+// MOTOR DE NOTIFICACIONES DE CAMBIO DE CITA (ESTILISTAS AFECTADAS Y CLIENTA)
+function generateRescheduleNotifications(apt, prevStaffId, prevStaffName, prevStartTime, newStaff, newStartTime) {
+  if (!db.notifications) db.notifications = [];
+  if (!db.appointmentAuditLogs) db.appointmentAuditLogs = [];
+
+  const prevStaff = (db.staff || []).find(s => s.id === prevStaffId);
+  const effectivePrevStaffName = prevStaff ? prevStaff.name : (prevStaffName || 'Estilista Salón');
+
+  const prevDate = new Date(prevStartTime || apt.startTime || Date.now());
+  const newDate = new Date(newStartTime || apt.startTime || Date.now());
+
+  const prevTimeStr = prevDate.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  const prevDateStr = prevDate.toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'short'});
+
+  const newTimeStr = newDate.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  const newDateStr = newDate.toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'short'});
+
+  const isStaffChanged = prevStaffId && prevStaffId !== newStaff.id;
+  const isTimeChanged = prevTimeStr !== newTimeStr || prevDate.toDateString() !== newDate.toDateString();
+
+  // Buscar ficha completa de la clienta
+  const client = (db.clients || []).find(c => 
+    (apt.clientId && c.id === apt.clientId) || 
+    (apt.clientDni && c.dni === apt.clientDni) ||
+    (c.name && apt.clientName && c.name.toLowerCase() === apt.clientName.toLowerCase())
+  );
+
+  const clientPhone = (client && client.phone) || apt.clientPhone || '';
+  const clientName = apt.clientName || 'Estimada clienta';
+
+  function cleanPhone(raw) {
+    if (!raw) return '';
+    let digits = String(raw).replace(/\D/g, '');
+    if (digits.length === 9 && (digits.startsWith('6') || digits.startsWith('7'))) {
+      digits = '34' + digits;
+    }
+    return digits;
+  }
+
+  // 1. AVISO PARA LA CLIENTA
+  const clientCleanPhone = cleanPhone(clientPhone);
+  let changeSummaryText = '';
+  if (isStaffChanged && isTimeChanged) {
+    changeSummaryText = `Tu cita pasa al *${newDateStr} a las ${newTimeStr}* con *${newStaff.name}* (anteriormente con ${effectivePrevStaffName} a las ${prevTimeStr}).`;
+  } else if (isStaffChanged) {
+    changeSummaryText = `Tu cita del *${newDateStr} a las ${newTimeStr}* será atendida por nuestra estilista *${newStaff.name}* (anteriormente con ${effectivePrevStaffName}).`;
+  } else {
+    changeSummaryText = `Tu cita con *${newStaff.name}* se ha movido al *${newDateStr} a las ${newTimeStr}* (antes: ${prevTimeStr}).`;
+  }
+
+  const clientWaText = `✨ *PELUQUERÍA - ACTUALIZACIÓN DE TU CITA* ✨\n\n` +
+    `Hola *${clientName}*, te informamos de una actualización en tu reserva:\n\n` +
+    `🗓️ *Fecha:* ${newDateStr}\n` +
+    `⏰ *Horario:* ${newTimeStr}\n` +
+    `💇 *Estilista:* ${newStaff.name}` + (isStaffChanged ? ` (anterior: ${effectivePrevStaffName})` : '') + `\n` +
+    `✂️ *Servicios:* ${apt.serviceNames || 'Tratamiento de Salón'}\n\n` +
+    `${changeSummaryText}\n\n` +
+    `Si tienes cualquier consulta o necesitas otro horario, puedes escribirnos por aquí. ¡Muchas gracias! 💖`;
+
+  const clientWaUrl = clientCleanPhone 
+    ? `https://wa.me/${clientCleanPhone}?text=${encodeURIComponent(clientWaText)}`
+    : `https://wa.me/?text=${encodeURIComponent(clientWaText)}`;
+
+  const clientNotif = {
+    id: 'notif-client-change-' + Date.now(),
+    type: 'client_reschedule_notice',
+    targetRole: 'client',
+    targetStaffId: null,
+    clientId: apt.clientId || (client ? client.id : null),
+    clientName: clientName,
+    clientPhone: clientPhone,
+    title: 'Aviso de Cambio de Cita (Clienta)',
+    message: `Cita de ${clientName} reprogramada al ${newDateStr} a las ${newTimeStr} con ${newStaff.name}.`,
+    appointmentId: apt.id,
+    whatsappUrl: clientWaUrl,
+    whatsappText: clientWaText,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+  db.notifications.unshift(clientNotif);
+
+  // 2. AVISOS PARA LAS ESTILISTAS AFECTADAS
+  const staffNotifs = [];
+
+  if (isStaffChanged) {
+    // Estilista que cede la cita (se le libera el tramo)
+    if (prevStaff) {
+      const prevStaffPhone = cleanPhone(prevStaff.phone);
+      const lossWaText = `⚠️ *PELUQUERÍA - AVISO DE AGENDA PARA ESTILISTAS*\n\n` +
+        `Hola *${prevStaff.name}*, la cita de *${clientName}* (${prevTimeStr}) ha sido reasignada a *${newStaff.name}*.\n\n` +
+        `🗓️ Tu hueco de las *${prevTimeStr}* queda ahora *LIBRE* en tu cuadrante.`;
+
+      const lossNotif = {
+        id: 'notif-reassign-loss-' + Date.now(),
+        type: 'reassignment_loss',
+        targetRole: 'staff',
+        targetStaffId: prevStaffId,
+        targetStaffName: prevStaff.name,
+        targetStaffPhone: prevStaff.phone,
+        title: 'Cita Reubicada a Otra Estilista',
+        message: `La cita de ${clientName} (${prevTimeStr}) ha sido reasignada a ${newStaff.name}. Tu hueco queda libre.`,
+        appointmentId: apt.id,
+        whatsappUrl: prevStaffPhone ? `https://wa.me/${prevStaffPhone}?text=${encodeURIComponent(lossWaText)}` : `https://wa.me/?text=${encodeURIComponent(lossWaText)}`,
+        whatsappText: lossWaText,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      db.notifications.unshift(lossNotif);
+      staffNotifs.push(lossNotif);
+    }
+
+    // Estilista que recibe la nueva cita
+    const newStaffPhone = cleanPhone(newStaff.phone);
+    const gainWaText = `✨ *PELUQUERÍA - NUEVA CITA ASIGNADA*\n\n` +
+      `Hola *${newStaff.name}*, se te ha asignado una nueva cita en tu agenda:\n\n` +
+      `👤 *Clienta:* ${clientName}\n` +
+      `📅 *Fecha:* ${newDateStr}\n` +
+      `⏰ *Horario:* ${newTimeStr}\n` +
+      `✂️ *Servicios:* ${apt.serviceNames || 'Tratamiento'}\n` +
+      `ℹ️ (Reasignada desde ${effectivePrevStaffName})`;
+
+    const gainNotif = {
+      id: 'notif-reassign-gain-' + Date.now() + '-gain',
+      type: 'reassignment_gain',
+      targetRole: 'staff',
+      targetStaffId: newStaff.id,
+      targetStaffName: newStaff.name,
+      targetStaffPhone: newStaff.phone,
+      title: 'Nueva Cita Asignada',
+      message: `Nueva clienta: ${clientName} a las ${newTimeStr} (${apt.serviceNames || 'Tratamiento'}). Reasignada desde ${effectivePrevStaffName}.`,
+      appointmentId: apt.id,
+      whatsappUrl: newStaffPhone ? `https://wa.me/${newStaffPhone}?text=${encodeURIComponent(gainWaText)}` : `https://wa.me/?text=${encodeURIComponent(gainWaText)}`,
+      whatsappText: gainWaText,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    db.notifications.unshift(gainNotif);
+    staffNotifs.push(gainNotif);
+
+  } else {
+    // Misma estilista, cambio de horario o fecha
+    const sameStaffPhone = cleanPhone(newStaff.phone);
+    const timeWaText = `🕒 *PELUQUERÍA - CAMBIO DE HORARIO EN TU AGENDA*\n\n` +
+      `Hola *${newStaff.name}*, la cita de *${clientName}* se ha movido de horario:\n\n` +
+      `⏰ *Nuevo Horario:* ${newDateStr} a las ${newTimeStr} (antes: ${prevTimeStr})\n` +
+      `✂️ *Servicios:* ${apt.serviceNames || 'Tratamiento'}`;
+
+    const timeNotif = {
+      id: 'notif-reassign-time-' + Date.now(),
+      type: 'reassignment_time',
+      targetRole: 'staff',
+      targetStaffId: newStaff.id,
+      targetStaffName: newStaff.name,
+      targetStaffPhone: newStaff.phone,
+      title: 'Horario de Cita Actualizado',
+      message: `La cita de ${clientName} se ha movido al ${newDateStr} a las ${newTimeStr} (antes: ${prevTimeStr}).`,
+      appointmentId: apt.id,
+      whatsappUrl: sameStaffPhone ? `https://wa.me/${sameStaffPhone}?text=${encodeURIComponent(timeWaText)}` : `https://wa.me/?text=${encodeURIComponent(timeWaText)}`,
+      whatsappText: timeWaText,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    db.notifications.unshift(timeNotif);
+    staffNotifs.push(timeNotif);
+  }
+
+  // Flag de cita reprogramada
+  apt.isRescheduled = true;
+  apt.rescheduledAt = new Date().toISOString();
+
+  // Registro en historial de auditoría
+  db.appointmentAuditLogs.push({
+    id: 'aud-' + Date.now(),
+    appointmentId: apt.id,
+    action: 'RESCHEDULE_NOTIFIED',
+    details: `Reubicada a ${newStaff.name} (${newTimeStr}). Notificados clienta y estilistas afectadas.`,
+    timestamp: new Date().toISOString()
+  });
+
+  return {
+    client: {
+      id: clientNotif.id,
+      name: clientName,
+      phone: clientPhone,
+      cleanPhone: clientCleanPhone,
+      whatsappUrl: clientWaUrl,
+      whatsappText: clientWaText,
+      summary: changeSummaryText
+    },
+    staffAffected: staffNotifs.map(sn => ({
+      id: sn.id,
+      type: sn.type,
+      staffId: sn.targetStaffId,
+      staffName: sn.targetStaffName,
+      staffPhone: sn.targetStaffPhone,
+      whatsappUrl: sn.whatsappUrl,
+      whatsappText: sn.whatsappText,
+      message: sn.message
+    }))
+  };
+}
+
+// E. ARRASTRE DE CITAS (DRAG & DROP EN AGENDA MAESTRA CON AVISOS AUTOMÁTICOS)
 app.put('/api/appointments/:id/reschedule', (req, res) => {
   const apt = db.appointments.find(a => a.id === req.params.id);
   if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
@@ -4393,7 +4619,7 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
 
   const prevStaffId = apt.staffId;
   const prevStaffName = apt.staffName || 'Estilista Salón';
-  const prevTimeStr = new Date(apt.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  const prevStartTime = apt.startTime;
   const newTimeStr = new Date(startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
 
   apt.staffId = staff.id;
@@ -4401,46 +4627,21 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
   apt.startTime = startTime;
   apt.endTime = endTime;
 
-  // Notificar a ambas estilistas (la que deja a la clienta y la que la recibe)
-  if (prevStaffId && prevStaffId !== staff.id) {
-    db.notifications.unshift({
-      id: 'notif-reassign-loss-' + Date.now(),
-      type: 'reassignment_loss',
-      targetStaffId: prevStaffId,
-      title: 'Cita Reubicada a Otra Estilista',
-      message: `La cita de ${apt.clientName} (${prevTimeStr}) ha sido reasignada a ${staff.name}.`,
-      appointmentId: apt.id,
-      timestamp: new Date().toISOString(),
-      read: false
-    });
-
-    db.notifications.unshift({
-      id: 'notif-reassign-gain-' + Date.now(),
-      type: 'reassignment_gain',
-      targetStaffId: staff.id,
-      title: 'Nueva Cita Asignada',
-      message: `Nueva clienta asignada: ${apt.clientName} a las ${newTimeStr} (${apt.serviceNames || 'Tratamiento'}).`,
-      appointmentId: apt.id,
-      timestamp: new Date().toISOString(),
-      read: false
-    });
-  } else {
-    db.notifications.unshift({
-      id: 'notif-reassign-time-' + Date.now(),
-      type: 'reassignment_time',
-      targetStaffId: staff.id,
-      title: 'Horario de Cita Actualizado',
-      message: `La cita de ${apt.clientName} se ha movido a las ${newTimeStr}.`,
-      appointmentId: apt.id,
-      timestamp: new Date().toISOString(),
-      read: false
-    });
-  }
+  // Disparar motor de avisos automáticos para estilistas afectadas y clienta
+  const notifPayload = generateRescheduleNotifications(
+    apt,
+    prevStaffId,
+    prevStaffName,
+    prevStartTime,
+    staff,
+    startTime
+  );
 
   res.json({
     success: true,
-    message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${newTimeStr}). Se ha notificado a las estilistas involucradas.`,
-    appointment: apt
+    message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${newTimeStr}). Se ha avisado a la clienta y a las estilistas afectadas.`,
+    appointment: apt,
+    notifications: notifPayload
   });
 });
 
