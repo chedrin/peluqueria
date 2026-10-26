@@ -1,0 +1,10 @@
+{
+  // Despliegue en Cloudflare Workers de la web estática (public/).
+  // `previews` es obligatorio para que `npx wrangler preview` (builds de ramas/PR) funcione.
+  "name": "peluqueria",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public"
+  },
+  "previews": {}
+}
