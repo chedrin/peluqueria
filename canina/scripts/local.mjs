@@ -7,7 +7,7 @@
  * Para desarrollar con recarga en caliente: npm run local -- --dev
  */
 import { execSync, spawn } from "node:child_process";
-import { existsSync, copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, copyFileSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import EmbeddedPostgres from "embedded-postgres";
 
@@ -39,6 +39,20 @@ const firstRun = !existsSync(".pgdata/PG_VERSION");
 if (firstRun) {
   console.log("· Inicializando PostgreSQL embebido (solo la primera vez)…");
   await pg.initialise();
+}
+// Un cierre brusco deja el candado postmaster.pid: se borra si ese proceso ya no existe
+const lock = ".pgdata/postmaster.pid";
+if (existsSync(lock)) {
+  const pid = Number(readFileSync(lock, "utf8").split("\n")[0]);
+  let alive = false;
+  try { process.kill(pid, 0); alive = true; } catch {}
+  if (alive) {
+    console.error(`\n✖ Ya hay un CRM (base de datos, proceso ${pid}) abierto en este PC.`);
+    console.error("  Cierra la otra ventana donde se está ejecutando, o detenlo con:");
+    console.error(`  Stop-Process -Id ${pid} -Force\n`);
+    process.exit(1);
+  }
+  rmSync(lock);
 }
 await pg.start();
 if (firstRun) await pg.createDatabase("cania");
