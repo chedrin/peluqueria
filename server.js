@@ -1801,6 +1801,8 @@ app.get('/api/availability', (req, res) => {
         time: timeStr,
         endTime: slotEndTime,
         available: false,
+        exceedsClosing: true,
+        closingTime: '14:00',
         reason: 'Los sábados el salón no abre por la tarde (cierre a las 14:00).'
       };
     }
@@ -1809,7 +1811,9 @@ app.get('/api/availability', (req, res) => {
         time: timeStr,
         endTime: slotEndTime,
         available: false,
-        reason: `Excede el horario del sábado (cierre 14:00). Requiere ${durationMinutes} min.`
+        exceedsClosing: true,
+        closingTime: '14:00',
+        reason: `El servicio de ${durationMinutes} min excede el cierre del sábado (14:00).`
       };
     }
 
@@ -1819,7 +1823,9 @@ app.get('/api/availability', (req, res) => {
         time: timeStr,
         endTime: slotEndTime,
         available: false,
-        reason: `Excede el turno de mañana (cierre a las 14:00). Requiere ${durationMinutes} min continuos.`
+        exceedsClosing: true,
+        closingTime: '14:00',
+        reason: `El servicio de ${durationMinutes} min no cabe antes del descanso del mediodía (14:00).`
       };
     }
     if (slotStartMin >= 16 * 60 && slotEndMin > 19 * 60 + 30) {
@@ -1827,7 +1833,9 @@ app.get('/api/availability', (req, res) => {
         time: timeStr,
         endTime: slotEndTime,
         available: false,
-        reason: `Excede el horario de cierre (19:30). Requiere ${durationMinutes} min continuos.`
+        exceedsClosing: true,
+        closingTime: '19:30',
+        reason: `El servicio de ${durationMinutes} min no cabe antes del cierre del salón (19:30).`
       };
     }
 
@@ -1855,6 +1863,10 @@ app.get('/api/availability', (req, res) => {
         time: timeStr,
         endTime: slotEndTime,
         available: false,
+        isConflict: true,
+        conflictClient: conflictApt.clientName,
+        conflictStart: aStartT,
+        conflictEnd: aEndT,
         reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}`
       };
     }

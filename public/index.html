@@ -6725,6 +6725,7 @@
       workerAgendaDate: TODAY_ISO_STRING, // Fecha seleccionada en Portal Trabajadoras
       masterAgendaDate: TODAY_ISO_STRING,
       bookingCalendarStaffId: 'stf-1', // Estilista seleccionada para ver huecos en Calendario
+      bookingSlotsView: 'free', // 'free' (solo huecos disponibles) o 'all' (cuadrante completo)
       selectedClientId: 'cli-1', // Clienta activa en el expediente técnico
       selectedAppointmentId: null,
       selectedSlots: null,
@@ -7486,10 +7487,10 @@
           }
 
           if (slotStartMin < 14 * 60 && slotEndMin > 14 * 60) {
-            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Excede el turno de mañana (cierre 14:00)` };
+            return { time: timeStr, endTime: slotEndTime, available: false, exceedsClosing: true, closingTime: '14:00', reason: `El servicio de ${duration} min no cabe antes del mediodía (cierre 14:00)` };
           }
           if (slotStartMin >= 16 * 60 && slotEndMin > 19 * 60 + 30) {
-            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Excede el horario de cierre (19:30)` };
+            return { time: timeStr, endTime: slotEndTime, available: false, exceedsClosing: true, closingTime: '19:30', reason: `El servicio de ${duration} min no cabe antes del cierre del salón (19:30)` };
           }
 
           const conflictApt = staffApts.find(a => {
@@ -7501,7 +7502,7 @@
           if (conflictApt) {
             const aStartT = extractTimeParts(conflictApt.startTime).timeStr;
             const aEndT = extractTimeParts(conflictApt.endTime).timeStr;
-            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}` };
+            return { time: timeStr, endTime: slotEndTime, available: false, isConflict: true, conflictClient: conflictApt.clientName, reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}` };
           }
 
           return { time: timeStr, endTime: slotEndTime, available: true, reason: `Hueco libre (${timeStr} - ${slotEndTime})` };
@@ -7518,8 +7519,37 @@
       const container = document.getElementById('slots-grid');
       const confirmBtn = document.getElementById('btn-confirm-booking');
       const summarySlotLabel = document.getElementById('booking-summary-slot');
+      const helpTextEl = document.getElementById('slots-help-text');
 
       const freeCount = slotsData.filter(s => s.available).length;
+      const viewMode = state.bookingSlotsView || 'free';
+
+      if (helpTextEl) {
+        if (viewMode === 'free') {
+          helpTextEl.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs text-emerald-950">
+              <span class="font-medium flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Mostrando las <strong>${freeCount} horas de inicio disponibles</strong> para tu servicio de <strong>${duration} min</strong>.
+              </span>
+              <button type="button" onclick="setBookingSlotsView('all')" class="text-[11px] font-bold text-stone-600 hover:text-stone-900 bg-white px-2.5 py-1 rounded-lg border border-stone-200 shadow-2xs transition cursor-pointer self-start sm:self-auto">
+                📋 Ver cuadrante completo
+              </button>
+            </div>
+          `;
+        } else {
+          helpTextEl.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-700">
+              <span class="text-[11px]">
+                Leyenda: <strong class="text-emerald-700 font-bold">✅ Verde</strong> = Inicio libre. <strong class="text-rose-600 font-bold">🚫 Rojo</strong> = Cita ocupada. <strong class="text-amber-700 font-bold">⏰ Amarillo</strong> = Cierre del salón.
+              </span>
+              <button type="button" onclick="setBookingSlotsView('free')" class="text-[11px] font-bold text-emerald-800 bg-emerald-100/90 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 shadow-2xs transition cursor-pointer self-start sm:self-auto">
+                ✨ Mostrar solo horas disponibles
+              </button>
+            </div>
+          `;
+        }
+      }
 
       if (freeCount === 0) {
         container.innerHTML = `
@@ -7549,6 +7579,46 @@
         summarySlotLabel.innerText = `${state.selectedSlots} - ${endH}:${endM} (${duration} min)`;
       }
 
+      // VISTA RECOMENDADA: Solo horas de inicio disponibles (estilo Fresha / Calendly)
+      if (viewMode === 'free') {
+        const freeSlots = slotsData.filter(s => s.available);
+        container.innerHTML = freeSlots.map(s => {
+          const isSelected = state.selectedSlots === s.time;
+          const [sh, sm] = s.time.split(':').map(Number);
+          const slotEndMinutes = sh * 60 + sm + duration;
+          const fallbackEndH = String(Math.floor(slotEndMinutes / 60)).padStart(2, '0');
+          const fallbackEndM = String(slotEndMinutes % 60).padStart(2, '0');
+          const displayEndTime = s.endTime || `${fallbackEndH}:${fallbackEndM}`;
+
+          return `
+            <button type="button" 
+              onclick="selectSlot('${s.time}')" 
+              class="p-4 rounded-2xl border-2 transition text-left flex flex-col justify-between gap-2.5 cursor-pointer shadow-2xs ${
+                isSelected
+                  ? 'bg-rose-600 border-rose-700 text-white shadow-md ring-4 ring-rose-200 scale-102'
+                  : 'bg-white border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/60 text-stone-900'
+              }">
+              <div class="flex items-center justify-between w-full">
+                <span class="text-lg font-black font-mono-code">${s.time}</span>
+                <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}">
+                  ${isSelected ? '✓ Seleccionada' : 'Disponible'}
+                </span>
+              </div>
+              <div class="space-y-0.5">
+                <div class="text-xs font-bold ${isSelected ? 'text-rose-100' : 'text-emerald-950'}">
+                  Inicio ${s.time} · Hasta las ${displayEndTime}
+                </div>
+                <div class="text-[11px] font-medium ${isSelected ? 'text-rose-200' : 'text-stone-500'}">
+                  ${displayEndTime === '19:30' ? '🏁 Hasta el cierre del salón (19:30)' : `⏱️ ${duration} min garantizados`}
+                </div>
+              </div>
+            </button>
+          `;
+        }).join('');
+        return;
+      }
+
+      // VISTA CUADRANTE COMPLETO (Todas las franjas horarias con distinción clara de estados)
       container.innerHTML = slotsData.map(s => {
         const isSelected = state.selectedSlots === s.time;
         const [sh, sm] = s.time.split(':').map(Number);
@@ -7575,26 +7645,33 @@
           `;
         } else if (s.isPast) {
           return `
-            <button type="button" 
-              disabled 
-              title="${s.reason || 'Hora pasada'}"
-              class="p-2.5 rounded-xl text-xs text-center border border-stone-200 bg-stone-100/70 text-stone-400 cursor-not-allowed opacity-45 flex flex-col items-center justify-center gap-0.5 select-none line-through">
+            <div title="${s.reason || 'Hora pasada'}" class="p-2.5 rounded-xl text-xs text-center border border-stone-200 bg-stone-100/70 text-stone-400 opacity-45 flex flex-col items-center justify-center gap-0.5 select-none line-through">
               <span class="text-xs font-mono-code">${s.time}</span>
               <span class="text-[9px] no-underline font-medium text-stone-400">🚫 Pasada</span>
-            </button>
+            </div>
+          `;
+        } else if (s.exceedsClosing || (s.reason && s.reason.includes('cierre'))) {
+          const closingLabel = s.closingTime || (s.time < '14:00' ? '14:00' : '19:30');
+          return `
+            <div title="${s.reason}" class="p-2.5 rounded-xl text-xs text-center border border-amber-200 bg-amber-50/70 text-amber-800 opacity-75 flex flex-col items-center justify-center gap-0.5 select-none">
+              <span class="text-xs font-mono-code font-bold text-amber-900">${s.time}</span>
+              <span class="text-[9px] font-bold text-amber-700">⏰ Cierre (${closingLabel})</span>
+            </div>
           `;
         } else {
           return `
-            <button type="button" 
-              disabled 
-              title="${s.reason || 'Hueco ocupado o excede turno'}"
-              class="p-2.5 rounded-xl text-xs text-center border border-rose-200 bg-rose-50/60 text-rose-400 cursor-not-allowed opacity-60 flex flex-col items-center justify-center gap-0.5 select-none line-through">
-              <span class="text-xs font-mono-code">${s.time}</span>
-              <span class="text-[9px] no-underline font-medium text-rose-500">🚫 Ocupado</span>
-            </button>
+            <div title="${s.reason || 'Cita de otra clienta'}" class="p-2.5 rounded-xl text-xs text-center border border-rose-200 bg-rose-50/60 text-rose-500 opacity-70 flex flex-col items-center justify-center gap-0.5 select-none line-through">
+              <span class="text-xs font-mono-code font-bold">${s.time}</span>
+              <span class="text-[9px] no-underline font-bold text-rose-600">🚫 Cita Ocupada</span>
+            </div>
           `;
         }
       }).join('');
+    }
+
+    function setBookingSlotsView(view) {
+      state.bookingSlotsView = view;
+      renderBookingSlots(state.bookingCalendarStaffId);
     }
 
     function selectSlot(time) {
