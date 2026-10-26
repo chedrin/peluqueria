@@ -7,3 +7,4 @@ uploads/
 .open-next/
 .wrangler/
 .dev.vars
+.pgdata/

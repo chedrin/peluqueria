@@ -1,0 +1,57 @@
+/**
+ * Arranque local en un solo comando, sin Docker ni cuentas externas:
+ *   npm run local
+ * Levanta PostgreSQL embebido (datos en .pgdata/, puerto 5433), aplica migraciones,
+ * carga los datos demo y arranca la app en http://localhost:3025.
+ */
+import { spawn } from "node:child_process";
+import { existsSync, copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import EmbeddedPostgres from "embedded-postgres";
+
+const DB_URL = "postgresql://cania:cania@localhost:5433/cania?schema=public";
+
+if (!existsSync(".env")) {
+  copyFileSync(".env.example", ".env");
+  const env = readFileSync(".env", "utf8").replace(/^AUTH_SECRET=.*$/m, `AUTH_SECRET="${randomBytes(32).toString("hex")}"`);
+  writeFileSync(".env", env);
+  console.log("· Creado .env a partir de .env.example");
+}
+
+const pg = new EmbeddedPostgres({ databaseDir: ".pgdata", user: "cania", password: "cania", port: 5433, persistent: true });
+const firstRun = !existsSync(".pgdata/PG_VERSION");
+if (firstRun) {
+  console.log("· Inicializando PostgreSQL embebido (solo la primera vez)…");
+  await pg.initialise();
+}
+await pg.start();
+if (firstRun) await pg.createDatabase("cania");
+
+const env = { ...process.env, DATABASE_URL: DB_URL, DIRECT_URL: DB_URL };
+const run = (cmd) =>
+  new Promise((resolve, reject) => {
+    const p = spawn(cmd, { stdio: "inherit", shell: true, env });
+    p.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} → código ${code}`))));
+  });
+
+let app;
+const stop = async () => {
+  app?.kill();
+  await pg.stop().catch(() => {});
+  process.exit(0);
+};
+process.on("SIGINT", stop);
+process.on("SIGTERM", stop);
+
+try {
+  await run("npx prisma migrate deploy");
+  await run("npx prisma db seed");
+} catch (e) {
+  console.error(e);
+  await pg.stop();
+  process.exit(1);
+}
+
+console.log("\n✅ Abre http://localhost:3025 · admin@cania.test / cania1234 (Ctrl+C para parar)\n");
+app = spawn("npx next dev -p 3025", { stdio: "inherit", shell: true, env });
+app.on("exit", stop);

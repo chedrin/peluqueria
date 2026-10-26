@@ -7,6 +7,19 @@ CRM completo para un salón de peluquería canina, con dos áreas:
 
 **Stack:** Next.js 15 (App Router, Server Actions) · React 19 · TypeScript · Tailwind CSS 4 + componentes shadcn/ui · PostgreSQL 16 + Prisma 6 · dnd-kit · pdf-lib · Cloudflare Workers (OpenNext) · Zod · Vitest.
 
+## Arranque rápido sin Docker (Windows, macOS, Linux)
+
+Solo necesitas Git y Node.js 20 o superior:
+
+```bash
+git clone https://github.com/chedrin/peluqueria.git
+cd peluqueria/canina
+npm install
+npm run local
+```
+
+`npm run local` levanta un PostgreSQL embebido (datos en `.pgdata/`), aplica las migraciones, carga los datos demo y abre la app en http://localhost:3025. Usuario `admin@cania.test`, contraseña `cania1234`.
+
 ## Puesta en marcha (puerto 3025)
 
 ```bash
