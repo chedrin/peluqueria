@@ -4588,19 +4588,44 @@ function generateRescheduleNotifications(apt, prevStaffId, prevStaffName, prevSt
   };
 }
 
-// E. ARRASTRE DE CITAS (DRAG & DROP EN AGENDA MAESTRA CON AVISOS AUTOMÁTICOS)
+// E. ARRASTRE Y REPROGRAMACIÓN DE CITAS (FULL BOOKING SCHEDULER & REASSIGNMENT)
+app.get('/api/appointments/:id', (req, res) => {
+  const apt = db.appointments.find(a => a.id === req.params.id);
+  if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
+  res.json(apt);
+});
+
 app.put('/api/appointments/:id/reschedule', (req, res) => {
   const apt = db.appointments.find(a => a.id === req.params.id);
   if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
 
-  let { staffId, startTime, endTime } = req.body;
+  let { staffId, startTime, endTime, reason, serviceIds, rescheduledBy } = req.body;
   const staff = db.staff.find(s => s.id === staffId);
   if (!staff) return res.status(404).json({ error: 'Estilista de destino no encontrada.' });
 
   if (!startTime) startTime = apt.startTime;
-  if (!endTime) endTime = apt.endTime;
 
-  // Comprobar colisión con otra cita de esa estilista
+  // Actualización opcional de servicios incluidos
+  if (Array.isArray(serviceIds) && serviceIds.length > 0) {
+    const matchedServices = db.services.filter(s => serviceIds.includes(s.id));
+    if (matchedServices.length > 0) {
+      apt.serviceIds = serviceIds;
+      apt.serviceNames = matchedServices.map(s => s.name).join(' + ');
+      const totalDurMin = matchedServices.reduce((acc, s) => acc + (s.durationMinutes || s.duration || 30), 0);
+      apt.totalPrice = matchedServices.reduce((acc, s) => acc + (s.price || 0), 0);
+      if (!endTime) {
+        endTime = new Date(new Date(startTime).getTime() + (totalDurMin * 60 * 1000)).toISOString();
+      }
+    }
+  }
+
+  if (!endTime) {
+    const oldDurMs = new Date(apt.endTime).getTime() - new Date(apt.startTime).getTime();
+    const durMs = (!isNaN(oldDurMs) && oldDurMs > 0) ? oldDurMs : (30 * 60 * 1000);
+    endTime = new Date(new Date(startTime).getTime() + durMs).toISOString();
+  }
+
+  // Comprobar colisión con otra cita activa de esa estilista
   const targetStart = new Date(startTime).getTime();
   const targetEnd = new Date(endTime).getTime();
 
@@ -4626,6 +4651,23 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
   apt.staffName = staff.name;
   apt.startTime = startTime;
   apt.endTime = endTime;
+  apt.status = 'confirmed'; // Reactivar si estaba en estado previo
+
+  // Registro en historial de reprogramaciones
+  if (!apt.rescheduleHistory) apt.rescheduleHistory = [];
+  apt.rescheduleHistory.unshift({
+    timestamp: new Date().toISOString(),
+    prevStaffId,
+    prevStaffName,
+    prevStartTime,
+    newStaffId: staff.id,
+    newStaffName: staff.name,
+    newStartTime: startTime,
+    reason: reason || 'Reprogramación solicitada',
+    rescheduledBy: rescheduledBy || 'admin'
+  });
+  apt.lastRescheduleReason = reason || null;
+  apt.rescheduledAt = new Date().toISOString();
 
   // Disparar motor de avisos automáticos para estilistas afectadas y clienta
   const notifPayload = generateRescheduleNotifications(
@@ -4642,6 +4684,49 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
     message: `Cita de ${apt.clientName} reubicada con éxito a ${staff.name} (${newTimeStr}). Se ha avisado a la clienta y a las estilistas afectadas.`,
     appointment: apt,
     notifications: notifPayload
+  });
+});
+
+// E2. CANCELACIÓN DE CITAS CON LIBERACIÓN INMEDIATA DE HUECO Y NOTIFICACIONES
+app.post('/api/appointments/:id/cancel', (req, res) => {
+  const apt = db.appointments.find(a => a.id === req.params.id);
+  if (!apt) return res.status(404).json({ error: 'Cita no encontrada.' });
+
+  const { reason, cancelledBy } = req.body;
+  const staff = db.staff.find(s => s.id === apt.staffId);
+  const staffName = staff ? staff.name : (apt.staffName || 'Estilista');
+
+  apt.status = 'cancelled';
+  apt.cancellationReason = reason || 'Cancelada a petición del usuario';
+  apt.cancelledAt = new Date().toISOString();
+  apt.cancelledBy = cancelledBy || 'client';
+
+  // Notificación al centro de avisos del salón
+  if (!db.notifications) db.notifications = [];
+  const cancelNotif = {
+    id: 'notif-' + Date.now(),
+    type: 'appointment_cancellation',
+    title: '⚠️ Cita cancelada: ' + apt.clientName,
+    message: `La cita de ${apt.clientName} del ${new Date(apt.startTime).toLocaleDateString('es-ES')} a las ${new Date(apt.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})} con ${staffName} ha sido cancelada. Motivo: ${apt.cancellationReason}. El hueco ha sido liberado inmediatamente en la agenda.`,
+    read: false,
+    timestamp: new Date().toISOString(),
+    appointmentId: apt.id
+  };
+  db.notifications.unshift(cancelNotif);
+
+  // Link de WhatsApp para avisar al estilista
+  if (staff && staff.phone) {
+    const timeStr = new Date(apt.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+    const dateStr = new Date(apt.startTime).toLocaleDateString('es-ES');
+    const waText = encodeURIComponent(`Hola ${staff.name.split(' ')[0]}, la cita de ${apt.clientName} prevista para el ${dateStr} a las ${timeStr} ha sido cancelada. Motivo: ${apt.cancellationReason}. Tu hueco queda liberado.`);
+    cancelNotif.whatsappUrl = `https://wa.me/${staff.phone.replace(/[^0-9]/g, '')}?text=${waText}`;
+  }
+
+  res.json({
+    success: true,
+    message: `Cita de ${apt.clientName} cancelada con éxito. El hueco queda inmediatamente liberado en la agenda.`,
+    appointment: apt,
+    notification: cancelNotif
   });
 });
 

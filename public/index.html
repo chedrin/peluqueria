@@ -3478,6 +3478,28 @@
         <!-- Renderizado dinámicamente -->
       </div>
 
+      <!-- Barra de Motivo y Notificación de Reprogramación (Admin Pattern) -->
+      <div class="flex flex-wrap items-center justify-between gap-2.5 bg-stone-50 p-2.5 rounded-2xl border border-stone-200 text-xs flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <label class="font-bold text-stone-700 flex items-center gap-1">
+            <i data-lucide="tag" class="w-3.5 h-3.5 text-indigo-600"></i> Motivo:
+          </label>
+          <select id="reschedule-modal-reason" class="bg-white border border-stone-300 rounded-xl px-2.5 py-1 text-xs font-semibold text-stone-800 focus:outline-none focus:border-indigo-500">
+            <option value="Petición expresa de la clienta">Petición expresa de la clienta</option>
+            <option value="Ajuste organizativo del salón">Ajuste organizativo del salón</option>
+            <option value="Sustitución de estilista por imprevisto">Sustitución de estilista por imprevisto</option>
+            <option value="Optimización de huecos de agenda">Optimización de huecos de agenda</option>
+            <option value="Otro motivo">Otro motivo</option>
+          </select>
+        </div>
+        <label class="flex items-center gap-1.5 font-bold text-stone-700 cursor-pointer select-none">
+          <input type="checkbox" id="reschedule-modal-notify-client" checked class="rounded accent-indigo-600">
+          <span class="text-[11px] text-stone-600 flex items-center gap-1">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Notificar a clienta por WhatsApp
+          </span>
+        </label>
+      </div>
+
       <!-- Barra de Filtros: Fecha y Estilista -->
       <div class="flex flex-wrap items-center justify-between gap-3 bg-stone-50 p-3 rounded-2xl border border-stone-200 flex-shrink-0">
         <div class="flex items-center gap-2">
@@ -3528,6 +3550,250 @@
         <button type="button" onclick="closeRescheduleSchedulerModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
           Cancelar
         </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: REPROGRAMACIÓN DE CITA PARA CLIENTAS (CAL.COM / FRESHA UX PATTERN) -->
+  <!-- ========================================================================= -->
+  <div id="modal-client-reschedule" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl relative max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150">
+      
+      <!-- Encabezado con Icono -->
+      <div class="flex items-start justify-between border-b border-stone-100 pb-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shadow-md flex-shrink-0">
+            <i data-lucide="calendar-sync" class="w-5 h-5 text-rose-100"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-stone-900 font-serif-luxury">Reprogramar Mi Cita</h3>
+              <span class="text-[10px] bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded-full border border-rose-200">
+                Cambio Flexible
+              </span>
+            </div>
+            <p class="text-xs text-stone-500 mt-0.5">Elige nueva fecha, hora o estilista. Tu cita actual se mantendrá hasta que confirmes el cambio.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeClientRescheduleModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Live Before vs After Comparison Banner -->
+      <div id="client-reschedule-comparison" class="bg-gradient-to-r from-stone-50 via-purple-50/30 to-emerald-50/30 p-3 rounded-2xl border border-stone-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs flex-shrink-0">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <!-- Motivo del Cambio -->
+      <div class="bg-stone-50/80 p-3 rounded-2xl border border-stone-200 space-y-1.5 flex-shrink-0">
+        <label class="block text-xs font-bold text-stone-700 flex items-center gap-1.5">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-600"></i> Motivo del cambio:
+        </label>
+        <select id="client-reschedule-reason-select" class="w-full bg-white border border-stone-300 rounded-xl p-2 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+          <option value="Incompatibilidad de horario / Cambio de turno">Incompatibilidad de horario / Cambio de turno laboral</option>
+          <option value="Prefiero acudir otro día">Prefiero acudir otro día</option>
+          <option value="Deseo probar con otra estilista">Deseo probar con otra estilista</option>
+          <option value="Motivos personales o de salud">Motivos personales o de salud</option>
+          <option value="Otro motivo">Otro motivo</option>
+        </select>
+      </div>
+
+      <!-- Selector de Estilista y Fecha -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-shrink-0">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-600"></i> Estilista:
+          </label>
+          <div id="client-reschedule-staff-pills" class="flex items-center gap-1.5 flex-wrap">
+            <!-- Renderizado dinámicamente -->
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-rose-600"></i> Nueva Fecha:
+          </label>
+          <div class="flex items-center gap-1.5">
+            <input type="date" id="client-reschedule-datepicker" onchange="handleClientRescheduleDateChange(this.value)" class="bg-white border border-stone-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-800 flex-1 focus:outline-none focus:border-rose-500 shadow-2xs">
+            <button type="button" onclick="setClientRescheduleRelativeDate(0)" class="px-2 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg text-[10px] font-bold text-stone-700 transition cursor-pointer">Hoy</button>
+            <button type="button" onclick="setClientRescheduleRelativeDate(1)" class="px-2 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg text-[10px] font-bold text-stone-700 transition cursor-pointer">Mañana</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejilla Dinámica de Huecos 30 min -->
+      <div class="space-y-1.5 flex-1 min-h-[160px] flex flex-col">
+        <div class="flex items-center justify-between text-xs px-1">
+          <span class="font-bold text-stone-700 flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600"></i> Selecciona la Nueva Hora:
+          </span>
+          <span class="text-[11px] text-stone-500" id="client-reschedule-slot-selected-label">Ninguna hora elegida</span>
+        </div>
+        <div id="client-reschedule-slots-container" class="flex-1 overflow-y-auto max-h-[200px] border border-stone-200 rounded-2xl p-3 bg-stone-50/60 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <!-- Renderizado dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="border-t border-stone-100 pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+        <span class="text-[11px] text-stone-400 flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> Tu hueco actual se liberará al confirmar.
+        </span>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="button" onclick="closeClientRescheduleModal()" class="w-1/2 sm:w-auto bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-4 py-2.5 rounded-xl text-xs transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" id="btn-client-confirm-reschedule" disabled onclick="submitClientReschedule()" class="w-1/2 sm:w-auto bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-6 py-2.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-rose-200">
+            <i data-lucide="check" class="w-4 h-4"></i> Confirmar Reprogramación
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CANCELACIÓN DE CITA (CLIENTA O ADMINISTRADOR) -->
+  <!-- ========================================================================= -->
+  <div id="modal-cancel-appointment" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in zoom-in-95 duration-150">
+      
+      <div class="flex items-start justify-between border-b border-stone-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-stone-900 font-serif-luxury">¿Cancelar esta Cita?</h3>
+            <p class="text-xs text-stone-500">El hueco se liberará de inmediato en la agenda.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCancelAppointmentModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="cancel-modal-apt-details" class="p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs space-y-1">
+        <!-- Renderizado dinámicamente -->
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-stone-700">Motivo de la cancelación:</label>
+        <select id="cancel-modal-reason-select" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-rose-500">
+          <option value="Imprevisto de agenda / No puedo asistir">Imprevisto de agenda / No puedo asistir</option>
+          <option value="He cambiado de planes">He cambiado de planes</option>
+          <option value="Prefiero reservar más adelante">Prefiero reservar más adelante</option>
+          <option value="Causas médicas o de fuerza mayor">Causas médicas o de fuerza mayor</option>
+          <option value="Cancelación solicitada por llamada/WhatsApp">Cancelación solicitada por llamada/WhatsApp</option>
+          <option value="Otro motivo">Otro motivo</option>
+        </select>
+      </div>
+
+      <div class="p-3 bg-rose-50/60 rounded-xl border border-rose-200/70 text-[11px] text-rose-800">
+        💡 <strong>Recuerda:</strong> Puedes reprogramar la fecha y hora sin cancelar tu cita si prefieres acudir en otro momento.
+      </div>
+
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-end gap-2">
+        <button type="button" onclick="closeCancelAppointmentModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer">
+          No, Mantener Cita
+        </button>
+        <button type="button" onclick="submitCancelAppointment()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-rose-200">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Sí, Cancelar Cita
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: FICHA 360 ACCIONES DE CITA EN AGENDA MAESTRA (FRESHA / BOULEVARD UX) -->
+  <!-- ========================================================================= -->
+  <div id="modal-admin-appointment-details" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white border border-stone-200 rounded-3xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl relative max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-150">
+      
+      <!-- Encabezado con Perfil de Clienta y Estado -->
+      <div class="flex items-start justify-between border-b border-stone-100 pb-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div id="admin-detail-avatar" class="w-12 h-12 rounded-2xl bg-stone-900 text-white font-black flex items-center justify-center text-base shadow-md flex-shrink-0">
+            L
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="admin-detail-client-name" class="text-base font-bold text-stone-900 font-serif-luxury">Laura Martínez</h3>
+              <span id="admin-detail-status-badge" class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200 uppercase">
+                Confirmada
+              </span>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 text-xs text-stone-500">
+              <span id="admin-detail-client-dni" class="font-mono-code font-bold">12345678A</span>
+              <span>·</span>
+              <span id="admin-detail-client-phone" class="font-mono-code">+34 600 123 456</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminAppointmentDetailsModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Barra de Contacto Directo 1-Clic -->
+      <div class="flex items-center gap-2 flex-wrap bg-stone-50 p-2.5 rounded-2xl border border-stone-200 text-xs flex-shrink-0">
+        <a id="admin-detail-wa-btn" href="javascript:void(0)" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-2xs transition">
+          <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp Clienta
+        </a>
+        <a id="admin-detail-tel-btn" href="tel:+34600123456" class="bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1 transition">
+          <i data-lucide="phone" class="w-4 h-4 text-indigo-600"></i> Llamar
+        </a>
+      </div>
+
+      <!-- Contenido Detallado: Datos de Cita + Auditoría de Reprogramaciones -->
+      <div class="space-y-3 overflow-y-auto flex-1 pr-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <!-- Columna Izquierda: Información de Agenda -->
+          <div class="bg-stone-50/80 p-3.5 rounded-2xl border border-stone-200 space-y-2">
+            <h4 class="font-bold text-stone-900 flex items-center gap-1.5 pb-1 border-b border-stone-200">
+              <i data-lucide="calendar" class="w-4 h-4 text-purple-600"></i> Datos de la Cita
+            </h4>
+            <p>📅 <strong>Horario:</strong> <span id="admin-detail-time" class="font-bold text-stone-800">Viernes 23 Oct, 10:00 - 11:30</span></p>
+            <p>💇‍♀️ <strong>Estilista:</strong> <span id="admin-detail-staff" class="font-bold text-purple-700">Elena Gómez</span></p>
+            <p>⏱️ <strong>Duración:</strong> <span id="admin-detail-duration" class="font-mono-code font-bold">90 min</span></p>
+            <p>💶 <strong>Precio Total:</strong> <span id="admin-detail-price" class="font-mono-code font-black text-stone-900 bg-white px-2 py-0.5 rounded border border-stone-200">60,00 €</span></p>
+            <p>✂️ <strong>Servicios:</strong> <span id="admin-detail-services" class="font-medium text-stone-700">Corte + Tinte</span></p>
+            <div id="admin-detail-comments-box" class="hidden p-2 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900">
+              <!-- Comentarios de la clienta -->
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Auditoría / Historial de Reprogramaciones -->
+          <div class="bg-stone-50/80 p-3.5 rounded-2xl border border-stone-200 space-y-2">
+            <h4 class="font-bold text-stone-900 flex items-center gap-1.5 pb-1 border-b border-stone-200">
+              <i data-lucide="history" class="w-4 h-4 text-indigo-600"></i> Historial & Auditoría
+            </h4>
+            <div id="admin-detail-history-container" class="space-y-2 max-h-[160px] overflow-y-auto text-[11px]">
+              <!-- Entradas de auditoría -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones de Administración Principales (Fresha Standard) -->
+      <div class="border-t border-stone-100 pt-3 flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+        <div class="flex items-center gap-1.5">
+          <button type="button" id="admin-detail-cancel-btn" onclick="openCancelModalFromAdmin()" class="bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Cancelar Cita
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="admin-detail-reschedule-btn" onclick="openRescheduleFromAdminDetails()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="calendar-clock" class="w-4 h-4"></i> Reprogramar
+          </button>
+          <button type="button" id="admin-detail-charge-btn" onclick="openChargeFromAdminDetails()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="credit-card" class="w-4 h-4"></i> Cobrar en TPV
+          </button>
+        </div>
       </div>
 
     </div>
@@ -8522,32 +8788,78 @@
         return;
       }
 
-      container.innerHTML = clientApts.map(a => `
-        <div class="luxury-card rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-stone-900">${a.serviceNames || 'Servicio de Peluquería'}</span>
-            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-              a.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-            }">
-              ${a.status === 'confirmed' ? 'Confirmada' : a.status}
-            </span>
+      container.innerHTML = clientApts.map(a => {
+        const isCancelled = a.status === 'cancelled';
+        if (isCancelled) {
+          return `
+            <div class="luxury-card rounded-2xl p-4 space-y-3 border-stone-200 opacity-80">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-stone-700">${a.serviceNames || 'Servicio de Peluquería'}</span>
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                  Cancelada
+                </span>
+              </div>
+              <div class="text-xs text-stone-500 space-y-1">
+                <p>📅 <strong>Era para:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</p>
+                <p>💇‍♀️ <strong>Estilista:</strong> ${a.staffName}</p>
+                <p class="text-rose-700 font-medium">⚠️ <strong>Motivo:</strong> ${a.cancellationReason || 'Cancelada a petición'}</p>
+              </div>
+              <div class="border-t border-stone-100 pt-2">
+                <button type="button" onclick="switchClientTab('calendar')" class="w-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer">
+                  <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> Reservar Nueva Cita
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="luxury-card rounded-2xl p-4 space-y-3 border-indigo-100 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-stone-900">${a.serviceNames || 'Servicio de Peluquería'}</span>
+              <div class="flex items-center gap-1.5">
+                ${a.rescheduleHistory && a.rescheduleHistory.length ? `
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-0.5" title="Cita reprogramada">
+                    <i data-lucide="rotate-ccw" class="w-2.5 h-2.5"></i> Reprogramada
+                  </span>
+                ` : ''}
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                  a.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }">
+                  ${a.status === 'confirmed' ? 'Confirmada' : a.status}
+                </span>
+              </div>
+            </div>
+            <div class="text-xs text-stone-600 space-y-1">
+              <p>📅 <strong>Fecha:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</p>
+              <p>💇‍♀️ <strong>Estilista:</strong> ${a.staffName}</p>
+              <p>💶 <strong>Precio estimado:</strong> <span class="font-bold text-stone-800">${a.totalPrice ? a.totalPrice.toFixed(2) + ' €' : '45.00 €'}</span></p>
+              <p>🆔 <strong>DNI Clienta:</strong> <span class="font-mono-code font-bold">${a.clientDni || c.dni}</span></p>
+              ${a.clientComments ? `<p class="italic text-stone-500">"${a.clientComments}"</p>` : ''}
+            </div>
+
+            <!-- Acciones de Reprogramación y Cancelación (Fresha UX Benchmark) -->
+            <div class="border-t border-stone-100 pt-2.5 space-y-2">
+              <div class="flex gap-2">
+                <button type="button" onclick="openClientRescheduleModal('${a.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer">
+                  <i data-lucide="calendar-sync" class="w-3.5 h-3.5"></i> Reprogramar Cita
+                </button>
+                <button type="button" onclick="openCancelAppointmentModal('${a.id}', false)" class="bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold px-3 py-2 rounded-xl flex items-center justify-center gap-1 transition cursor-pointer" title="Cancelar esta cita">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i> Cancelar
+                </button>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition cursor-pointer">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 24h
+                </button>
+                <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition cursor-pointer">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 2h
+                </button>
+              </div>
+            </div>
           </div>
-          <div class="text-xs text-stone-600 space-y-1">
-            <p>📅 <strong>Fecha:</strong> ${new Date(a.startTime).toLocaleDateString('es-ES')} a las ${new Date(a.startTime).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</p>
-            <p>💇‍♀️ <strong>Estilista:</strong> ${a.staffName}</p>
-            <p>🆔 <strong>DNI Clienta:</strong> <span class="font-mono-code font-bold">${a.clientDni || c.dni}</span></p>
-            ${a.clientComments ? `<p class="italic text-stone-500">"${a.clientComments}"</p>` : ''}
-          </div>
-          <div class="border-t border-stone-100 pt-2 flex gap-2">
-            <button onclick="previewWhatsAppReminder('${a.id}', '24h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 24h
-            </button>
-            <button onclick="previewWhatsAppReminder('${a.id}', '2h')" class="flex-1 bg-stone-50 hover:bg-stone-100 border border-stone-200 text-emerald-700 text-[11px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
-              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i> WhatsApp 2h
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       lucide.createIcons();
     }
 
@@ -8704,7 +9016,8 @@
             <div draggable="true" 
                  ondragstart="handleAppointmentDragStart(event, '${a.id}')" 
                  ondragend="handleAppointmentDragEnd(event)" 
-                 class="appointment-card ${isJustMoved ? 'just-moved' : ''} p-4 bg-gradient-to-br from-white via-indigo-50/25 to-purple-50/40 border-2 ${isSelectedToMove ? 'border-purple-600 ring-4 ring-purple-300 bg-purple-50/90' : 'border-indigo-200 hover:border-indigo-400'} border-l-[6px] ${staffBorderColor} rounded-2xl space-y-2.5 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition-all relative group">
+                 onclick="openAdminAppointmentDetails('${a.id}')" 
+                 class="appointment-card ${isJustMoved ? 'just-moved' : ''} p-4 bg-gradient-to-br from-white via-indigo-50/25 to-purple-50/40 border-2 ${isSelectedToMove ? 'border-purple-600 ring-4 ring-purple-300 bg-purple-50/90' : 'border-indigo-200 hover:border-indigo-400'} border-l-[6px] ${staffBorderColor} rounded-2xl space-y-2.5 shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing transition-all relative group">
               
               <!-- Cabecera de Hora y Badge de Ocupación de Alto Contraste -->
               <div class="flex flex-wrap items-center justify-between gap-1.5">
@@ -9262,7 +9575,7 @@
       await executeRescheduleAppointment(aptId, targetStaffId, slotTime, date);
     }
 
-    async function executeRescheduleAppointment(aptId, targetStaffId, slotTime, customDate = null) {
+    async function executeRescheduleAppointment(aptId, targetStaffId, slotTime, customDate = null, reason = null, rescheduledBy = 'admin') {
       const apt = (state.appointments || []).find(a => a.id === aptId);
       if (!apt) {
         showAgendaToast('Cita no encontrada', 'No se ha podido localizar en la agenda', 'alert-circle');
@@ -9365,7 +9678,9 @@
           body: JSON.stringify({
             staffId: targetStaffId,
             startTime: newStartIso,
-            endTime: newEndIso
+            endTime: newEndIso,
+            reason: reason || document.getElementById('reschedule-modal-reason')?.value || 'Reprogramación solicitada',
+            rescheduledBy: rescheduledBy
           })
         });
 
@@ -9427,6 +9742,475 @@
         renderMasterAgenda();
         showAgendaToast('Error de conexión', 'No se pudo guardar en el servidor', 'alert-circle');
       }
+    }
+
+    // ========================================================================
+    // CLIENT PORTAL RESCHEDULING WORKFLOW (FRESHA / CAL.COM UX BENCHMARK)
+    // ========================================================================
+    window.activeClientRescheduleAptId = null;
+    window.clientRescheduleDate = null;
+    window.clientRescheduleStaffId = null;
+    window.clientRescheduleSelectedSlot = null;
+
+    function openClientRescheduleModal(aptId) {
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      if (!apt) {
+        alert('No se ha encontrado la cita.');
+        return;
+      }
+      window.activeClientRescheduleAptId = aptId;
+      window.clientRescheduleStaffId = apt.staffId;
+      
+      const aptDate = apt.startTime ? new Date(apt.startTime).toISOString().slice(0, 10) : '2026-10-23';
+      window.clientRescheduleDate = aptDate;
+      window.clientRescheduleSelectedSlot = null;
+
+      const datePicker = document.getElementById('client-reschedule-datepicker');
+      if (datePicker) datePicker.value = aptDate;
+
+      renderClientRescheduleStaffPills();
+      updateClientRescheduleComparison();
+      renderClientRescheduleSlots();
+
+      const modal = document.getElementById('modal-client-reschedule');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeClientRescheduleModal() {
+      const modal = document.getElementById('modal-client-reschedule');
+      if (modal) modal.classList.add('hidden');
+      window.activeClientRescheduleAptId = null;
+      window.clientRescheduleSelectedSlot = null;
+    }
+
+    function renderClientRescheduleStaffPills() {
+      const container = document.getElementById('client-reschedule-staff-pills');
+      if (!container) return;
+      const staffList = (state.staff || []).filter(s => s.status !== 'inactive');
+      container.innerHTML = staffList.map(s => {
+        const isSelected = s.id === window.clientRescheduleStaffId;
+        return `
+          <button type="button" onclick="selectClientRescheduleStaff('${s.id}')" class="px-2.5 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+            isSelected 
+              ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-200' 
+              : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-200'
+          }">
+            <span class="w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-rose-500'}"></span>
+            ${s.name.split(' ')[0]}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectClientRescheduleStaff(staffId) {
+      window.clientRescheduleStaffId = staffId;
+      window.clientRescheduleSelectedSlot = null;
+      renderClientRescheduleStaffPills();
+      updateClientRescheduleComparison();
+      renderClientRescheduleSlots();
+    }
+
+    function handleClientRescheduleDateChange(newDate) {
+      if (!newDate) return;
+      window.clientRescheduleDate = newDate;
+      window.clientRescheduleSelectedSlot = null;
+      updateClientRescheduleComparison();
+      renderClientRescheduleSlots();
+    }
+
+    function setClientRescheduleRelativeDate(daysOffset) {
+      const base = new Date('2026-10-23T00:00:00');
+      base.setDate(base.getDate() + daysOffset);
+      const y = base.getFullYear();
+      const m = String(base.getMonth() + 1).padStart(2, '0');
+      const d = String(base.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+      window.clientRescheduleDate = dateStr;
+      const dp = document.getElementById('client-reschedule-datepicker');
+      if (dp) dp.value = dateStr;
+      window.clientRescheduleSelectedSlot = null;
+      updateClientRescheduleComparison();
+      renderClientRescheduleSlots();
+    }
+
+    function updateClientRescheduleComparison() {
+      const container = document.getElementById('client-reschedule-comparison');
+      if (!container) return;
+      const apt = (state.appointments || []).find(a => a.id === window.activeClientRescheduleAptId);
+      if (!apt) return;
+
+      const oldStaff = (state.staff || []).find(s => s.id === apt.staffId) || { name: apt.staffName || 'Estilista' };
+      const oldDateStr = apt.startTime ? new Date(apt.startTime).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy';
+      const oldTimeStr = apt.startTime ? new Date(apt.startTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '10:00';
+
+      const newStaff = (state.staff || []).find(s => s.id === window.clientRescheduleStaffId) || oldStaff;
+      const newDateObj = new Date((window.clientRescheduleDate || '2026-10-23') + 'T00:00:00');
+      const newDateStr = newDateObj.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      const newSlot = window.clientRescheduleSelectedSlot;
+
+      container.innerHTML = `
+        <div class="flex-1 bg-white p-2.5 rounded-xl border border-stone-200/90 shadow-2xs space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase text-stone-500 tracking-wider">Cita Actual</span>
+            <span class="text-[9px] bg-rose-50 text-rose-700 font-bold px-1.5 py-0.2 rounded border border-rose-200">En Agenda</span>
+          </div>
+          <p class="font-bold text-stone-800 text-xs truncate">💇‍♀️ ${oldStaff.name.split(' ')[0]} · ✂️ ${apt.serviceNames || 'Servicio'}</p>
+          <p class="text-[11px] text-stone-500 font-mono-code">📅 ${oldDateStr} a las <strong>${oldTimeStr}</strong></p>
+        </div>
+
+        <div class="flex items-center justify-center text-stone-400 font-bold self-center">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-indigo-500"></i>
+        </div>
+
+        <div class="flex-1 bg-white p-2.5 rounded-xl border ${newSlot ? 'border-emerald-300 ring-2 ring-emerald-200 bg-emerald-50/20' : 'border-stone-200'} shadow-2xs space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black uppercase ${newSlot ? 'text-emerald-700' : 'text-stone-400'} tracking-wider">Nueva Cita Propuesta</span>
+            <span class="text-[9px] ${newSlot ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-500'} font-bold px-1.5 py-0.2 rounded">
+              ${newSlot ? '✓ Seleccionada' : 'Pendiente'}
+            </span>
+          </div>
+          <p class="font-bold text-stone-800 text-xs truncate">💇‍♀️ ${newStaff.name.split(' ')[0]} · ✂️ ${apt.serviceNames || 'Servicio'}</p>
+          <p class="text-[11px] ${newSlot ? 'text-emerald-800 font-bold font-mono-code' : 'text-stone-400 italic'}">
+            ${newSlot ? `📅 ${newDateStr} a las ${newSlot}` : '👉 Elige una hora verde abajo'}
+          </p>
+        </div>
+      `;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      const confirmBtn = document.getElementById('btn-client-confirm-reschedule');
+      if (confirmBtn) {
+        confirmBtn.disabled = !newSlot;
+      }
+    }
+
+    function renderClientRescheduleSlots() {
+      const container = document.getElementById('client-reschedule-slots-container');
+      if (!container) return;
+      const apt = (state.appointments || []).find(a => a.id === window.activeClientRescheduleAptId);
+      if (!apt) return;
+
+      const activeDate = window.clientRescheduleDate || '2026-10-23';
+      const staffId = window.clientRescheduleStaffId;
+
+      const dayApts = (state.appointments || []).filter(a => {
+        if (a.staffId !== staffId || a.status === 'cancelled' || a.id === apt.id) return false;
+        const d = new Date(a.startTime);
+        const isoDate = d.toISOString().slice(0, 10);
+        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return isoDate === activeDate || localDate === activeDate;
+      }).map(a => {
+        const ds = new Date(a.startTime);
+        const de = new Date(a.endTime);
+        return {
+          startMin: ds.getHours() * 60 + ds.getMinutes(),
+          endMin: de.getHours() * 60 + de.getMinutes()
+        };
+      });
+
+      const slots = [
+        '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+        '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'
+      ];
+
+      container.innerHTML = slots.map(slotTime => {
+        const [sh, sm] = slotTime.split(':').map(Number);
+        const slotStart = sh * 60 + sm;
+        const slotEnd = slotStart + 30;
+
+        const isBreak = slotStart >= 14 * 60 && slotStart < 15 * 60;
+        if (isBreak) {
+          return `
+            <div class="p-2 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-700 text-[11px] font-semibold flex items-center justify-between opacity-60 cursor-not-allowed">
+              <span>${slotTime}</span>
+              <span class="text-[9px]">Descanso</span>
+            </div>
+          `;
+        }
+
+        const occupied = dayApts.find(da => slotStart < da.endMin && slotEnd > da.startMin);
+        if (occupied) {
+          return `
+            <div class="p-2 rounded-xl bg-stone-100 border border-stone-200 text-stone-400 text-[11px] font-semibold flex items-center justify-between opacity-60 cursor-not-allowed">
+              <span>${slotTime}</span>
+              <span class="text-[9px]">Ocupado</span>
+            </div>
+          `;
+        }
+
+        const isSelected = window.clientRescheduleSelectedSlot === slotTime;
+        return `
+          <button type="button" onclick="selectClientRescheduleSlot('${slotTime}')" class="p-2 rounded-xl text-[11px] font-bold flex items-center justify-between transition cursor-pointer active:scale-95 shadow-2xs ${
+            isSelected 
+              ? 'bg-rose-600 text-white ring-2 ring-rose-300' 
+              : 'bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900'
+          }">
+            <span class="font-mono-code">${slotTime}</span>
+            <span class="text-[9px] ${isSelected ? 'bg-white/20 text-white' : 'bg-emerald-200/80 text-emerald-950'} px-1.5 py-0.2 rounded">
+              ${isSelected ? '✓ Elegida' : 'Libre'}
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectClientRescheduleSlot(slotTime) {
+      window.clientRescheduleSelectedSlot = slotTime;
+      const label = document.getElementById('client-reschedule-slot-selected-label');
+      if (label) {
+        label.innerHTML = `<span class="font-bold text-rose-600 font-mono-code">✓ ${slotTime}</span>`;
+      }
+      updateClientRescheduleComparison();
+      renderClientRescheduleSlots();
+    }
+
+    async function submitClientReschedule() {
+      const aptId = window.activeClientRescheduleAptId;
+      const slotTime = window.clientRescheduleSelectedSlot;
+      const dateStr = window.clientRescheduleDate || '2026-10-23';
+      const targetStaffId = window.clientRescheduleStaffId;
+      const reason = document.getElementById('client-reschedule-reason-select')?.value || 'Petición expresa de la clienta';
+
+      if (!aptId || !slotTime || !targetStaffId) {
+        alert('Por favor selecciona una hora libre.');
+        return;
+      }
+
+      closeClientRescheduleModal();
+
+      await executeRescheduleAppointment(aptId, targetStaffId, slotTime, dateStr, reason, 'client');
+      renderClientAppointments();
+    }
+
+    // ========================================================================
+    // CANCEL APPOINTMENT WORKFLOW (CLIENT & ADMIN)
+    // ========================================================================
+    window.activeCancelAptId = null;
+    window.cancelFromAdmin = false;
+
+    function openCancelAppointmentModal(aptId, fromAdmin = false) {
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      if (!apt) return;
+
+      window.activeCancelAptId = aptId;
+      window.cancelFromAdmin = fromAdmin;
+
+      const detailsEl = document.getElementById('cancel-modal-apt-details');
+      if (detailsEl) {
+        const timeStr = apt.startTime ? new Date(apt.startTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '10:00';
+        const dateStr = apt.startTime ? new Date(apt.startTime).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Hoy';
+        detailsEl.innerHTML = `
+          <div class="flex items-center justify-between pb-1 border-b border-stone-200">
+            <span class="font-bold text-stone-900">${apt.clientName}</span>
+            <span class="font-mono-code font-bold text-rose-700">${apt.totalPrice ? apt.totalPrice.toFixed(2) + ' €' : '45.00 €'}</span>
+          </div>
+          <p class="text-stone-600">💇‍♀️ <strong>Estilista:</strong> ${apt.staffName}</p>
+          <p class="text-stone-600">📅 <strong>Fecha:</strong> ${dateStr} a las ${timeStr}</p>
+          <p class="text-stone-600">✂️ <strong>Servicios:</strong> ${apt.serviceNames || 'Servicio de Peluquería'}</p>
+        `;
+      }
+
+      const modal = document.getElementById('modal-cancel-appointment');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeCancelAppointmentModal() {
+      const modal = document.getElementById('modal-cancel-appointment');
+      if (modal) modal.classList.add('hidden');
+      window.activeCancelAptId = null;
+    }
+
+    async function submitCancelAppointment() {
+      const aptId = window.activeCancelAptId;
+      const reason = document.getElementById('cancel-modal-reason-select')?.value || 'Cancelada a petición del usuario';
+      const fromAdmin = window.cancelFromAdmin;
+
+      if (!aptId) return;
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      if (!apt) return;
+
+      closeCancelAppointmentModal();
+
+      // Actualización optimista inmediata
+      apt.status = 'cancelled';
+      apt.cancellationReason = reason;
+      apt.cancelledAt = new Date().toISOString();
+      apt.cancelledBy = fromAdmin ? 'admin' : 'client';
+
+      renderClientAppointments();
+      renderMasterAgenda();
+      if (typeof renderWorkerAgenda === 'function') renderWorkerAgenda();
+      if (typeof renderBookingSlots === 'function') renderBookingSlots(state.bookingCalendarStaffId);
+
+      showAgendaToast('Cita cancelada', `Hueco liberado para el ${new Date(apt.startTime).toLocaleDateString('es-ES')}`, 'trash-2');
+
+      try {
+        const res = await fetch(`/api/appointments/${aptId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reason: reason,
+            cancelledBy: fromAdmin ? 'admin' : 'client'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.notification) {
+          if (typeof pollAdminNotifications === 'function') pollAdminNotifications();
+        }
+      } catch (err) {
+        console.warn('Error cancelando cita en servidor:', err);
+      }
+    }
+
+    // ========================================================================
+    // ADMIN MASTER AGENDA APPOINTMENT 360 ACTION MODAL (FRESHA / BOULEVARD)
+    // ========================================================================
+    window.currentAdminDetailAptId = null;
+
+    function openAdminAppointmentDetails(aptId) {
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      if (!apt) return;
+
+      window.currentAdminDetailAptId = aptId;
+
+      const staff = (state.staff || []).find(s => s.id === apt.staffId) || { name: apt.staffName || 'Estilista' };
+      const client = (state.clients || []).find(c => c.id === apt.clientId || (c.dni && c.dni === apt.clientDni)) || {};
+      
+      const clientName = apt.clientName || 'Clienta';
+      const clientPhone = client.phone || apt.clientPhone || '+34 600 000 000';
+      const clientDni = apt.clientDni || client.dni || 'Sin DNI';
+      const isCancelled = apt.status === 'cancelled';
+
+      const avatarEl = document.getElementById('admin-detail-avatar');
+      if (avatarEl) avatarEl.innerText = clientName.charAt(0).toUpperCase();
+
+      const nameEl = document.getElementById('admin-detail-client-name');
+      if (nameEl) nameEl.innerText = clientName;
+
+      const statusBadge = document.getElementById('admin-detail-status-badge');
+      if (statusBadge) {
+        statusBadge.innerText = isCancelled ? 'Cancelada' : (apt.status === 'confirmed' ? 'Confirmada' : apt.status);
+        statusBadge.className = `text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${
+          isCancelled ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+        }`;
+      }
+
+      const dniEl = document.getElementById('admin-detail-client-dni');
+      if (dniEl) dniEl.innerText = clientDni;
+
+      const phoneEl = document.getElementById('admin-detail-client-phone');
+      if (phoneEl) phoneEl.innerText = clientPhone;
+
+      const waBtn = document.getElementById('admin-detail-wa-btn');
+      if (waBtn) {
+        const cleanPhone = clientPhone.replace(/[^0-9]/g, '');
+        const msg = encodeURIComponent(`Hola ${clientName.split(' ')[0]}, te contactamos desde el salón Peluquería respecto a tu cita del ${new Date(apt.startTime).toLocaleDateString('es-ES')}.`);
+        waBtn.href = `https://wa.me/${cleanPhone}?text=${msg}`;
+      }
+
+      const telBtn = document.getElementById('admin-detail-tel-btn');
+      if (telBtn) telBtn.href = `tel:${clientPhone}`;
+
+      const timeEl = document.getElementById('admin-detail-time');
+      if (timeEl) {
+        const dStr = new Date(apt.startTime).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        const sStr = new Date(apt.startTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const eStr = new Date(apt.endTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        timeEl.innerText = `${dStr}, ${sStr} - ${eStr}`;
+      }
+
+      const staffEl = document.getElementById('admin-detail-staff');
+      if (staffEl) staffEl.innerText = staff.name;
+
+      const durMin = Math.round((new Date(apt.endTime).getTime() - new Date(apt.startTime).getTime()) / 60000) || 30;
+      const durEl = document.getElementById('admin-detail-duration');
+      if (durEl) durEl.innerText = `${durMin} min`;
+
+      const priceEl = document.getElementById('admin-detail-price');
+      if (priceEl) priceEl.innerText = apt.totalPrice ? apt.totalPrice.toFixed(2) + ' €' : '45.00 €';
+
+      const srvEl = document.getElementById('admin-detail-services');
+      if (srvEl) srvEl.innerText = apt.serviceNames || 'Servicio de Peluquería';
+
+      const commBox = document.getElementById('admin-detail-comments-box');
+      if (commBox) {
+        if (apt.clientComments) {
+          commBox.classList.remove('hidden');
+          commBox.innerHTML = `<strong>Observaciones:</strong> "${apt.clientComments}"`;
+        } else {
+          commBox.classList.add('hidden');
+        }
+      }
+
+      const historyContainer = document.getElementById('admin-detail-history-container');
+      if (historyContainer) {
+        if (apt.rescheduleHistory && apt.rescheduleHistory.length > 0) {
+          historyContainer.innerHTML = apt.rescheduleHistory.map((h, idx) => `
+            <div class="p-2 rounded-xl bg-white border border-stone-200/90 shadow-2xs space-y-1">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="font-bold text-indigo-700">Cambio #${apt.rescheduleHistory.length - idx}</span>
+                <span class="text-stone-400 font-mono-code">${new Date(h.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <p class="text-stone-800">
+                <strong>${h.prevStaffName}</strong> ➔ <strong>${h.newStaffName}</strong>
+              </p>
+              <p class="text-stone-500 italic">
+                Motivo: "${h.reason}" (${h.rescheduledBy === 'client' ? 'Clienta' : 'Administración'})
+              </p>
+            </div>
+          `).join('');
+        } else {
+          historyContainer.innerHTML = `
+            <div class="p-3 text-center bg-white rounded-xl border border-dashed border-stone-200 text-stone-400">
+              <i data-lucide="check-circle" class="w-4 h-4 mx-auto mb-1 text-emerald-500"></i>
+              <span>Cita original sin reprogramaciones previas.</span>
+            </div>
+          `;
+        }
+      }
+
+      const cancelBtn = document.getElementById('admin-detail-cancel-btn');
+      if (cancelBtn) cancelBtn.style.display = isCancelled ? 'none' : 'flex';
+      const reschedBtn = document.getElementById('admin-detail-reschedule-btn');
+      if (reschedBtn) reschedBtn.style.display = isCancelled ? 'none' : 'flex';
+
+      const modal = document.getElementById('modal-admin-appointment-details');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeAdminAppointmentDetailsModal() {
+      const modal = document.getElementById('modal-admin-appointment-details');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openRescheduleFromAdminDetails() {
+      const aptId = window.currentAdminDetailAptId;
+      closeAdminAppointmentDetailsModal();
+      if (aptId) openRescheduleSchedulerModal(aptId);
+    }
+
+    function openChargeFromAdminDetails() {
+      const aptId = window.currentAdminDetailAptId;
+      const apt = (state.appointments || []).find(a => a.id === aptId);
+      closeAdminAppointmentDetailsModal();
+      if (apt) {
+        openChargeModal({
+          appointmentId: apt.id,
+          clientId: apt.clientId,
+          clientName: apt.clientName,
+          concept: apt.serviceNames,
+          defaultPrice: apt.totalPrice || 45.00,
+          staffId: apt.staffId
+        });
+      }
+    }
+
+    function openCancelModalFromAdmin() {
+      const aptId = window.currentAdminDetailAptId;
+      closeAdminAppointmentDetailsModal();
+      if (aptId) openCancelAppointmentModal(aptId, true);
     }
 
     async function executeMedicalLeaveProtocol() {
