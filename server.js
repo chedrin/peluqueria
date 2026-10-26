@@ -1515,24 +1515,177 @@ app.delete('/api/staff/:id', (req, res) => {
 
 // 3. Citas y Agenda
 app.get('/api/appointments', (req, res) => {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  ensureAppointmentsForDate(todayStr);
   res.json(db.appointments);
 });
 
-// Comprobar colisión de horario para estilista
+// Generador de citas de prueba dinámicas para cualquier fecha activa
+function ensureAppointmentsForDate(targetDate) {
+  if (!targetDate) return;
+  const hasApt = db.appointments.some(a => a.startTime && a.startTime.startsWith(targetDate));
+  if (!hasApt) {
+    db.appointments.push(
+      {
+        id: `apt-elena-1-${targetDate}`,
+        clientId: 'cli-1',
+        clientDni: '12345678Z',
+        clientName: 'Laura Martínez',
+        staffId: 'stf-1',
+        staffName: 'Elena Gómez',
+        serviceIds: ['srv-2', 'srv-1'],
+        serviceNames: 'Coloración Completa (Tinte) + Corte y Estilismo',
+        startTime: `${targetDate}T10:00:00.000Z`,
+        endTime: `${targetDate}T11:30:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Repetir la fórmula de septiembre pero con reflejos un poco más claros.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-elena-2-${targetDate}`,
+        clientId: 'cli-3',
+        clientDni: '45678912C',
+        clientName: 'Carmen Sánchez',
+        staffId: 'stf-1',
+        staffName: 'Elena Gómez',
+        serviceIds: ['srv-1'],
+        serviceNames: 'Corte y Estilismo',
+        startTime: `${targetDate}T12:00:00.000Z`,
+        endTime: `${targetDate}T12:30:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Corte y desfilado de flequillo cortina.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-elena-3-${targetDate}`,
+        clientId: 'cli-4',
+        clientDni: '78912345M',
+        clientName: 'Marta Domínguez',
+        staffId: 'stf-1',
+        staffName: 'Elena Gómez',
+        serviceIds: ['srv-3'],
+        serviceNames: 'Mechas Balayage & Matiz',
+        startTime: `${targetDate}T16:00:00.000Z`,
+        endTime: `${targetDate}T17:30:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Balayage rubio ceniza, matiz frío anti-reflejos dorados.',
+        reminderSent24h: false,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-raquel-1-${targetDate}`,
+        clientId: 'cli-5',
+        clientDni: '32165498B',
+        clientName: 'Beatriz Navarro',
+        staffId: 'stf-2',
+        staffName: 'Raquel Santos',
+        serviceIds: ['srv-1'],
+        serviceNames: 'Corte y Estilismo (Bob Simétrico)',
+        startTime: `${targetDate}T10:30:00.000Z`,
+        endTime: `${targetDate}T11:15:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Repasar corte Bob y peinado liso.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-raquel-2-${targetDate}`,
+        clientId: 'cli-2',
+        clientDni: '87654321X',
+        clientName: 'Sofía Morales',
+        staffId: 'stf-2',
+        staffName: 'Raquel Santos',
+        serviceIds: ['srv-1', 'srv-4'],
+        serviceNames: 'Corte y Estilismo + Peinado & Brushing',
+        startTime: `${targetDate}T16:30:00.000Z`,
+        endTime: `${targetDate}T17:30:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Tiene una boda el sábado, probar ondas sueltas con tenacilla.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-carmen-1-${targetDate}`,
+        clientId: 'cli-7',
+        clientDni: '98732165S',
+        clientName: 'Clara Sanz',
+        staffId: 'stf-3',
+        staffName: 'Carmen Vidal',
+        serviceIds: ['srv-5'],
+        serviceNames: 'Tratamiento Olaplex / Keratina',
+        startTime: `${targetDate}T09:30:00.000Z`,
+        endTime: `${targetDate}T10:30:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Sesión mensual de nutrición profunda bajo vapor ozonizado.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      },
+      {
+        id: `apt-carmen-2-${targetDate}`,
+        clientId: 'cli-8',
+        clientDni: '15975346A',
+        clientName: 'Andrea Gil',
+        staffId: 'stf-3',
+        staffName: 'Carmen Vidal',
+        serviceIds: ['srv-2', 'srv-5'],
+        serviceNames: 'Coloración Completa + Tratamiento Olaplex',
+        startTime: `${targetDate}T12:30:00.000Z`,
+        endTime: `${targetDate}T14:00:00.000Z`,
+        status: 'confirmed',
+        clientComments: 'Tinte 5.0 castaño natural y protección de brillo.',
+        reminderSent24h: true,
+        reminderSent2h: false,
+      }
+    );
+  }
+}
+
+// Helper para extraer horas y minutos exactos de cualquier cadena ISO o fecha UTC de forma infalible
+function extractTimeParts(isoString) {
+  if (!isoString) return { hour: 0, minute: 0, timeStr: '00:00', totalMinutes: 0 };
+  let str = isoString;
+  if (isoString instanceof Date) {
+    str = isoString.toISOString();
+  }
+  if (typeof str === 'string' && str.includes('T')) {
+    const timePart = str.split('T')[1].slice(0, 5); // 'HH:mm'
+    const [h, m] = timePart.split(':').map(Number);
+    return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+  }
+  if (typeof str === 'string' && str.includes(':')) {
+    const timePart = str.slice(0, 5);
+    const [h, m] = timePart.split(':').map(Number);
+    return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+  }
+  const d = new Date(str);
+  const timePart = d.toISOString().split('T')[1].slice(0, 5);
+  const [h, m] = timePart.split(':').map(Number);
+  return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+}
+
+// Comprobar colisión de horario estricta para estilista por minutos del día
 function hasOverlap(staffId, start, end, excludeAptId = null) {
-  const reqStart = new Date(start).getTime();
-  const reqEnd = new Date(end).getTime();
+  const reqStartMin = extractTimeParts(start).totalMinutes;
+  const reqEndMin = extractTimeParts(end).totalMinutes;
+  const reqDate = typeof start === 'string' ? start.slice(0, 10) : (start instanceof Date ? start.toISOString().slice(0, 10) : '');
 
   return db.appointments.some(apt => {
     if (apt.id === excludeAptId) return false;
     if (apt.staffId !== staffId) return false;
     if (apt.status === 'cancelled' || apt.status === 'rescheduling_required') return false;
 
-    const aStart = new Date(apt.startTime).getTime();
-    const aEnd = new Date(apt.endTime).getTime();
+    const aptDate = typeof apt.startTime === 'string' ? apt.startTime.slice(0, 10) : (apt.startTime instanceof Date ? apt.startTime.toISOString().slice(0, 10) : '');
+    if (aptDate !== reqDate) return false;
 
-    // Comprobación de solapamiento de rangos
-    return reqStart < aEnd && reqEnd > aStart;
+    const aptStartMin = extractTimeParts(apt.startTime).totalMinutes;
+    const aptEndMin = extractTimeParts(apt.endTime).totalMinutes;
+
+    // Condición estricta de solape continuo de rangos [StartA, EndA] y [StartB, EndB]
+    return reqStartMin < aptEndMin && reqEndMin > aptStartMin;
   });
 }
 
@@ -1540,6 +1693,7 @@ function hasOverlap(staffId, start, end, excludeAptId = null) {
 app.get('/api/availability', (req, res) => {
   const staffId = req.query.staffId || 'stf-1';
   const dateStr = req.query.date || '2026-10-23';
+  ensureAppointmentsForDate(dateStr);
   let durationMinutes = parseInt(req.query.durationMinutes, 10);
 
   if (isNaN(durationMinutes) || durationMinutes <= 0) {
@@ -1563,6 +1717,12 @@ app.get('/api/availability', (req, res) => {
   if (!staff) {
     return res.status(404).json({ error: 'Estilista no encontrada' });
   }
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
   if (staff.isActive === false || staff.isAvailable === false) {
     return res.json({
       staffId: staff.id,
@@ -1579,7 +1739,8 @@ app.get('/api/availability', (req, res) => {
     });
   }
 
-  const dateObj = new Date(dateStr + 'T12:00:00Z');
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(Date.UTC(y, (m || 1) - 1, d || 1, 12, 0, 0));
   const dayOfWeek = dateObj.getUTCDay(); // 0 = Domingo, 6 = Sábado
 
   // Domingo: Salón Cerrado
@@ -1603,73 +1764,106 @@ app.get('/api/availability', (req, res) => {
     a.staffId === staffId && 
     a.status !== 'cancelled' && 
     a.status !== 'rescheduling_required' &&
-    a.startTime.startsWith(dateStr)
+    (typeof a.startTime === 'string' && a.startTime.startsWith(dateStr))
   );
 
-  const shiftMorningEndMs = new Date(`${dateStr}T14:00:00.000Z`).getTime();
-  const shiftAfternoonEndMs = new Date(`${dateStr}T19:30:00.000Z`).getTime();
-
   const slots = allIntervals.map(timeStr => {
-    const slotStartMs = new Date(`${dateStr}T${timeStr}:00.000Z`).getTime();
-    const slotEndMs = slotStartMs + durationMinutes * 60000;
-    const endStr = new Date(slotEndMs).toISOString().slice(11, 16);
+    const [sh, sm] = timeStr.split(':').map(Number);
+    const slotStartMin = sh * 60 + sm;
+    const slotEndMin = slotStartMin + durationMinutes;
+    const endH = String(Math.floor(slotEndMin / 60)).padStart(2, '0');
+    const endM = String(slotEndMin % 60).padStart(2, '0');
+    const slotEndTime = `${endH}:${endM}`;
 
-    // Sábados solo turno de mañana (cierre 14:00)
-    if (dayOfWeek === 6 && timeStr >= '14:00') {
+    // 1. REGLA: Bloquear horas anteriores a la actual
+    if (dateStr < todayStr) {
       return {
         time: timeStr,
+        endTime: slotEndTime,
+        available: false,
+        isPast: true,
+        reason: 'Esta fecha ya ha pasado.'
+      };
+    }
+    if (dateStr === todayStr && slotStartMin <= currentMinutes) {
+      return {
+        time: timeStr,
+        endTime: slotEndTime,
+        available: false,
+        isPast: true,
+        reason: 'Esta hora ya ha pasado para el día de hoy.'
+      };
+    }
+
+    // 2. Sábados solo turno de mañana (cierre 14:00)
+    if (dayOfWeek === 6 && slotStartMin >= 14 * 60) {
+      return {
+        time: timeStr,
+        endTime: slotEndTime,
         available: false,
         reason: 'Los sábados el salón no abre por la tarde (cierre a las 14:00).'
       };
     }
-
-    // 1. Verificar límites de turno
-    const isMorning = timeStr < '14:00';
-    if (isMorning && slotEndMs > shiftMorningEndMs) {
+    if (dayOfWeek === 6 && slotEndMin > 14 * 60) {
       return {
         time: timeStr,
+        endTime: slotEndTime,
         available: false,
-        reason: `Excede el turno de mañana (cierre a las 14:00). Requiere ${durationMinutes} min.`
-      };
-    }
-    if (!isMorning && slotEndMs > shiftAfternoonEndMs) {
-      return {
-        time: timeStr,
-        available: false,
-        reason: `Excede el horario de cierre (19:30). Requiere ${durationMinutes} min.`
+        reason: `Excede el horario del sábado (cierre 14:00). Requiere ${durationMinutes} min.`
       };
     }
 
-    // 2. Disponibilidad de la trabajadora
+    // 3. Verificar límites de turno (L-V: Mañana hasta 14:00, Tarde de 16:00 a 19:30)
+    if (slotStartMin < 14 * 60 && slotEndMin > 14 * 60) {
+      return {
+        time: timeStr,
+        endTime: slotEndTime,
+        available: false,
+        reason: `Excede el turno de mañana (cierre a las 14:00). Requiere ${durationMinutes} min continuos.`
+      };
+    }
+    if (slotStartMin >= 16 * 60 && slotEndMin > 19 * 60 + 30) {
+      return {
+        time: timeStr,
+        endTime: slotEndTime,
+        available: false,
+        reason: `Excede el horario de cierre (19:30). Requiere ${durationMinutes} min continuos.`
+      };
+    }
+
+    // 4. Disponibilidad de la trabajadora
     if (!staff.isAvailable) {
       return {
         time: timeStr,
+        endTime: slotEndTime,
         available: false,
         reason: `${staff.name} no se encuentra disponible (baja médica o descanso).`
       };
     }
 
-    // 3. Colisión con citas activas
+    // 5. Colisión continua con citas activas de la estilista
     const conflictApt = staffApts.find(a => {
-      const aStartMs = new Date(a.startTime).getTime();
-      const aEndMs = new Date(a.endTime).getTime();
-      return slotStartMs < aEndMs && slotEndMs > aStartMs;
+      const aStartMin = extractTimeParts(a.startTime).totalMinutes;
+      const aEndMin = extractTimeParts(a.endTime).totalMinutes;
+      return slotStartMin < aEndMin && slotEndMin > aStartMin;
     });
 
     if (conflictApt) {
-      const aStartTime = new Date(conflictApt.startTime).toISOString().slice(11, 16);
-      const aEndTime = new Date(conflictApt.endTime).toISOString().slice(11, 16);
+      const aStartT = extractTimeParts(conflictApt.startTime).timeStr;
+      const aEndT = extractTimeParts(conflictApt.endTime).timeStr;
       return {
         time: timeStr,
+        endTime: slotEndTime,
         available: false,
-        reason: `Solapa con cita (${aStartTime} - ${aEndTime}) de ${conflictApt.clientName}`
+        reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}`
       };
     }
 
     return {
       time: timeStr,
+      endTime: slotEndTime,
       available: true,
-      reason: `Hueco libre (${timeStr} - ${endStr})`
+      reason: `Hueco libre (${timeStr} - ${slotEndTime})`
     };
   });
 
@@ -1702,6 +1896,18 @@ app.post('/api/appointments/book', (req, res) => {
 
   const start = new Date(startTime);
   const end = new Date(start.getTime() + totalDuration * 60000);
+
+  // REGLA: Bloquear reservas en fechas u horas anteriores a la actual
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const reqDate = typeof startTime === 'string' ? startTime.slice(0, 10) : start.toISOString().slice(0, 10);
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const startMin = extractTimeParts(start).totalMinutes;
+
+  if (reqDate < todayStr || (reqDate === todayStr && startMin <= currentMinutes) || start.getTime() <= now.getTime()) {
+    return res.status(400).json({ error: 'No es posible reservar citas en fechas u horas pasadas. Por favor, selecciona una fecha y hora posterior a la actual.' });
+  }
 
   let targetStaff = null;
   if (staffId && staffId !== 'any') {

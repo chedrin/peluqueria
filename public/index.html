@@ -6686,6 +6686,35 @@
   <!-- JAVASCRIPT DE LA APLICACIÓN -->
   <script>
     // ========================================================================
+    // HELPERS GLOBALES DE TIEMPO Y FECHA (SIN DESFASES HORARIOS)
+    // ========================================================================
+    const _now = new Date();
+    const _pad = n => String(n).padStart(2, '0');
+    const TODAY_ISO_STRING = `${_now.getFullYear()}-${_pad(_now.getMonth() + 1)}-${_pad(_now.getDate())}`;
+
+    function extractTimeParts(isoString) {
+      if (!isoString) return { hour: 0, minute: 0, timeStr: '00:00', totalMinutes: 0 };
+      let str = isoString;
+      if (isoString instanceof Date) {
+        str = isoString.toISOString();
+      }
+      if (typeof str === 'string' && str.includes('T')) {
+        const timePart = str.split('T')[1].slice(0, 5); // 'HH:mm'
+        const [h, m] = timePart.split(':').map(Number);
+        return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+      }
+      if (typeof str === 'string' && str.includes(':')) {
+        const timePart = str.slice(0, 5);
+        const [h, m] = timePart.split(':').map(Number);
+        return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+      }
+      const d = new Date(str);
+      const timePart = d.toISOString().split('T')[1].slice(0, 5);
+      const [h, m] = timePart.split(':').map(Number);
+      return { hour: h, minute: m || 0, timeStr: timePart, totalMinutes: (h || 0) * 60 + (m || 0) };
+    }
+
+    // ========================================================================
     // ESTADO LOCAL DE LA APLICACIÓN
     // ========================================================================
     const state = {
@@ -6693,11 +6722,12 @@
       activeClientTab: 'ai-chat',
       activeAdminTab: 'agenda-master',
       activeStaffId: 'stf-1', // Estilista activa en Portal Trabajadoras
-      workerAgendaDate: '2026-10-23', // Fecha seleccionada en Portal Trabajadoras (Ayer, Hoy, Mañana o Selector)
+      workerAgendaDate: TODAY_ISO_STRING, // Fecha seleccionada en Portal Trabajadoras
+      masterAgendaDate: TODAY_ISO_STRING,
       bookingCalendarStaffId: 'stf-1', // Estilista seleccionada para ver huecos en Calendario
       selectedClientId: 'cli-1', // Clienta activa en el expediente técnico
       selectedAppointmentId: null,
-      selectedSlots: '17:30',
+      selectedSlots: null,
       selectedServicesForBooking: ['srv-1', 'srv-2'],
       loggedInClient: null, // Clienta autenticada mediante DNI (ID fundamental)
       // MODO PRUEBAS: Inicio por contraseña desactivado para facilitar la verificación
@@ -7421,7 +7451,7 @@
         console.warn('Fallo al consultar /api/availability, usando motor local.');
       }
 
-      // Si falló el endpoint, cálculo idéntico en local
+      // Si falló el endpoint, cálculo idéntico en local con extractTimeParts
       if (!slotsData || slotsData.length === 0) {
         const allIntervals = [
           '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
@@ -7431,37 +7461,50 @@
           a.staffId === staffId && 
           a.status !== 'cancelled' && 
           a.status !== 'rescheduling_required' &&
-          a.startTime.startsWith(dateStr)
+          (typeof a.startTime === 'string' && a.startTime.startsWith(dateStr))
         );
-        const shiftMorningEndMs = new Date(`${dateStr}T14:00:00.000Z`).getTime();
-        const shiftAfternoonEndMs = new Date(`${dateStr}T19:30:00.000Z`).getTime();
+
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
         slotsData = allIntervals.map(timeStr => {
-          const slotStartMs = new Date(`${dateStr}T${timeStr}:00.000Z`).getTime();
-          const slotEndMs = slotStartMs + duration * 60000;
-          const endStr = new Date(slotEndMs).toISOString().slice(11, 16);
+          const [sh, sm] = timeStr.split(':').map(Number);
+          const slotStartMin = sh * 60 + sm;
+          const slotEndMin = slotStartMin + duration;
+          const endH = String(Math.floor(slotEndMin / 60)).padStart(2, '0');
+          const endM = String(slotEndMin % 60).padStart(2, '0');
+          const slotEndTime = `${endH}:${endM}`;
 
-          const isMorning = timeStr < '14:00';
-          if (isMorning && slotEndMs > shiftMorningEndMs) {
-            return { time: timeStr, available: false, reason: `Excede el turno de mañana (cierre 14:00)` };
+          // 1. Bloquear horas anteriores a la actual
+          if (dateStr < todayStr) {
+            return { time: timeStr, endTime: slotEndTime, available: false, isPast: true, reason: 'Esta fecha ya ha pasado.' };
           }
-          if (!isMorning && slotEndMs > shiftAfternoonEndMs) {
-            return { time: timeStr, available: false, reason: `Excede el horario de cierre (19:30)` };
+          if (dateStr === todayStr && slotStartMin <= currentMinutes) {
+            return { time: timeStr, endTime: slotEndTime, available: false, isPast: true, reason: 'Esta hora ya ha pasado para el día de hoy.' };
+          }
+
+          if (slotStartMin < 14 * 60 && slotEndMin > 14 * 60) {
+            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Excede el turno de mañana (cierre 14:00)` };
+          }
+          if (slotStartMin >= 16 * 60 && slotEndMin > 19 * 60 + 30) {
+            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Excede el horario de cierre (19:30)` };
           }
 
           const conflictApt = staffApts.find(a => {
-            const aStartMs = new Date(a.startTime).getTime();
-            const aEndMs = new Date(a.endTime).getTime();
-            return slotStartMs < aEndMs && slotEndMs > aStartMs;
+            const aStartMin = extractTimeParts(a.startTime).totalMinutes;
+            const aEndMin = extractTimeParts(a.endTime).totalMinutes;
+            return slotStartMin < aEndMin && slotEndMin > aStartMin;
           });
 
           if (conflictApt) {
-            const aStartT = new Date(conflictApt.startTime).toISOString().slice(11, 16);
-            const aEndT = new Date(conflictApt.endTime).toISOString().slice(11, 16);
-            return { time: timeStr, available: false, reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}` };
+            const aStartT = extractTimeParts(conflictApt.startTime).timeStr;
+            const aEndT = extractTimeParts(conflictApt.endTime).timeStr;
+            return { time: timeStr, endTime: slotEndTime, available: false, reason: `Solapa con cita (${aStartT} - ${aEndT}) de ${conflictApt.clientName}` };
           }
 
-          return { time: timeStr, available: true, reason: `Hueco libre (${timeStr} - ${endStr})` };
+          return { time: timeStr, endTime: slotEndTime, available: true, reason: `Hueco libre (${timeStr} - ${slotEndTime})` };
         });
       }
 
@@ -7481,7 +7524,7 @@
       if (freeCount === 0) {
         container.innerHTML = `
           <div class="col-span-full p-4 bg-amber-50 border border-amber-200 rounded-xl text-center text-xs text-amber-800">
-            ⚠️ No hay huecos continuos de <strong>${duration} min</strong> disponibles para esta estilista en esta fecha. Selecciona otra estilista o fecha.
+            ⚠️ No hay huecos continuos de <strong>${duration} min</strong> disponibles para esta profesional en esta fecha. Selecciona otra profesional o fecha posterior.
           </div>
         `;
         if (confirmBtn) {
@@ -7503,35 +7546,51 @@
         const endMinutes = h * 60 + m + duration;
         const endH = String(Math.floor(endMinutes / 60)).padStart(2, '0');
         const endM = String(endMinutes % 60).padStart(2, '0');
-        summarySlotLabel.innerText = `${state.selectedSlots} - ${endH}:${endM} (${duration}m)`;
+        summarySlotLabel.innerText = `${state.selectedSlots} - ${endH}:${endM} (${duration} min)`;
       }
 
       container.innerHTML = slotsData.map(s => {
         const isSelected = state.selectedSlots === s.time;
+        const [sh, sm] = s.time.split(':').map(Number);
+        const slotEndMinutes = sh * 60 + sm + duration;
+        const fallbackEndH = String(Math.floor(slotEndMinutes / 60)).padStart(2, '0');
+        const fallbackEndM = String(slotEndMinutes % 60).padStart(2, '0');
+        const displayEndTime = s.endTime || `${fallbackEndH}:${fallbackEndM}`;
+
         if (s.available) {
           return `
             <button type="button" 
               onclick="selectSlot('${s.time}')" 
-              title="${s.reason}"
+              title="${s.reason || `Disponible de ${s.time} a ${displayEndTime}`}"
               class="p-2.5 rounded-xl text-xs transition text-center font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                 isSelected
                   ? 'bg-rose-600 border-2 border-rose-700 text-white shadow-md shadow-rose-200 ring-2 ring-rose-400'
                   : 'bg-emerald-50/80 border-2 border-emerald-300 text-emerald-900 hover:bg-emerald-100 hover:border-emerald-500 shadow-2xs'
               }">
               <span class="text-sm font-mono-code">${s.time}</span>
-              <span class="text-[10px] font-medium ${isSelected ? 'text-rose-100' : 'text-emerald-700'}">
-                ✅ Libre (${duration}m)
+              <span class="text-[10px] font-semibold ${isSelected ? 'text-rose-100' : 'text-emerald-700'}">
+                ${isSelected ? `✓ Hasta las ${displayEndTime}` : `Hasta las ${displayEndTime}`}
               </span>
+            </button>
+          `;
+        } else if (s.isPast) {
+          return `
+            <button type="button" 
+              disabled 
+              title="${s.reason || 'Hora pasada'}"
+              class="p-2.5 rounded-xl text-xs text-center border border-stone-200 bg-stone-100/70 text-stone-400 cursor-not-allowed opacity-45 flex flex-col items-center justify-center gap-0.5 select-none line-through">
+              <span class="text-xs font-mono-code">${s.time}</span>
+              <span class="text-[9px] no-underline font-medium text-stone-400">🚫 Pasada</span>
             </button>
           `;
         } else {
           return `
             <button type="button" 
               disabled 
-              title="${s.reason}"
-              class="p-2.5 rounded-xl text-xs text-center border border-stone-200 bg-stone-100/80 text-stone-400 cursor-not-allowed opacity-50 flex flex-col items-center justify-center gap-0.5 select-none line-through">
+              title="${s.reason || 'Hueco ocupado o excede turno'}"
+              class="p-2.5 rounded-xl text-xs text-center border border-rose-200 bg-rose-50/60 text-rose-400 cursor-not-allowed opacity-60 flex flex-col items-center justify-center gap-0.5 select-none line-through">
               <span class="text-xs font-mono-code">${s.time}</span>
-              <span class="text-[9px] no-underline text-stone-400">🚫 Ocupado</span>
+              <span class="text-[9px] no-underline font-medium text-rose-500">🚫 Ocupado</span>
             </button>
           `;
         }
@@ -8576,10 +8635,23 @@
         return;
       }
 
-      const staffId = document.getElementById('select-booking-staff').value;
-      const comments = document.getElementById('booking-comments').value;
+      const staffId = document.getElementById('select-booking-staff')?.value || state.bookingCalendarStaffId || 'stf-1';
+      const comments = document.getElementById('booking-comments')?.value || '';
       const dateStr = getBookingDate();
       const targetBtn = btnElem || document.getElementById('btn-confirm-booking');
+
+      // Comprobar inmediatamente en cliente si la fecha/hora seleccionada es pasada
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const [sh, sm] = state.selectedSlots.split(':').map(Number);
+      const slotStartMin = sh * 60 + sm;
+
+      if (dateStr < todayStr || (dateStr === todayStr && slotStartMin <= currentMinutes)) {
+        alert('No es posible reservar citas en fechas u horas pasadas. Por favor, selecciona una fecha y hora posterior a la actual.');
+        return;
+      }
 
       try {
         const res = await fetch('/api/appointments/book', {
@@ -8947,27 +9019,25 @@
       lucide.createIcons();
     }
 
-        function renderColumnSlots(staffId) {
-      const activeDate = state.masterAgendaDate || '2026-10-23';
+    function renderColumnSlots(staffId) {
+      const activeDate = state.masterAgendaDate || TODAY_ISO_STRING;
       const staffObj = (state.staff || []).find(s => s.id === staffId) || { name: 'Estilista' };
 
-      // Filtrar citas del estilista en la fecha seleccionada
+      // Filtrar citas del estilista en la fecha seleccionada sin desfases horarios
       const staffApts = (state.appointments || []).filter(a => {
         if (a.staffId !== staffId || a.status === 'cancelled') return false;
-        const d = new Date(a.startTime);
-        const isoDate = d.toISOString().slice(0, 10);
-        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        return isoDate === activeDate || localDate === activeDate;
+        const aptDate = typeof a.startTime === 'string' ? a.startTime.slice(0, 10) : '';
+        return aptDate === activeDate;
       });
 
-      // Mapear cada cita a sus horas de inicio y fin
+      // Mapear cada cita a sus horas de inicio y fin con extractTimeParts exacto
       const aptsWithTimes = staffApts.map(a => {
-        const dStart = new Date(a.startTime);
-        const dEnd = new Date(a.endTime);
-        const startMinutes = dStart.getHours() * 60 + dStart.getMinutes();
-        const endMinutes = dEnd.getHours() * 60 + dEnd.getMinutes();
-        const startTimeStr = `${String(dStart.getHours()).padStart(2, '0')}:${String(dStart.getMinutes()).padStart(2, '0')}`;
-        const endTimeStr = `${String(dEnd.getHours()).padStart(2, '0')}:${String(dEnd.getMinutes()).padStart(2, '0')}`;
+        const startParts = extractTimeParts(a.startTime);
+        const endParts = extractTimeParts(a.endTime);
+        const startMinutes = startParts.totalMinutes;
+        const endMinutes = endParts.totalMinutes;
+        const startTimeStr = startParts.timeStr;
+        const endTimeStr = endParts.timeStr;
         const durationMin = Math.max(15, Math.round(endMinutes - startMinutes));
 
         return {
@@ -12308,9 +12378,9 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     // ========================================================================
     // CALENDARIO MENSUAL COMPLETO INTERACTIVO
     // ========================================================================
-    state.calendarYear = 2026;
-    state.calendarMonth = 9; // 0-indexado: 9 = Octubre
-    state.selectedBookingDate = '2026-10-23';
+    state.calendarYear = _now.getFullYear();
+    state.calendarMonth = _now.getMonth();
+    state.selectedBookingDate = TODAY_ISO_STRING;
 
     const MONTH_NAMES_ES = [
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -12318,7 +12388,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     ];
 
     function getBookingDate() {
-      return state.selectedBookingDate || '2026-10-23';
+      return state.selectedBookingDate || TODAY_ISO_STRING;
     }
 
     function renderMonthCalendar() {
@@ -12340,7 +12410,7 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
       const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
       const daysInPrevMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
 
-      const todayStr = '2026-10-23';
+      const todayStr = TODAY_ISO_STRING;
       const selectedStr = state.selectedBookingDate || todayStr;
 
       let cellsHtml = '';
@@ -12465,9 +12535,12 @@ La estilista ha dejado de estar visible para nuevas reservas en el portal de cli
     }
 
     function calendarGoToToday() {
-      state.calendarYear = 2026;
-      state.calendarMonth = 9; // Octubre
-      selectCalendarDay('2026-10-23');
+      const now = new Date();
+      state.calendarYear = now.getFullYear();
+      state.calendarMonth = now.getMonth();
+      const pad = n => String(n).padStart(2, '0');
+      const todayIso = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      selectCalendarDay(todayIso);
     }
 
 
