@@ -361,9 +361,15 @@
               </p>
             </div>
           </div>
-          <button onclick="logoutClient()" class="text-xs font-semibold text-stone-600 hover:text-rose-700 hover:bg-stone-100 px-3.5 py-2 rounded-xl border border-stone-200 flex items-center gap-1.5 transition">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Cambiar Clienta / Salir
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="startClientBookingFlow()" class="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm shadow-rose-200 transition cursor-pointer">
+              <i data-lucide="calendar-plus" class="w-4 h-4 text-rose-200"></i>
+              <span>Pedir Cita Online</span>
+            </button>
+            <button onclick="logoutClient()" class="text-xs font-semibold text-stone-600 hover:text-rose-700 hover:bg-stone-100 px-3.5 py-2 rounded-xl border border-stone-200 flex items-center gap-1.5 transition">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
+            </button>
+          </div>
         </div>
 
         <!-- Sub-navegación Portal Clientas -->
@@ -634,6 +640,25 @@
                 <div class="flex items-baseline gap-2">
                   <span class="text-xs text-stone-500">Total con IVA (21%):</span>
                   <span class="text-xl font-black text-stone-900 font-mono-code" id="booking-total-price">60,00 €</span>
+                </div>
+              </div>
+
+                <!-- Resumen y Selección Rápida de Servicios antes de Confirmar -->
+                <div class="pt-2 border-t border-stone-200/80 space-y-1.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-stone-700 flex items-center gap-1">
+                      <i data-lucide="scissors" class="w-3.5 h-3.5 text-rose-600"></i> Servicios a Confirmar:
+                    </span>
+                    <button type="button" onclick="toggleQuickServiceSelector()" class="text-[11px] font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-lg transition cursor-pointer flex items-center gap-1">
+                      <span>✏️ Modificar Servicios</span>
+                    </button>
+                  </div>
+                  <div id="booking-summary-services" class="flex flex-wrap items-center gap-1.5 min-h-[26px]">
+                    <!-- Renderizado dinámicamente con los servicios elegidos -->
+                  </div>
+                  <div id="quick-services-dropdown" class="hidden p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2 mt-2 shadow-inner">
+                    <!-- Checkboxes rápidos de servicios -->
+                  </div>
                 </div>
               </div>
               <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
@@ -6943,9 +6968,11 @@
       if (targetView) targetView.classList.remove('hidden');
 
       if (tab === 'calendar') {
+        renderServicesChecklist();
         renderBookingStylistSelectors();
         renderMonthCalendar();
         renderBookingSlots(state.bookingCalendarStaffId);
+        updateBookingTotalPrice();
       } else if (tab === 'loyalty') {
         loadClientStampCard();
       } else if (tab === 'history') {
@@ -8203,11 +8230,68 @@
     }
 
     function updateBookingTotalPrice() {
-      const total = state.services
-        .filter(s => state.selectedServicesForBooking.includes(s.id))
-        .reduce((sum, s) => sum + s.price, 0);
+      const selected = (state.services || []).filter(s => (state.selectedServicesForBooking || []).includes(s.id));
+      const total = selected.reduce((sum, s) => sum + s.price, 0);
+      const totalMinutes = selected.reduce((sum, s) => sum + s.durationMinutes, 0) || 30;
+
       const priceElem = document.getElementById('booking-total-price');
       if (priceElem) priceElem.innerText = total.toFixed(2) + ' €';
+
+      const durationBadge = document.getElementById('slots-duration-badge');
+      if (durationBadge) {
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+        const durStr = h > 0 ? `${h}h ${m > 0 ? m + 'm' : ''}` : `${m}m`;
+        durationBadge.innerText = `⏱️ Duración: ${totalMinutes} min (${durStr})`;
+      }
+
+      // Actualizar badges en el resumen antes del botón de confirmación
+      const summaryServicesEl = document.getElementById('booking-summary-services');
+      if (summaryServicesEl) {
+        if (!selected.length) {
+          summaryServicesEl.innerHTML = '<span class="text-xs text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200">⚠️ Por favor, selecciona al menos un servicio abajo o en la lista</span>';
+        } else {
+          summaryServicesEl.innerHTML = selected.map(s => `
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-1 rounded-xl shadow-2xs">
+              <i data-lucide="scissors" class="w-3 h-3 text-rose-600"></i>
+              ${s.name}
+              <span class="text-[11px] text-rose-500 font-mono-code font-normal">(${s.durationMinutes}m · ${s.price.toFixed(2)}€)</span>
+            </span>
+          `).join('');
+        }
+      }
+
+      // Desplegable rápido de servicios junto al botón de confirmar cita
+      const quickDropdown = document.getElementById('quick-services-dropdown');
+      if (quickDropdown) {
+        quickDropdown.innerHTML = (state.services || []).map(s => {
+          const checked = (state.selectedServicesForBooking || []).includes(s.id);
+          return `
+            <label class="flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition ${checked ? 'bg-rose-50 border-rose-300 shadow-2xs' : 'bg-white border-stone-200 hover:bg-stone-50'}">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" onchange="toggleServiceSelection('${s.id}')" ${checked ? 'checked' : ''} class="rounded border-stone-300 text-rose-600 focus:ring-0">
+                <span class="font-bold text-stone-800">${s.name} <span class="text-stone-400 font-normal">(${s.durationMinutes}m)</span></span>
+              </div>
+              <span class="font-extrabold text-stone-900">${s.price.toFixed(2)} €</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleQuickServiceSelector() {
+      const el = document.getElementById('quick-services-dropdown');
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function startClientBookingFlow() {
+      switchClientTab('calendar');
+      const checklist = document.getElementById('services-checklist');
+      if (checklist) {
+        checklist.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
     async function submitManualBooking(btnElem) {
@@ -8551,13 +8635,8 @@
       lucide.createIcons();
     }
 
-    function renderColumnSlots(staffId) {
-      const activeDate = customDate || state.masterAgendaDate || '2026-10-23';
-      if (customDate && customDate !== state.masterAgendaDate) {
-        state.masterAgendaDate = customDate;
-        const dp = document.getElementById('master-agenda-datepicker');
-        if (dp) dp.value = customDate;
-      }
+        function renderColumnSlots(staffId) {
+      const activeDate = state.masterAgendaDate || '2026-10-23';
       const staffObj = (state.staff || []).find(s => s.id === staffId) || { name: 'Estilista' };
 
       // Filtrar citas del estilista en la fecha seleccionada
@@ -9190,7 +9269,12 @@
         return;
       }
 
-      const activeDate = state.masterAgendaDate || '2026-10-23';
+      const activeDate = customDate || state.masterAgendaDate || '2026-10-23';
+      if (customDate && customDate !== state.masterAgendaDate) {
+        state.masterAgendaDate = customDate;
+        const dp = document.getElementById('master-agenda-datepicker');
+        if (dp) dp.value = customDate;
+      }
       const newStaff = (state.staff || []).find(s => s.id === targetStaffId) || { name: 'Estilista' };
       const prevStaff = (state.staff || []).find(s => s.id === apt.staffId) || { name: apt.staffName || 'Estilista Salón' };
       
