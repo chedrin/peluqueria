@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cania
+      POSTGRES_PASSWORD: cania
+      POSTGRES_DB: cania
+    ports:
+      - "5433:5432"
+    volumes:
+      - cania-db:/var/lib/postgresql/data
+volumes:
+  cania-db:
