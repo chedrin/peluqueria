@@ -3,8 +3,10 @@
  *   npm run local
  * Levanta PostgreSQL embebido (datos en .pgdata/, puerto 5433), aplica migraciones,
  * carga los datos demo y arranca la app en http://localhost:3025.
+ * Usa la app compilada (rápida); solo recompila si el código cambió.
+ * Para desarrollar con recarga en caliente: npm run local -- --dev
  */
-import { spawn } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { existsSync, copyFileSync, readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import EmbeddedPostgres from "embedded-postgres";
@@ -55,6 +57,26 @@ try {
   process.exit(1);
 }
 
+const devMode = process.argv.includes("--dev");
+if (!devMode) {
+  // Recompila solo si no hay build o si el código cambió desde la última (commit de git)
+  let head = "";
+  try { head = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim(); } catch {}
+  const stamp = ".next/.local-build";
+  const built = existsSync(".next/BUILD_ID") && existsSync(stamp) && readFileSync(stamp, "utf8") === head && head !== "";
+  if (!built) {
+    console.log("· Compilando la app (unos minutos, solo cuando hay cambios)…");
+    try {
+      await run("npx next build");
+      writeFileSync(stamp, head);
+    } catch (e) {
+      console.error(e);
+      await pg.stop();
+      process.exit(1);
+    }
+  }
+}
+
 console.log("\n✅ Abre http://localhost:3025 · admin@cania.test / cania1234 (Ctrl+C para parar)\n");
-app = spawn("npx next dev -p 3025", { stdio: "inherit", shell: true, env });
+app = spawn(devMode ? "npx next dev -p 3025" : "npx next start -p 3025", { stdio: "inherit", shell: true, env });
 app.on("exit", stop);
