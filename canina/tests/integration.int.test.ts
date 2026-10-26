@@ -9,6 +9,7 @@ import { redeemVoucherSession, reverseVoucherSession } from "@/features/vouchers
 import { loadStaffDays } from "@/features/scheduling/server/availability.service";
 import { findConflict } from "@/features/scheduling/domain/availability";
 import { localDay } from "@/lib/time";
+import { renderInvoicePdf } from "@/features/billing/pdf/invoice-pdf";
 
 const run = process.env.INTEGRATION === "1";
 
@@ -58,6 +59,11 @@ describe.skipIf(!run)("integración con PostgreSQL", () => {
 
     await registerPayment(issued.id, { method: "CARD", amountCents: 800, actorId });
     await expect(registerPayment(issued.id, { method: "CASH", amountCents: 1, actorId })).rejects.toThrow(/supera/);
+
+    // PDF (pdf-lib: mismo código en Node y en Cloudflare Workers)
+    const full = await prisma.invoice.findUniqueOrThrow({ where: { id: issued.id }, include: { items: true, payments: true } });
+    const pdf = await renderInvoicePdf({ invoice: full, items: full.items, payments: full.payments });
+    expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-");
 
     // Segunda factura → número siguiente y huella encadenada
     const d2 = await createDraftFromAppointment(a.id, { type: "SIMPLIFIED", actorId });

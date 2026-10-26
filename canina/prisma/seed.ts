@@ -16,7 +16,8 @@ function todayAt(h: number, m = 0, addDays = 0) {
 }
 
 async function main() {
-  const passwordHash = await bcrypt.hash("cania1234", 10);
+  // En producción define SEED_PASSWORD: si no, todos los usuarios demo usan "cania1234"
+  const passwordHash = await bcrypt.hash(process.env.SEED_PASSWORD || "cania1234", 10);
 
   await prisma.businessSettings.upsert({
     where: { id: "default" },
@@ -229,7 +230,7 @@ async function main() {
   if (!(await prisma.timeBlock.findFirst({ where: { staffId: laura.staffProfile!.id, startsAt: breakStart } })))
     await prisma.timeBlock.create({ data: { staffId: laura.staffProfile!.id, type: "BREAK", startsAt: breakStart, endsAt: todayAt(13, 30), reason: "Descanso" } });
 
-  console.log("✅ Seed completado. Entra en http://localhost:3025 con admin@cania.test / cania1234");
+  console.log(`✅ Seed completado. Entra en http://localhost:3025 con admin@cania.test / ${process.env.SEED_PASSWORD ? "(tu SEED_PASSWORD)" : "cania1234"}`);
 }
 
 main()
