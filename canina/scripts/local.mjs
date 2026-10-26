@@ -20,6 +20,17 @@ if (!existsSync(".env")) {
   console.log("· Creado .env a partir de .env.example");
 }
 
+// PostgreSQL se niega a arrancar con permisos de administrador (PowerShell "como administrador")
+if (process.platform === "win32") {
+  let elevated = false;
+  try { execSync("net session", { stdio: "ignore" }); elevated = true; } catch {}
+  if (elevated) {
+    console.error("\n✖ Esta ventana está abierta como ADMINISTRADOR y PostgreSQL no puede arrancar así.");
+    console.error("  Ciérrala, abre PowerShell con un clic normal (sin \"Ejecutar como administrador\") y repite: npm run local\n");
+    process.exit(1);
+  }
+}
+
 const pg = new EmbeddedPostgres({ databaseDir: ".pgdata", user: "cania", password: "cania", port: 5433, persistent: true,
   // UTF-8 siempre: en Windows en español initdb usaría WIN1252 y fallarían las migraciones
   initdbFlags: ["--encoding=UTF8", "--locale=C"],
