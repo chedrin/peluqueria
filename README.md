@@ -1,5 +1,7 @@
 # 💇‍♀️ Peluquería & Estilismo — Plataforma Integral de Gestión
 
+> 🐶 **Nuevo:** el CRM de **Peluquería y Estética Canina** (Next.js + Prisma + PostgreSQL) vive en [`canina/`](canina/README.md) y se arranca en el puerto 3025.
+
 > Aplicación web integral para la gestión de salones de peluquería y belleza, con control de acceso basado en roles (**RBAC**), agente de citas con **IA conversacional & Tool Calling**, protocolo de **contingencia por baja médica**, y motor de **facturación inalterable Veri*Factu** conforme a la **Ley Antifraude Española 11/2021** y **RD 1007/2023**.
 
 ---

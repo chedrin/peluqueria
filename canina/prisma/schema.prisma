@@ -1,0 +1,878 @@
+// =============================================================================
+//  CANIA · CRM para Peluquería y Estética Canina
+//  Modelo de datos relacional (PostgreSQL + Prisma ORM)
+//
+//  Convenciones:
+//   - Importes monetarios en CÉNTIMOS (Int) para evitar errores de coma flotante.
+//   - Porcentajes fiscales en "basis points" (2100 = 21,00 %).
+//   - Duraciones en minutos.
+//   - Los registros fiscales (Invoice, InvoiceItem, Payment) son INMUTABLES una vez
+//     emitidos: se corrigen con facturas rectificativas, nunca con UPDATE/DELETE.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+//  ENUMS
+// -----------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  GROOMER
+  RECEPTION
+  CLIENT
+}
+
+enum DogSize {
+  SMALL // Pequeño  (< 10 kg)
+  MEDIUM // Mediano  (10-25 kg)
+  LARGE // Grande   (25-45 kg)
+  GIANT // Gigante  (> 45 kg)
+}
+
+enum CoatType {
+  SHORT // Corto
+  LONG // Largo
+  CURLY // Rizado (caniche, bichón…)
+  DOUBLE // Doble capa (husky, pastor…)
+  WIRE // Duro (terrier → stripping)
+}
+
+enum CoatCondition {
+  GOOD
+  KNOTS // Nudos
+  MATTED // Enredos severos / afieltrado
+  SHEDDING // En muda
+}
+
+enum Temperament {
+  DOCILE
+  NERVOUS
+  FEARFUL
+  REACTIVE
+  AGGRESSIVE
+}
+
+enum ToleranceLevel {
+  YES
+  PARTIAL
+  NO
+  UNKNOWN
+}
+
+enum HealthAlertType {
+  SKIN_ALLERGY
+  FOOD_ALLERGY
+  DERMATITIS
+  RECENT_SURGERY
+  SENSITIVE_AREA
+  MEDICATION
+  PARASITES
+  HEART_CONDITION
+  EPILEPSY
+  OTHER
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ContactChannel {
+  WHATSAPP
+  SMS
+  EMAIL
+  PHONE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+/// Sub-fase visible en la agenda cuando la cita está IN_PROGRESS
+enum GroomingStage {
+  BATH // Baño
+  CUT // Corte
+  DRY // Secado
+  FINISHING // Acabado / perfume
+}
+
+enum AppointmentSource {
+  ONLINE
+  PHONE
+  WALK_IN
+  BACKOFFICE
+}
+
+enum TimeBlockType {
+  BREAK // Descanso
+  SICK_LEAVE // Baja
+  HOLIDAY // Vacaciones
+  INCIDENT // Incidencia (avería, etc.)
+  TRAINING
+}
+
+enum PhotoKind {
+  BEFORE
+  AFTER
+  DETAIL
+}
+
+enum VoucherStatus {
+  ACTIVE
+  EXHAUSTED
+  EXPIRED
+  CANCELLED
+}
+
+enum LoyaltyMode {
+  POINTS // puntos por € gastado
+  STAMPS // sellos por visita
+}
+
+enum LoyaltyTxType {
+  EARN
+  REDEEM
+  ADJUST
+  EXPIRE
+}
+
+enum InvoiceType {
+  STANDARD // Factura completa (F1)
+  SIMPLIFIED // Factura simplificada / ticket (F2)
+  RECTIFYING // Rectificativa (R1-R5)
+}
+
+enum InvoiceStatus {
+  DRAFT // Borrador: editable, SIN número
+  ISSUED // Emitida: inmutable, con número correlativo
+  VOIDED // Anulada mediante rectificativa (la original no se borra)
+}
+
+enum TaxRate {
+  GENERAL_21
+  REDUCED_10
+  SUPER_REDUCED_4
+  EXEMPT
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BIZUM
+  VOUCHER
+  TRANSFER
+}
+
+enum ConsentPurpose {
+  PRIVACY_POLICY
+  MARKETING_EMAIL
+  MARKETING_WHATSAPP
+  IMAGE_RIGHTS // uso de fotos "antes/después" en redes
+  CANCELLATION_POLICY
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  MOVE
+  STATUS_CHANGE
+  ISSUE
+  RECTIFY
+  PAYMENT
+  CONSUME
+  LOGIN
+  EXPORT
+}
+
+// -----------------------------------------------------------------------------
+//  CONFIGURACIÓN DE EMPRESA (emisor de facturas)
+// -----------------------------------------------------------------------------
+
+model BusinessSettings {
+  id                      String   @id @default("default")
+  legalName               String
+  tradeName               String?
+  taxId                   String // NIF/CIF del emisor
+  address                 String
+  postalCode              String
+  city                    String
+  province                String
+  country                 String   @default("ES")
+  email                   String?
+  phone                   String?
+  logoUrl                 String?
+  /// Mercantile registry text for the invoice footer (LSSI-CE)
+  registryInfo            String?
+  timezone                String   @default("Europe/Madrid")
+  slotGranularityMin      Int      @default(15)
+  /// Horas mínimas de antelación para cancelar/reprogramar desde el portal
+  cancellationWindowHours Int      @default(24)
+  /// Límite legal para facturas simplificadas (RD 1619/2012 art. 4): 400 € IVA incl.
+  simplifiedInvoiceLimit  Int      @default(40000)
+  updatedAt               DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+//  USUARIOS (dueños + staff) Y PERFILES
+// -----------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  role         Role      @default(CLIENT)
+  firstName    String
+  lastName     String
+  phone        String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  /// RGPD: borrado lógico + anonimización (derecho de supresión)
+  deletedAt    DateTime?
+
+  ownerProfile OwnerProfile?
+  staffProfile StaffProfile?
+  consents     Consent[]
+  auditLogs    AuditLog[]    @relation("AuditActor")
+  createdAppts Appointment[] @relation("AppointmentCreatedBy")
+
+  @@index([role])
+}
+
+/// Datos fiscales y preferencias del propietario (cliente)
+model OwnerProfile {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taxId             String? // NIF/DNI/NIE (necesario para factura completa)
+  whatsapp          String?
+  address           String?
+  postalCode        String?
+  city              String?
+  province          String?
+  preferredChannel  ContactChannel @default(WHATSAPP)
+  preferredCutStyle String? // "Corte cachorro", "Corte raza", …
+  personalNotes     String? // notas de trato personal
+  /// Si es profesional/empresa puede requerir retención IRPF
+  isBusiness        Boolean        @default(false)
+  favoriteGroomerId String?
+  favoriteGroomer   StaffProfile?  @relation("FavoriteGroomer", fields: [favoriteGroomerId], references: [id])
+
+  dogs         Dog[]
+  vouchers     Voucher[]
+  loyaltyCard  LoyaltyCard?
+  invoices     Invoice[]
+  appointments Appointment[]
+}
+
+/// Datos del personal (peluquero/a, recepción, admin)
+model StaffProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName    String
+  color          String  @default("#6366f1") // color de columna en la agenda
+  bookableOnline Boolean @default(true)
+  sortOrder      Int     @default(0)
+
+  workingHours    WorkingHours[]
+  timeBlocks      TimeBlock[]
+  appointments    Appointment[]
+  groomingRecords GroomingRecord[]
+  skills          StaffService[]
+  favoritedBy     OwnerProfile[]   @relation("FavoriteGroomer")
+}
+
+/// Plan semanal de trabajo (inspirado en el "working plan" de Easy!Appointments)
+model WorkingHours {
+  id       String       @id @default(cuid())
+  staffId  String
+  staff    StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  weekday  Int // 0 = domingo … 6 = sábado
+  startMin Int // minutos desde 00:00 (09:00 → 540)
+  endMin   Int
+
+  @@index([staffId, weekday])
+}
+
+/// Bloqueo de franjas: descansos, bajas, vacaciones, incidencias
+model TimeBlock {
+  id        String        @id @default(cuid())
+  staffId   String? // null = bloqueo de todo el salón
+  staff     StaffProfile? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  type      TimeBlockType
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String?
+  createdAt DateTime      @default(now())
+
+  @@index([staffId, startsAt, endsAt])
+}
+
+// -----------------------------------------------------------------------------
+//  PERROS, FICHA CLÍNICA / ESTÉTICA
+// -----------------------------------------------------------------------------
+
+model Breed {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  defaultSize     DogSize
+  defaultCoatType CoatType
+  dogs            Dog[]
+}
+
+model Dog {
+  id              String        @id @default(cuid())
+  ownerId         String
+  owner           OwnerProfile  @relation(fields: [ownerId], references: [id])
+  name            String
+  breedId         String?
+  breed           Breed?        @relation(fields: [breedId], references: [id])
+  breedText       String? // mestizos / razas no catalogadas
+  sex             String? // M / F
+  sterilized      Boolean?
+  birthDate       DateTime?
+  size            DogSize
+  currentWeightKg Decimal?      @db.Decimal(5, 2)
+  coatType        CoatType
+  coatCondition   CoatCondition @default(GOOD)
+  coatColor       String?
+  microchip       String?
+  photoUrl        String?
+
+  // Temperamento y manejo
+  temperament     Temperament    @default(DOCILE)
+  handlingNotes   String? // cómo manipularlo
+  toleratesDryer  ToleranceLevel @default(UNKNOWN) // secador
+  toleratesBlower ToleranceLevel @default(UNKNOWN) // expulsador
+  allowsNailTrim  ToleranceLevel @default(UNKNOWN)
+  needsMuzzle     Boolean        @default(false)
+
+  // Preferencias
+  favoriteTreats String?
+  allowedTreats  String?
+  favoriteToys   String?
+
+  isActive   Boolean   @default(true)
+  deceasedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  healthAlerts    HealthAlert[]
+  weightHistory   DogWeight[]
+  appointments    Appointment[]
+  groomingRecords GroomingRecord[]
+  photos          GroomingPhoto[]
+
+  @@index([ownerId])
+  @@index([name])
+}
+
+/// Alertas de salud: se muestran en ROJO en la tarjeta de la cita
+model HealthAlert {
+  id          String          @id @default(cuid())
+  dogId       String
+  dog         Dog             @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  type        HealthAlertType
+  severity    AlertSeverity   @default(WARNING)
+  description String
+  bodyArea    String? // zona sensible
+  validUntil  DateTime? // p.ej. "cirugía reciente" caduca
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+
+  @@index([dogId, isActive])
+}
+
+model DogWeight {
+  id         String   @id @default(cuid())
+  dogId      String
+  dog        Dog      @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  weightKg   Decimal  @db.Decimal(5, 2)
+  measuredAt DateTime @default(now())
+}
+
+/// Registro técnico de cada sesión (historial de actuaciones)
+model GroomingRecord {
+  id             String         @id @default(cuid())
+  dogId          String
+  dog            Dog            @relation(fields: [dogId], references: [id])
+  appointmentId  String?        @unique
+  appointment    Appointment?   @relation(fields: [appointmentId], references: [id])
+  groomerId      String
+  groomer        StaffProfile   @relation(fields: [groomerId], references: [id])
+  performedAt    DateTime       @default(now())
+  servicesDone   String[] // nombres de los servicios realizados (snapshot)
+  shampoo        String? // cosmética / champú
+  conditioner    String?
+  otherProducts  String?
+  bladeNumber    String? // nº de cuchilla: "#7F", "#10"…
+  combGuide      String? // recalce / peine guía: "13 mm"
+  cutDescription String?
+  coatCondition  CoatCondition?
+  weightKg       Decimal?       @db.Decimal(5, 2)
+  behaviorNotes  String? // cómo se comportó hoy
+  internalNotes  String?
+  createdAt      DateTime       @default(now())
+
+  photos GroomingPhoto[]
+
+  @@index([dogId, performedAt])
+}
+
+/// Galería "Antes y Después"
+model GroomingPhoto {
+  id               String          @id @default(cuid())
+  dogId            String
+  dog              Dog             @relation(fields: [dogId], references: [id], onDelete: Cascade)
+  groomingRecordId String?
+  groomingRecord   GroomingRecord? @relation(fields: [groomingRecordId], references: [id], onDelete: SetNull)
+  kind             PhotoKind
+  url              String
+  /// Visible en el área privada del cliente
+  visibleToOwner   Boolean         @default(true)
+  takenAt          DateTime        @default(now())
+}
+
+// -----------------------------------------------------------------------------
+//  SERVICIOS, TARIFAS Y TIEMPOS
+// -----------------------------------------------------------------------------
+
+model ServiceCategory {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  sortOrder Int       @default(0)
+  services  Service[]
+}
+
+model Service {
+  id              String           @id @default(cuid())
+  categoryId      String?
+  category        ServiceCategory? @relation(fields: [categoryId], references: [id])
+  name            String
+  slug            String           @unique
+  description     String?
+  imageUrl        String?
+  taxRate         TaxRate          @default(GENERAL_21)
+  /// Precio/duración por defecto si no existe una tarifa específica
+  basePriceCents  Int
+  baseDurationMin Int
+  /// Minutos extra de limpieza/preparación tras el servicio
+  bufferAfterMin  Int              @default(0)
+  bookableOnline  Boolean          @default(true)
+  isActive        Boolean          @default(true)
+  sortOrder       Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  pricing          ServicePricing[]
+  appointmentLines AppointmentService[]
+  staff            StaffService[]
+  voucherProducts  VoucherProductService[]
+}
+
+/// Matriz de tarifas: precio y duración por tamaño y/o tipo de pelo.
+/// Resolución: (size+coat) > (size) > (coat) > precio base del servicio.
+model ServicePricing {
+  id          String    @id @default(cuid())
+  serviceId   String
+  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  size        DogSize?
+  coatType    CoatType?
+  minWeightKg Decimal?  @db.Decimal(5, 2)
+  maxWeightKg Decimal?  @db.Decimal(5, 2)
+  priceCents  Int
+  durationMin Int
+
+  @@unique([serviceId, size, coatType])
+}
+
+/// Qué peluquero puede realizar qué servicio (y si tarda más/menos)
+model StaffService {
+  staffId           String
+  staff             StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  serviceId         String
+  service           Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  durationAdjustMin Int          @default(0)
+
+  @@id([staffId, serviceId])
+}
+
+model Product {
+  id           String        @id @default(cuid())
+  sku          String        @unique
+  name         String
+  priceCents   Int
+  taxRate      TaxRate       @default(GENERAL_21)
+  stock        Int           @default(0)
+  isActive     Boolean       @default(true)
+  invoiceItems InvoiceItem[]
+}
+
+// -----------------------------------------------------------------------------
+//  AGENDA
+// -----------------------------------------------------------------------------
+
+model Appointment {
+  id             String            @id @default(cuid())
+  dogId          String
+  dog            Dog               @relation(fields: [dogId], references: [id])
+  ownerId        String
+  owner          OwnerProfile      @relation(fields: [ownerId], references: [id])
+  /// null = "cualquier peluquero" pendiente de asignar
+  groomerId      String?
+  groomer        StaffProfile?     @relation(fields: [groomerId], references: [id])
+  startsAt       DateTime
+  endsAt         DateTime
+  status         AppointmentStatus @default(PENDING)
+  stage          GroomingStage?
+  source         AppointmentSource @default(BACKOFFICE)
+  clientNotes    String?
+  internalNotes  String?
+  /// Precio total estimado al reservar (snapshot)
+  estimatedCents Int               @default(0)
+  cancelledAt    DateTime?
+  cancelReason   String?
+  reminderSentAt DateTime?
+  /// Optimistic locking para el drag-and-drop concurrente
+  version        Int               @default(0)
+  createdById    String?
+  createdBy      User?             @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  services       AppointmentService[]
+  groomingRecord GroomingRecord?
+  voucherUses    VoucherRedemption[]
+  invoices       Invoice[]
+
+  @@index([groomerId, startsAt])
+  @@index([startsAt, endsAt])
+  @@index([dogId])
+  @@index([status])
+}
+
+/// Línea de servicio dentro de la cita (snapshot de precio y duración)
+model AppointmentService {
+  id            String              @id @default(cuid())
+  appointmentId String
+  appointment   Appointment         @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  serviceId     String
+  service       Service             @relation(fields: [serviceId], references: [id])
+  priceCents    Int
+  durationMin   Int
+  /// Consumos de bono de esta línea (como mucho uno activo: ver índice parcial en la migración)
+  redemptions   VoucherRedemption[]
+}
+
+// -----------------------------------------------------------------------------
+//  BONOS (packs de sesiones)
+// -----------------------------------------------------------------------------
+
+/// Plantilla de bono que se vende: "Bono 5 Baños + 1 Gratis"
+model VoucherProduct {
+  id            String                  @id @default(cuid())
+  name          String
+  description   String?
+  priceCents    Int
+  taxRate       TaxRate                 @default(GENERAL_21)
+  totalSessions Int // 6 (5 + 1 gratis)
+  validityDays  Int // caducidad desde la compra
+  /// Restringe el bono a un tamaño concreto (precio distinto por tamaño)
+  size          DogSize?
+  isActive      Boolean                 @default(true)
+  services      VoucherProductService[]
+  vouchers      Voucher[]
+}
+
+model VoucherProductService {
+  voucherProductId String
+  voucherProduct   VoucherProduct @relation(fields: [voucherProductId], references: [id], onDelete: Cascade)
+  serviceId        String
+  service          Service        @relation(fields: [serviceId], references: [id])
+
+  @@id([voucherProductId, serviceId])
+}
+
+/// Bono vendido a un cliente concreto
+model Voucher {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  productId     String
+  product       VoucherProduct @relation(fields: [productId], references: [id])
+  ownerId       String
+  owner         OwnerProfile   @relation(fields: [ownerId], references: [id])
+  /// Opcional: bono nominativo para un perro
+  dogId         String?
+  totalSessions Int
+  usedSessions  Int            @default(0)
+  status        VoucherStatus  @default(ACTIVE)
+  purchasedAt   DateTime       @default(now())
+  expiresAt     DateTime
+  /// Factura de venta del bono (el IVA se devenga al cobrar el bono)
+  saleInvoiceId String?
+  /// Optimistic locking: evita consumir dos veces la misma sesión
+  version       Int            @default(0)
+
+  redemptions VoucherRedemption[]
+
+  @@index([ownerId, status])
+}
+
+model VoucherRedemption {
+  id                   String             @id @default(cuid())
+  voucherId            String
+  voucher              Voucher            @relation(fields: [voucherId], references: [id])
+  appointmentId        String
+  appointment          Appointment        @relation(fields: [appointmentId], references: [id])
+  appointmentServiceId String
+  appointmentService   AppointmentService @relation(fields: [appointmentServiceId], references: [id])
+  sessionNumber        Int // 1..totalSessions
+  redeemedAt           DateTime           @default(now())
+  redeemedById         String?
+  /// Reversión (cita cancelada tras consumir): se marca, nunca se borra
+  reversedAt           DateTime?
+
+  @@index([voucherId])
+  @@index([appointmentServiceId])
+}
+
+// -----------------------------------------------------------------------------
+//  FIDELIZACIÓN
+// -----------------------------------------------------------------------------
+
+/// Reglas configurables desde el panel
+model LoyaltyProgram {
+  id                    String      @id @default("default")
+  mode                  LoyaltyMode @default(POINTS)
+  isActive              Boolean     @default(true)
+  /// POINTS: puntos por cada euro (100 céntimos) gastado
+  pointsPerEuro         Int         @default(1)
+  /// POINTS: valor de canje → 100 puntos = X céntimos de descuento
+  centsPer100Points     Int         @default(500)
+  minPointsToRedeem     Int         @default(100)
+  /// STAMPS: sellos necesarios para el premio
+  stampsForReward       Int         @default(10)
+  rewardServiceId       String? // servicio gratis al completar la tarjeta
+  pointsExpireAfterDays Int? // null = no caducan
+  updatedAt             DateTime    @updatedAt
+}
+
+model LoyaltyCard {
+  id             String               @id @default(cuid())
+  ownerId        String               @unique
+  owner          OwnerProfile         @relation(fields: [ownerId], references: [id])
+  cardNumber     String               @unique
+  pointsBalance  Int                  @default(0)
+  stampsBalance  Int                  @default(0)
+  lifetimePoints Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  transactions   LoyaltyTransaction[]
+}
+
+model LoyaltyTransaction {
+  id        String        @id @default(cuid())
+  cardId    String
+  card      LoyaltyCard   @relation(fields: [cardId], references: [id])
+  type      LoyaltyTxType
+  points    Int           @default(0) // + gana, - canjea
+  stamps    Int           @default(0)
+  invoiceId String?
+  note      String?
+  createdAt DateTime      @default(now())
+
+  @@index([cardId, createdAt])
+}
+
+// -----------------------------------------------------------------------------
+//  FACTURACIÓN (RD 1619/2012 + Ley 11/2021 antifraude / Veri*Factu)
+// -----------------------------------------------------------------------------
+
+/// Series independientes y correlativas por año: F2026, T2026, R2026…
+model InvoiceSeries {
+  id         String      @id @default(cuid())
+  code       String // "F", "T", "R"
+  year       Int
+  type       InvoiceType
+  /// Último número emitido. Se incrementa dentro de una transacción con
+  /// bloqueo de fila (SELECT … FOR UPDATE) → numeración SIN huecos.
+  lastNumber Int         @default(0)
+  invoices   Invoice[]
+
+  @@unique([code, year])
+}
+
+model Invoice {
+  id            String         @id @default(cuid())
+  type          InvoiceType
+  status        InvoiceStatus  @default(DRAFT)
+  seriesId      String?
+  series        InvoiceSeries? @relation(fields: [seriesId], references: [id])
+  number        Int? // asignado SOLO al emitir
+  fullNumber    String?        @unique // "F2026-000123"
+  issueDate     DateTime?
+  operationDate DateTime? // fecha de la operación si difiere
+
+  // Snapshot del emisor (no depende de cambios futuros en BusinessSettings)
+  issuerName    String
+  issuerTaxId   String
+  issuerAddress String
+
+  // Destinatario (obligatorio en STANDARD, opcional en SIMPLIFIED)
+  ownerId         String?
+  owner           OwnerProfile? @relation(fields: [ownerId], references: [id])
+  customerName    String?
+  customerTaxId   String?
+  customerAddress String?
+
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+
+  // Rectificativas
+  rectifiesId   String?
+  rectifies     Invoice?  @relation("Rectification", fields: [rectifiesId], references: [id])
+  rectifiedBy   Invoice[] @relation("Rectification")
+  rectifyReason String?
+
+  /// true = precios de línea con IVA incluido (PVP, habitual en tickets B2C)
+  pricesIncludeTax Boolean @default(true)
+
+  // Totales (céntimos)
+  subtotalCents    Int     @default(0) // suma de bases imponibles
+  discountCents    Int     @default(0)
+  taxCents         Int     @default(0) // cuota total IVA
+  withholdingRate  Int     @default(0) // IRPF en bp (1500 = 15 %)
+  withholdingCents Int     @default(0)
+  totalCents       Int     @default(0)
+  /// Desglose por tipo de IVA: [{rate, baseCents, taxCents}]
+  taxBreakdown     Json?
+  notes            String?
+
+  // Encadenamiento Veri*Factu
+  previousHash String?
+  hash         String? @unique
+  qrPayload    String?
+
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@unique([seriesId, number])
+  @@index([ownerId])
+  @@index([issueDate])
+}
+
+model InvoiceItem {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  position          Int
+  description       String
+  serviceId         String?
+  productId         String?
+  product           Product? @relation(fields: [productId], references: [id])
+  voucherId         String? // venta de bono o consumo de bono (importe 0)
+  quantity          Decimal  @db.Decimal(10, 3)
+  /// Precio unitario tal y como se introdujo (con IVA si Invoice.pricesIncludeTax)
+  unitPriceCents    Int
+  /// Precio unitario SIN IVA (el que se imprime, art. 6.1.f RD 1619/2012)
+  netUnitPriceCents Int
+  discountBp        Int      @default(0)
+  taxRate           TaxRate
+  taxRateBp         Int // 2100, 1000, 400, 0 (snapshot)
+  exemptionCause    String? // p.ej. "E1 - Art. 20 LIVA"
+  baseCents         Int
+  taxCents          Int
+  totalCents        Int
+}
+
+/// Registro de cobros. Append-only.
+model Payment {
+  id           String        @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice       @relation(fields: [invoiceId], references: [id])
+  method       PaymentMethod
+  amountCents  Int // negativo = devolución
+  reference    String? // nº operación TPV / Bizum
+  voucherId    String?
+  receivedAt   DateTime      @default(now())
+  receivedById String?
+}
+
+// -----------------------------------------------------------------------------
+//  RGPD, CONSENTIMIENTOS Y AUDITORÍA
+// -----------------------------------------------------------------------------
+
+/// Prueba del consentimiento explícito (art. 7 RGPD): quién, qué versión, cuándo
+model Consent {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose       ConsentPurpose
+  granted       Boolean
+  policyVersion String
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime       @default(now())
+
+  @@index([userId, purpose])
+}
+
+/// Log de consentimiento de cookies (visitantes anónimos incluidos)
+model CookieConsentLog {
+  id          String   @id @default(cuid())
+  visitorId   String
+  userId      String?
+  necessary   Boolean  @default(true)
+  analytics   Boolean
+  marketing   Boolean
+  preferences Boolean
+  version     String
+  createdAt   DateTime @default(now())
+}
+
+/// Registro de auditoría append-only (quién cambió qué y cuándo)
+model AuditLog {
+  id        String      @id @default(cuid())
+  actorId   String?
+  actor     User?       @relation("AuditActor", fields: [actorId], references: [id])
+  action    AuditAction
+  entity    String // "Appointment", "Invoice", …
+  entityId  String
+  before    Json?
+  after     Json?
+  ipAddress String?
+  createdAt DateTime    @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+}
+
+model NotificationLog {
+  id            String         @id @default(cuid())
+  channel       ContactChannel
+  to            String
+  template      String
+  appointmentId String?
+  status        String // QUEUED | SENT | FAILED
+  error         String?
+  createdAt     DateTime       @default(now())
+}
