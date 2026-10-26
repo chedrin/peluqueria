@@ -18,7 +18,10 @@ if (!existsSync(".env")) {
   console.log("· Creado .env a partir de .env.example");
 }
 
-const pg = new EmbeddedPostgres({ databaseDir: ".pgdata", user: "cania", password: "cania", port: 5433, persistent: true });
+const pg = new EmbeddedPostgres({ databaseDir: ".pgdata", user: "cania", password: "cania", port: 5433, persistent: true,
+  // UTF-8 siempre: en Windows en español initdb usaría WIN1252 y fallarían las migraciones
+  initdbFlags: ["--encoding=UTF8", "--locale=C"],
+});
 const firstRun = !existsSync(".pgdata/PG_VERSION");
 if (firstRun) {
   console.log("· Inicializando PostgreSQL embebido (solo la primera vez)…");
