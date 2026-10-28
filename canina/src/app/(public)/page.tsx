@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Sparkles } from "lucide-react";
+import { CalendarCheck, Clock, HeartHandshake, NotebookPen, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCents } from "@/lib/money";
 import { buttonVariants } from "@/components/ui/button";
@@ -34,22 +34,34 @@ export default async function HomePage() {
           <Link href="/reservar" className={buttonVariants({ size: "lg" })}>Reservar cita</Link>
           <Link href="#servicios" className={buttonVariants({ size: "lg", variant: "outline" })}>Ver servicios</Link>
         </div>
+        <ul className="mx-auto mt-12 grid max-w-4xl gap-4 text-left sm:grid-cols-3">
+          {[
+            { icon: CalendarCheck, title: "Reserva online", text: "Eliges servicio, día y peluquero. Te confirmamos al momento." },
+            { icon: NotebookPen, title: "Recordamos sus manías", text: "Alergias, champú, cuchilla y cómo le gusta que le traten." },
+            { icon: HeartHandshake, title: "Sin prisas", text: "Calculamos el tiempo según su tamaño y tipo de pelo." },
+          ].map(({ icon: Icon, title, text }) => (
+            <li key={title} className="flex gap-3 rounded-xl border bg-card p-4 shadow-sm">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground"><Icon className="size-4" aria-hidden /></span>
+              <span><strong className="block text-sm font-semibold">{title}</strong><span className="text-sm text-muted-foreground">{text}</span></span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section id="servicios" className="scroll-mt-20 space-y-10">
         {categories.map((c) => (
-          <div key={c.id}>
-            <h2 className="mb-4 text-xl font-semibold">{c.name}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div key={c.id} className="gap-6 border-t pt-8 lg:grid lg:grid-cols-[220px_1fr]">
+            <h2 className="mb-4 text-xl font-semibold lg:sticky lg:top-24 lg:self-start">{c.name}</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
               {c.services.map((s) => {
                 const from = Math.min(s.basePriceCents, ...s.pricing.map((p) => p.priceCents));
                 return (
-                  <Card key={s.id}>
+                  <Card key={s.id} className="flex flex-col">
                     <CardHeader>
                       <CardTitle>{s.name}</CardTitle>
                       {s.description && <CardDescription>{s.description}</CardDescription>}
                     </CardHeader>
-                    <CardContent className="space-y-2 text-sm">
+                    <CardContent className="flex flex-1 flex-col gap-2 text-sm">
                       <p className="flex items-center justify-between">
                         <span className="text-2xl font-bold">desde {formatCents(from)}</span>
                         <span className="inline-flex items-center gap-1 text-muted-foreground">
@@ -66,6 +78,7 @@ export default async function HomePage() {
                           ))}
                         </ul>
                       )}
+                      <Link href="/reservar" className={buttonVariants({ variant: "outline", size: "sm", className: "mt-auto self-start" })}>Reservar</Link>
                     </CardContent>
                   </Card>
                 );

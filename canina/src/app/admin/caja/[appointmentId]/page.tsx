@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatCents } from "@/lib/money";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { checkRedemption } from "@/features/vouchers/domain/voucher-rules";
 import { CheckoutLines } from "@/features/billing/components/CheckoutLines";
 
@@ -40,25 +38,15 @@ export default async function CheckoutPage({ params }: { params: Promise<{ appoi
   }));
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold">Caja · {appt.dog.name}</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>{appt.owner.user.firstName} {appt.owner.user.lastName}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {appt.startsAt.toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Madrid" })} · NIF: {appt.owner.taxId ?? "—"}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <CheckoutLines
-            appointmentId={appt.id}
-            lines={lines}
-            hasTaxId={!!appt.owner.taxId}
-            existingInvoices={appt.invoices}
-          />
-          <p className="mt-4 text-right text-lg font-semibold">Total: {formatCents(lines.reduce((s, l) => s + l.priceCents, 0))}</p>
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-5xl space-y-5">
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight">Cobrar a {appt.dog.name}</h1>
+        <p className="text-sm text-muted-foreground">
+          {appt.owner.user.firstName} {appt.owner.user.lastName} · NIF {appt.owner.taxId ?? "—"} · cita del{" "}
+          {appt.startsAt.toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" })}
+        </p>
+      </header>
+      <CheckoutLines appointmentId={appt.id} lines={lines} hasTaxId={!!appt.owner.taxId} existingInvoices={appt.invoices} />
     </div>
   );
 }
