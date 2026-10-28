@@ -106,7 +106,7 @@ Las citas reservadas con «cualquiera» aparecen arriba en una bandeja «sin asi
 4. **Emisión** (`issueInvoice`, una transacción): bloqueo de la cadena y de la serie (`FOR UPDATE`) → número correlativo **sin huecos** (si algo falla, rollback del contador) → huella SHA-256 encadenada con la anterior (formato Veri*Factu) → URL del QR de cotejo AEAT → `ISSUED`. Desde ese momento los triggers impiden cualquier cambio.
 5. **Cobro** (`registerPayment`): append-only, sin sobrepagos; al completar el pago se suman puntos/sellos de fidelidad.
 6. **Rectificación**: borrador `RECTIFYING` por diferencias (serie R); si anula el total, la original pasa a `VOIDED` (nunca se borra).
-7. **PDF** (`/api/invoices/[id]/pdf`): @react-pdf con todos los datos obligatorios y el QR.
+7. **PDF** (`/api/invoices/[id]/pdf`): pdf-lib (JS puro, compatible con Workers) con todos los datos obligatorios y el QR.
 
 Series: `F` (completas), `T` (simplificadas), `R` (rectificativas), por año → `T2026-000001`.
 

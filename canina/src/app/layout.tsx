@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body className="min-h-dvh">
         {children}
-        <Toaster richColors position="top-center" />
+        <Toaster richColors position="bottom-right" />
         <CookieBanner />
       </body>
     </html>

@@ -1,12 +1,12 @@
 import type { AppointmentStatus, GroomingStage } from "@prisma/client";
 
-export const STATUS_META: Record<AppointmentStatus, { label: string; className: string }> = {
-  PENDING: { label: "Pendiente", className: "bg-amber-50 border-amber-400 text-amber-900" },
-  CONFIRMED: { label: "Confirmada", className: "bg-sky-50 border-sky-500 text-sky-900" },
-  IN_PROGRESS: { label: "En curso", className: "bg-violet-50 border-violet-500 text-violet-900" },
-  COMPLETED: { label: "Completada", className: "bg-emerald-50 border-emerald-500 text-emerald-900" },
-  CANCELLED: { label: "Cancelada", className: "bg-zinc-100 border-zinc-300 text-zinc-500 line-through" },
-  NO_SHOW: { label: "No presentado", className: "bg-rose-50 border-rose-300 text-rose-700" },
+export const STATUS_META: Record<AppointmentStatus, { label: string; className: string; dot: string }> = {
+  PENDING: { label: "Pendiente", className: "bg-amber-50 border-amber-400 text-amber-900", dot: "bg-amber-500" },
+  CONFIRMED: { label: "Confirmada", className: "bg-sky-50 border-sky-500 text-sky-900", dot: "bg-sky-500" },
+  IN_PROGRESS: { label: "En curso", className: "bg-violet-50 border-violet-500 text-violet-900", dot: "bg-primary" },
+  COMPLETED: { label: "Completada", className: "bg-emerald-50 border-emerald-500 text-emerald-900", dot: "bg-emerald-600" },
+  CANCELLED: { label: "Cancelada", className: "bg-zinc-100 border-zinc-300 text-zinc-500 line-through", dot: "bg-zinc-400" },
+  NO_SHOW: { label: "No presentado", className: "bg-rose-50 border-rose-300 text-rose-700", dot: "bg-rose-500" },
 };
 
 export const STAGE_LABEL: Record<GroomingStage, string> = {

@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { atLocalMinutes, localMinutes, localDay } from "@/lib/time";
 import { loadStaffDays } from "@/features/scheduling/server/availability.service";
+import { serviceTone } from "../domain/tone";
 
 export type AgendaAppointment = Awaited<ReturnType<typeof getAgendaDay>>["appointments"][number];
 
@@ -28,7 +29,7 @@ export async function getAgendaDay(day: string, staffFilter?: string[]) {
           },
         },
         owner: { select: { id: true, user: { select: { firstName: true, lastName: true, phone: true } } } },
-        services: { select: { id: true, service: { select: { name: true } } } },
+        services: { select: { id: true, service: { select: { name: true, category: { select: { name: true } } } } } },
       },
       orderBy: { startsAt: "asc" },
     }),
@@ -59,6 +60,7 @@ export async function getAgendaDay(day: string, staffFilter?: string[]) {
       ownerName: `${a.owner.user.firstName} ${a.owner.user.lastName}`,
       ownerPhone: a.owner.user.phone,
       services: a.services.map((s) => s.service.name),
+      tone: serviceTone(a.services.map((s) => ({ name: s.service.name, category: s.service.category?.name }))),
     })),
   };
 }

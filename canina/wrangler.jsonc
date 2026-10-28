@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker del CRM canino (Next.js vía OpenNext). Secretos: DATABASE_URL, AUTH_SECRET.
+  "name": "cania-crm",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Conserva las variables y secretos definidos en el panel de Cloudflare
+  "keep_vars": true,
+  "observability": { "enabled": true },
+  "previews": {}
+}
