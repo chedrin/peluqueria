@@ -25,8 +25,12 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
   const allStaff = await prisma.staffProfile.findMany({ where: { user: { isActive: true } }, orderBy: { sortOrder: "asc" }, select: { id: true, displayName: true, color: true } });
 
   let body: React.ReactNode;
+  let summary: string | undefined;
   if (view === "day") {
     const data = await getAgendaDay(day, staffFilter);
+    const live = data.appointments.filter((a) => a.status !== "CANCELLED" && a.status !== "NO_SHOW");
+    const free = live.filter((a) => !a.groomerId).length;
+    summary = [live.length === 1 ? "1 cita" : `${live.length} citas`, free > 0 && `${free} sin asignar`].filter(Boolean).join(" · ");
     body = (
       <>
         <AgendaBoard data={data} />
@@ -71,7 +75,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <AgendaToolbar day={day} view={view} staff={allStaff} selectedStaff={staffFilter} />
+      <AgendaToolbar day={day} view={view} staff={allStaff} selectedStaff={staffFilter} summary={summary} />
       {body}
     </>
   );

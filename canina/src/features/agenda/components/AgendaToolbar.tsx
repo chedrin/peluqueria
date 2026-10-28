@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { localDay } from "@/lib/time";
 
 export type AgendaView = "day" | "week" | "month";
 
@@ -17,6 +18,7 @@ export function AgendaToolbar(props: {
   view: AgendaView;
   staff: { id: string; displayName: string; color: string }[];
   selectedStaff: string[];
+  summary?: string;
 }) {
   const href = (o: Partial<{ day: string; view: AgendaView; staff: string[] }>) => {
     const q = new URLSearchParams({ day: o.day ?? props.day, view: o.view ?? props.view });
@@ -38,14 +40,18 @@ export function AgendaToolbar(props: {
     <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-2">
         <Link href={href({ day: shift(props.day, props.view, -1) })} className="rounded-md border p-2 hover:bg-muted" aria-label="Anterior"><ChevronLeft className="size-4" /></Link>
-        <Link href={href({ day: new Date().toISOString().slice(0, 10) })} className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted">Hoy</Link>
+        <Link href={href({ day: localDay(new Date()) })} className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted">Hoy</Link>
         <Link href={href({ day: shift(props.day, props.view, 1) })} className="rounded-md border p-2 hover:bg-muted" aria-label="Siguiente"><ChevronRight className="size-4" /></Link>
-        <h1 className="ml-2 text-lg font-semibold first-letter:uppercase">{label}</h1>
+        <div className="ml-2">
+          <h1 className="text-xl font-bold tracking-tight first-letter:uppercase">{label}</h1>
+          {props.summary && <p className="text-sm text-muted-foreground">{props.summary}</p>}
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-md border p-0.5">
+        <div className="inline-flex rounded-lg bg-muted p-0.5">
           {(["day", "week", "month"] as const).map((v) => (
-            <Link key={v} href={href({ view: v })} className={cn("rounded px-3 py-1 text-sm", props.view === v ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
+            <Link key={v} href={href({ view: v })} aria-current={props.view === v ? "page" : undefined}
+              className={cn("rounded-md px-3 py-1 text-sm", props.view === v ? "bg-card font-semibold shadow-sm" : "text-muted-foreground hover:text-foreground")}>
               {{ day: "Día", week: "Semana", month: "Mes" }[v]}
             </Link>
           ))}

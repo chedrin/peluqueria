@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -18,9 +18,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { AlertTriangle, Ban, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { formatHM } from "@/lib/time";
+import { formatHM, localDay, localMinutes } from "@/lib/time";
+import { HEALTH_ALERT_LABEL } from "@/features/dogs/domain/labels";
 import { DEFAULT_GRID, dragToStart, hourMarks, minutesToPx, type GridConfig } from "../domain/grid";
 import { DRAGGABLE, STAGE_LABEL, STATUS_META } from "../domain/status";
+import { TONE_META } from "../domain/tone";
 import { moveAppointment } from "../server/agenda.actions";
 import type { getAgendaDay, AgendaAppointment } from "../server/agenda.queries";
 import { AppointmentPanel } from "./AppointmentPanel";
@@ -55,6 +57,7 @@ export function AgendaBoard({ data, grid = DEFAULT_GRID }: { data: AgendaData; g
   );
 
   const unassigned = appointments.filter((a) => !a.groomerId);
+  const nowMin = useNowMinutes(data.day);
   const height = (grid.dayEndMin - grid.dayStartMin) * grid.pxPerMin;
 
   function computeTarget(e: DragMoveEvent | DragEndEvent) {
@@ -101,11 +104,11 @@ export function AgendaBoard({ data, grid = DEFAULT_GRID }: { data: AgendaData; g
   return (
     <DndContext sensors={sensors} onDragMove={onDragMove} onDragEnd={onDragEnd} onDragCancel={() => setPreview(null)}>
       {unassigned.length > 0 && (
-        <div className="mb-3 rounded-lg border border-dashed border-amber-400 bg-amber-50 p-3 text-sm">
-          <strong>{unassigned.length} cita(s) sin peluquero asignado</strong> (reservadas con «cualquiera»). Arrástralas a una columna:
-          <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          <span><strong className="font-semibold">Sin peluquero:</strong> arrastra {unassigned.length === 1 ? "la cita" : `las ${unassigned.length} citas`} a una columna</span>
+          <div className="flex flex-wrap gap-2">
             {unassigned.map((a) => (
-              <div key={a.id} className="relative h-16 w-56">
+              <div key={a.id} className="w-64">
                 <AppointmentCard appt={a} grid={grid} floating onOpen={() => setSelected(a)} />
               </div>
             ))}
@@ -113,6 +116,7 @@ export function AgendaBoard({ data, grid = DEFAULT_GRID }: { data: AgendaData; g
         </div>
       )}
 
+      <ToneLegend />
       <div className="overflow-x-auto rounded-xl border bg-card">
         <div className="flex min-w-fit">
           {/* Eje horario */}
@@ -142,6 +146,7 @@ export function AgendaBoard({ data, grid = DEFAULT_GRID }: { data: AgendaData; g
                 return a ? a.endMin - a.startMin : 0;
               })()}
               onOpen={setSelected}
+              nowMin={nowMin}
             />
           ))}
         </div>
@@ -162,6 +167,7 @@ function StaffColumn(props: {
   preview: { startMin: number } | null;
   draggingDuration: number;
   onOpen: (a: AgendaAppointment) => void;
+  nowMin: number | null;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: props.staff.id });
   const { grid } = props;
@@ -180,11 +186,14 @@ function StaffColumn(props: {
   }, [props.working, grid]);
 
   return (
-    <div className="w-56 shrink-0 border-r last:border-r-0 sm:w-64">
+    <div className="min-w-56 flex-1 border-r last:border-r-0">
       <div className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-card px-3">
         <span className="size-3 rounded-full" style={{ background: props.staff.color }} />
         <span className="truncate text-sm font-semibold">{props.staff.displayName}</span>
-        <span className="ml-auto text-xs text-muted-foreground">{props.appointments.filter((a) => a.status !== "CANCELLED").length}</span>
+        <span className="ml-auto text-xs text-muted-foreground">{(() => {
+          const n = props.appointments.filter((a) => a.status !== "CANCELLED").length;
+          return n === 1 ? "1 cita" : `${n} citas`;
+        })()}</span>
       </div>
       <div ref={setNodeRef} className={cn("relative transition-colors", isOver && "bg-primary/5")} style={{ height: props.height }}>
         {/* Líneas de cuarto de hora */}
@@ -218,6 +227,9 @@ function StaffColumn(props: {
         {props.appointments.map((a) => (
           <AppointmentCard key={a.id} appt={a} grid={grid} onOpen={() => props.onOpen(a)} />
         ))}
+        {props.nowMin !== null && props.nowMin >= grid.dayStartMin && props.nowMin <= grid.dayEndMin && (
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 z-20 h-0.5 bg-red-500" style={{ top: minutesToPx(props.nowMin, grid) }} />
+        )}
       </div>
     </div>
   );
@@ -227,7 +239,9 @@ function AppointmentCard({ appt, grid, floating, onOpen }: { appt: AgendaAppoint
   const draggable = DRAGGABLE.includes(appt.status);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: appt.id, disabled: !draggable });
   const meta = STATUS_META[appt.status];
-  const critical = appt.dog.alerts.length > 0;
+  const tone = TONE_META[appt.tone];
+  const caution = appt.dog.needsMuzzle || appt.dog.temperament === "REACTIVE" || appt.dog.temperament === "AGGRESSIVE";
+  const cancelled = appt.status === "CANCELLED" || appt.status === "NO_SHOW";
 
   return (
     <button
@@ -237,35 +251,63 @@ function AppointmentCard({ appt, grid, floating, onOpen }: { appt: AgendaAppoint
       // Las citas no arrastrables siguen siendo botones normales (dnd-kit marcaría aria-disabled)
       {...(draggable ? { ...attributes, ...listeners } : {})}
       className={cn(
-        "group absolute inset-x-1 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left text-xs shadow-sm",
-        meta.className,
-        critical && "ring-2 ring-red-500",
+        "group absolute inset-x-1 flex flex-col gap-0.5 overflow-hidden rounded-lg px-2 py-1.5 text-left text-xs transition-shadow hover:shadow-md",
+        cancelled ? STATUS_META[appt.status].className : tone.card,
+        appt.status === "IN_PROGRESS" && "ring-2 ring-inset ring-primary",
         draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isDragging && "z-40 opacity-80 shadow-lg",
-        floating && "relative inset-auto h-full w-full",
+        floating && "relative inset-auto w-full border border-amber-200 bg-card",
       )}
       style={{
         ...(floating ? {} : { top: minutesToPx(appt.startMin, grid), height: Math.max((appt.endMin - appt.startMin) * grid.pxPerMin - 2, 22) }),
         transform: CSS.Translate.toString(transform),
       }}
     >
-      {critical && (
-        <div className="-mx-2 -mt-1 mb-1 flex items-center gap-1 bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-          <AlertTriangle className="size-3" /> {appt.dog.alerts.map((h) => h.description).join(" · ")}
-        </div>
-      )}
-      <div className="flex items-center gap-1 font-semibold">
-        <span>{formatHM(appt.startMin)}</span>
-        <span className="truncate">{appt.dog.name}</span>
-        {(appt.dog.needsMuzzle || appt.dog.temperament === "REACTIVE" || appt.dog.temperament === "AGGRESSIVE") && (
-          <ShieldAlert className="size-3 text-red-600" aria-label="Precaución en el manejo" />
+      <div className="flex min-w-0 flex-wrap items-center gap-1">
+        <span className="font-semibold">{formatHM(appt.startMin)}</span>
+        <span className="truncate font-semibold">{appt.dog.name}</span>
+        {appt.dog.alerts.map((h) => (
+          <span key={h.id} title={h.description}
+            className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10.5px] font-semibold", h.severity === "INFO" ? "bg-amber-100 text-amber-900" : "bg-red-100 text-red-800")}>
+            <AlertTriangle className="size-2.5" aria-hidden /> {HEALTH_ALERT_LABEL[h.type]}
+            <span className="sr-only">: {h.description}</span>
+          </span>
+        ))}
+        {caution && (
+          <span title={appt.dog.needsMuzzle ? "Necesita bozal" : "Precaución en el manejo"} className="inline-flex items-center gap-0.5 rounded-full bg-orange-100 px-1.5 text-[10.5px] font-semibold text-orange-900">
+            <ShieldAlert className="size-2.5" aria-hidden /> {appt.dog.needsMuzzle ? "Bozal" : "Cuidado"}
+          </span>
         )}
       </div>
       <div className="truncate opacity-80">{appt.dog.breed} · {appt.services.join(", ")}</div>
-      <div className="truncate opacity-70">
+      <div className="mt-auto flex items-center gap-1.5 truncate opacity-80">
+        <span className={cn("size-1.5 shrink-0 rounded-full", meta.dot)} aria-hidden />
         {meta.label}
         {appt.stage ? ` · ${STAGE_LABEL[appt.stage]}` : ""}
       </div>
     </button>
   );
+}
+
+function ToneLegend() {
+  return (
+    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" aria-label="Colores por servicio">
+      {Object.values(TONE_META).filter((t) => t.label !== "Otros").map((t) => (
+        <span key={t.label} className="inline-flex items-center gap-1.5"><span className={cn("size-2.5 rounded-sm", t.swatch)} aria-hidden />{t.label}</span>
+      ))}
+      <span className="inline-flex items-center gap-1.5"><span className="h-0.5 w-3 bg-red-500" aria-hidden />Ahora</span>
+    </div>
+  );
+}
+
+/** Minuto actual en hora del salón si `day` es hoy (se actualiza cada minuto), o null. */
+function useNowMinutes(day: string) {
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  if (!now || localDay(now) !== day) return null;
+  return localMinutes(now);
 }
