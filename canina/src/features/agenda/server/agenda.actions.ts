@@ -11,6 +11,8 @@ import { addMinutes, atLocalMinutes, formatHM } from "@/lib/time";
 import { findConflict } from "@/features/scheduling/domain/availability";
 import { loadStaffDays } from "@/features/scheduling/server/availability.service";
 import { notifyAppointmentChange } from "@/features/booking/server/notifications";
+import { scheduleGoogleSync } from "@/features/gcal/server/trigger";
+import { removeBlockEvent } from "@/features/gcal/server/sync.service";
 import { canTransition, DRAGGABLE } from "../domain/status";
 
 const moveSchema = z.object({
@@ -80,6 +82,7 @@ export async function moveAppointment(input: z.infer<typeof moveSchema>) {
 
     if (result.timeChanged)
       await notifyAppointmentChange(result.updated.id, `Tu cita se ha movido a las ${formatHM(p.startMin)} del ${p.day}.`);
+    scheduleGoogleSync();
     revalidatePath("/admin/agenda");
     return { id: result.updated.id, version: result.updated.version };
   });
@@ -114,6 +117,7 @@ export async function changeAppointmentStatus(input: z.infer<typeof statusSchema
       });
       await audit(tx, { actorId: session.sub, action: "STATUS_CHANGE", entity: "Appointment", entityId: appt.id, before: { status: appt.status, stage: appt.stage }, after: { status: to, stage: p.stage } });
     });
+    scheduleGoogleSync();
     revalidatePath("/admin/agenda");
   });
 }
@@ -149,6 +153,7 @@ export async function createTimeBlock(input: z.infer<typeof blockSchema>) {
       },
       select: { id: true, startsAt: true, dog: { select: { name: true } } },
     });
+    scheduleGoogleSync();
     revalidatePath("/admin/agenda");
     return { blockId: block.id, affected };
   });
@@ -159,6 +164,7 @@ export async function deleteTimeBlock(blockId: string) {
     const session = await requireRole(["ADMIN", "RECEPTION"]);
     const block = await prisma.timeBlock.delete({ where: { id: blockId } });
     await audit(prisma, { actorId: session.sub, action: "DELETE", entity: "TimeBlock", entityId: blockId, before: block });
+    await removeBlockEvent(block.googleEventId);
     revalidatePath("/admin/agenda");
   });
 }
