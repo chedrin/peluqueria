@@ -7,6 +7,7 @@ import { AgendaToolbar, type AgendaView } from "@/features/agenda/components/Age
 import { TimeBlockForm } from "@/features/agenda/components/TimeBlockForm";
 import { getAgendaDay, getAgendaRange } from "@/features/agenda/server/agenda.queries";
 import { STATUS_META } from "@/features/agenda/domain/status";
+import { scheduleGoogleSync } from "@/features/gcal/server/trigger";
 
 export const metadata = { title: "Agenda" };
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ function addDays(day: string, n: number) {
 
 export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ day?: string; view?: AgendaView; staff?: string }> }) {
   const sp = await searchParams;
+  scheduleGoogleSync({ ifOlderThanMs: 60_000 }); // trae las reservas nuevas del agente de WhatsApp
   const day = sp.day ?? localDay(new Date());
   const view = sp.view ?? "day";
   const staffFilter = sp.staff?.split(",").filter(Boolean) ?? [];

@@ -15,7 +15,7 @@ import {
   type DragMoveEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { AlertTriangle, Ban, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Ban, MessageCircle, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatHM, localDay, localMinutes } from "@/lib/time";
@@ -266,6 +266,11 @@ function AppointmentCard({ appt, grid, floating, onOpen }: { appt: AgendaAppoint
       <div className="flex min-w-0 flex-wrap items-center gap-1">
         <span className="font-semibold">{formatHM(appt.startMin)}</span>
         <span className="truncate font-semibold">{appt.dog.name}</span>
+        {appt.source === "WHATSAPP" && (
+          <span title="Reservada por el agente de WhatsApp" className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 text-[10.5px] font-semibold text-emerald-800">
+            <MessageCircle className="size-2.5" aria-hidden /> WhatsApp
+          </span>
+        )}
         {appt.dog.alerts.map((h) => (
           <span key={h.id} title={h.description}
             className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 text-[10.5px] font-semibold", h.severity === "INFO" ? "bg-amber-100 text-amber-900" : "bg-red-100 text-red-800")}>

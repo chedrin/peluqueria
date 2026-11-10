@@ -48,6 +48,9 @@ export async function getAgendaDay(day: string, staffFilter?: string[]) {
       endMin: localDay(a.endsAt) > day ? 24 * 60 : localMinutes(a.endsAt),
       status: a.status,
       stage: a.stage,
+      source: a.source,
+      internalNotes: a.internalNotes,
+      clientNotes: a.clientNotes,
       dog: {
         id: a.dog.id,
         name: a.dog.name,

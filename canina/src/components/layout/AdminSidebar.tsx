@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Euro, Gift, House, PawPrint, Scissors, Star, Users } from "lucide-react";
+import { CalendarDays, Euro, Gift, House, PawPrint, Scissors, Settings, Star, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/bonos", label: "Bonos", icon: Gift },
   { href: "/admin/fidelidad", label: "Fidelización", icon: Star },
   { href: "/admin/facturas", label: "Caja y facturas", icon: Euro },
+  { href: "/admin/ajustes", label: "Ajustes", icon: Settings },
 ];
 
 const ROLE_LABEL: Record<string, string> = { ADMIN: "Administración", RECEPTION: "Recepción", GROOMER: "Peluquería" };

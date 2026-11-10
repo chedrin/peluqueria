@@ -10,6 +10,7 @@ import { audit } from "@/lib/audit";
 import { addMinutes, atLocalMinutes } from "@/lib/time";
 import { findConflict } from "@/features/scheduling/domain/availability";
 import { loadStaffDays } from "@/features/scheduling/server/availability.service";
+import { scheduleGoogleSync } from "@/features/gcal/server/trigger";
 
 const bookSchema = z.object({
   dogId: z.string(),
@@ -26,6 +27,7 @@ export async function bookOnlineAction(input: z.infer<typeof bookSchema>) {
     const s = await requireRole(["CLIENT"]);
     const p = bookSchema.parse(input);
     const appt = await createBooking({ ...p, ownerId: s.ownerId!, source: "ONLINE", actorId: s.sub });
+    scheduleGoogleSync();
     revalidatePath("/mi-cuenta/citas");
     return { id: appt.id };
   });
@@ -42,6 +44,7 @@ export async function cancelMyAppointmentAction(appointmentId: string) {
   return toActionResult(async () => {
     const s = await requireRole(["CLIENT"]);
     await cancelByOwner({ appointmentId, ownerId: s.ownerId!, actorId: s.sub });
+    scheduleGoogleSync();
     revalidatePath("/mi-cuenta/citas");
   });
 }
@@ -68,6 +71,7 @@ export async function rescheduleMyAppointmentAction(input: { appointmentId: stri
       });
       await audit(tx, { actorId: s.sub, action: "MOVE", entity: "Appointment", entityId: a.id, before: { startsAt: a.startsAt }, after: { startsAt, by: "owner" } });
     });
+    scheduleGoogleSync();
     revalidatePath("/mi-cuenta/citas");
   });
 }

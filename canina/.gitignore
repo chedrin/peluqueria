@@ -8,3 +8,6 @@ uploads/
 .wrangler/
 .dev.vars
 .pgdata/
+
+# Google Calendar (cuenta de servicio del agente de WhatsApp)
+google-service-account.json

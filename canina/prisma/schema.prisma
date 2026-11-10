@@ -119,6 +119,7 @@ enum AppointmentSource {
   PHONE
   WALK_IN
   BACKOFFICE
+  WHATSAPP // Reservada por el agente de WhatsApp (vía Google Calendar)
 }
 
 enum TimeBlockType {
@@ -231,6 +232,19 @@ model BusinessSettings {
   updatedAt               DateTime @updatedAt
 }
 
+/// Estado de la sincronización con Google Calendar (una sola fila)
+model GoogleCalendarSync {
+  id        String    @id @default("default")
+  /// Solo se envían a Google las citas y bloqueos creados desde esta fecha
+  enabledAt DateTime  @default(now())
+  lastRunAt DateTime?
+  lastOkAt  DateTime?
+  lastError String?
+  /// Resumen de la última pasada: importadas, actualizadas, enviadas…
+  lastStats Json?
+  updatedAt DateTime  @updatedAt
+}
+
 // -----------------------------------------------------------------------------
 //  USUARIOS (dueños + staff) Y PERFILES
 // -----------------------------------------------------------------------------
@@ -325,6 +339,8 @@ model TimeBlock {
   endsAt    DateTime
   reason    String?
   createdAt DateTime      @default(now())
+  /// Evento "Bloqueo"/"Ausencia" creado en Google Calendar para que el agente no reserve encima
+  googleEventId String? @unique
 
   @@index([staffId, startsAt, endsAt])
 }
@@ -560,6 +576,12 @@ model Appointment {
   createdBy      User?             @relation("AppointmentCreatedBy", fields: [createdById], references: [id])
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+
+  /// Sincronización con Google Calendar: id del evento, `updated` de Google visto
+  /// la última vez y `version` de la cita que ya está reflejada en Google.
+  googleEventId       String? @unique
+  googleUpdated       String?
+  googleSyncedVersion Int?
 
   services       AppointmentService[]
   groomingRecord GroomingRecord?

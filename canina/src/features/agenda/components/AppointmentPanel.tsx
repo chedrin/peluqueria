@@ -39,7 +39,10 @@ export function AppointmentPanel({ appointment: a, onClose }: { appointment: Age
       <aside className="h-full w-full max-w-md overflow-y-auto bg-card p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-semibold">{a.dog.name}</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              {a.dog.name}
+              {a.source === "WHATSAPP" && <Badge variant="success">WhatsApp</Badge>}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {a.dog.breed} · {formatHM(a.startMin)}–{formatHM(a.endMin)}
             </p>
@@ -65,7 +68,19 @@ export function AppointmentPanel({ appointment: a, onClose }: { appointment: Age
           <dt className="text-muted-foreground">Temperamento</dt>
           <dd>{TEMPERAMENT[a.dog.temperament]}{a.dog.needsMuzzle ? " · usa bozal" : ""}</dd>
           <dt className="text-muted-foreground">Servicios</dt>
-          <dd>{a.services.join(", ")}</dd>
+          <dd>{a.services.join(", ") || "Sin servicio asignado"}</dd>
+          {a.clientNotes && (
+            <>
+              <dt className="text-muted-foreground">Notas del cliente</dt>
+              <dd>{a.clientNotes}</dd>
+            </>
+          )}
+          {a.internalNotes && (
+            <>
+              <dt className="text-muted-foreground">Notas internas</dt>
+              <dd>{a.internalNotes}</dd>
+            </>
+          )}
           <dt className="text-muted-foreground">Propietario</dt>
           <dd>
             {a.ownerName}
